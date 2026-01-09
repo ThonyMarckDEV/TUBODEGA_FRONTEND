@@ -8,7 +8,7 @@ import {
     UserGroupIcon, 
     UsersIcon, 
     ListBulletIcon,
-    BanknotesIcon, 
+    UserIcon, 
     ChartBarIcon, 
     ClipboardDocumentCheckIcon, 
     DocumentTextIcon 
@@ -33,12 +33,20 @@ const menus = {
                 { name: 'Listar Clientes', link: '/admin/listar-clientes' },
             ]
         },
-    {
+        {
             section: 'Categorías',
             icon: ListBulletIcon,
             subs: [
                 { name: 'Agregar Categoría', link: '/admin/agregar-categoria' },
                 { name: 'Listar Categorías', link: '/admin/listar-categorias' },
+            ]
+        },
+        {
+            section: 'Proveedores',
+            icon: UserIcon,
+            subs: [
+                { name: 'Agregar Proveedor', link: '/admin/agregar-proveedor' },
+                { name: 'Listar Proveedores', link: '/admin/listar-proveedores' },
             ]
         },
     ],
