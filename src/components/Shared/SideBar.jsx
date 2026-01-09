@@ -74,6 +74,13 @@ const menus = {
                 { name: 'Listar Reposiciones', link: '/admin/listar-reposiciones' },
             ]
         },
+        {
+            section: 'Kardex',
+            icon: ClipboardDocumentCheckIcon,
+            subs: [
+                { name: 'Reporte Kardex', link: '/admin/reporte-kardex' },
+            ]
+        },
     ],
     cajero: [
         { 

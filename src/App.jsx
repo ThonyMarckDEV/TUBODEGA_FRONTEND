@@ -48,6 +48,8 @@ import AgregarReposicion from 'ui/Administrador/reposiciones/agregarReposicion/A
 import ListarReposiciones from 'ui/Administrador/reposiciones/listarReposiciones/ListarReposiciones';
 import EditarReposicion from 'ui/Administrador/reposiciones/editarReposicion/EditarReposicion';
 
+import ReporteKardex from 'ui/Administrador/kardex/reporteKardex/ReporteKardex';
+
 // UIS USUARIO
 
 
@@ -126,6 +128,10 @@ function AppContent() {
           <Route path="listar-reposiciones" element={<ListarReposiciones />} />
           {/* Ruta Editar Reposición */}
           <Route path="editar-reposicion/:id" element={<EditarReposicion />} />
+
+         {/* RUTAS KARDEX */}
+          {/* Ruta Reporte Kardex */}
+          <Route path="reporte-kardex" element={<ReporteKardex />} />
 
 
       </Route>
