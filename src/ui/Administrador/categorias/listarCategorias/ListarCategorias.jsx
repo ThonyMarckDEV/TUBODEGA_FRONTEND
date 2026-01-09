@@ -62,7 +62,7 @@ const ListarCategorias = () => {
     ], []);
 
     // --- CARGAR DATOS  ---
-    const fetchData = useCallback(async (page, search = '') => {
+    const fetchCategorias = useCallback(async (page, search = '') => {
         setLoading(true);
         setError(null);
         try {
@@ -86,15 +86,15 @@ const ListarCategorias = () => {
 
    // Carga inicial
     useEffect(() => {
-        fetchData(1, '');
-    }, [fetchData]);
+        fetchCategorias(1, '');
+    }, [fetchCategorias]);
 
     const handleSearchTable = (term) => {
         setSearchTerm(term); 
-        fetchData(1, term);
+        fetchCategorias(1, term);
     };
     const handlePageChange = (page) => {
-        fetchData(page, searchTerm);
+        fetchCategorias(page, searchTerm);
     };
 
     // --- MANEJAR CAMBIO DE ESTADO ---
@@ -109,7 +109,7 @@ const ListarCategorias = () => {
         try {
             const res = await toggleCategoriaEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            await fetchData(currentPage); 
+            await fetchCategorias(currentPage); 
         } catch (err) {
             setAlert(err);
             setLoading(false);

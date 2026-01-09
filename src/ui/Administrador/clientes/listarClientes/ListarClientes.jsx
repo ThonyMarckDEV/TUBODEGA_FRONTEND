@@ -24,6 +24,8 @@ const ListarCliente = () => {
     });
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [searchTerm, setSearchTerm] = useState('');
+
     // DEFINICIÓN DE COLUMNAS
     const columns = useMemo(() => [
         {
@@ -71,16 +73,16 @@ const ListarCliente = () => {
         }
     ], [loading]); // Dependencia 'loading' para deshabilitar botones si es necesario
 
-    const fetchClientes = useCallback(async (page) => {
+    const fetchClientes = useCallback(async (page , search = '') => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getClientes(page);
-            setClientes(data.data);
+            const response = await getClientes(page , search);
+            setClientes(response.data || []);
             setPaginationInfo({
-                currentPage: data.current_page,
-                totalPages: data.last_page,
-                totalItems: data.total,
+                currentPage: response.current_page,
+                totalPages: response.last_page,
+                totalItems: response.total,
             });
         } catch (err) {
             setError('No se pudieron cargar los clientes. Por favor, intente de nuevo más tarde.');
@@ -91,12 +93,20 @@ const ListarCliente = () => {
         }
     }, [isInitialLoad]);
 
+  // Carga inicial
     useEffect(() => {
-        fetchClientes(currentPage);
-    }, [currentPage, fetchClientes]);
+        fetchClientes(1, '');
+    }, [fetchClientes]);
 
+    // LÓGICA DEL BUSCADOR 
+    const handleSearchTable = (term) => {
+        setSearchTerm(term);
+        fetchClientes(1, term); // Buscamos y reseteamos a página 1
+    };
+
+    // LÓGICA DE PAGINACIÓN 
     const handlePageChange = (page) => {
-        setCurrentPage(page);
+        fetchClientes(page, searchTerm);
     };
 
     const handleToggleEstado = (clienteId, currentEstado) => {
@@ -161,6 +171,8 @@ const ListarCliente = () => {
                     totalPages: paginationInfo.totalPages,
                     onPageChange: handlePageChange
                 }}
+                onSearch={handleSearchTable}
+                searchPlaceholder="Buscar por DNI o Nombre"
             />
         </div>
     );
