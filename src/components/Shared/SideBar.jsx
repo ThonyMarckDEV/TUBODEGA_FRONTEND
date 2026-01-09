@@ -19,7 +19,6 @@ import logoImg from 'assets/img/logo_TU_BODEGA.png';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 
 const menus = {
-    // ... (Misma configuración de menús que tenías antes) ...
     admin: [
         { 
             section: 'Roles', 
@@ -43,21 +42,7 @@ const menus = {
             ]
         },
     ],
-    cliente: [
-        { 
-            section: 'Prestamos', 
-            icon: BanknotesIcon, 
-            subs: [{ name: 'Pagar Prestamo', link: '/cliente/pagar-prestamo' }] 
-        },
-    ],
-    contador: [
-        { 
-            section: 'Prestamos', 
-            icon: BanknotesIcon, 
-            subs: [{ name: 'Pagar Prestamo', link: '/cliente/pagar-prestamo' }] 
-        },
-    ],
-    jefe_contabilidad: [
+    cajero: [
         { 
             section: 'Dashboard', 
             link: '/asesor/dashboard',
@@ -137,15 +122,23 @@ const Sidebar = () => {
                     ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full'} 
                     ${sidebarWidth} md:translate-x-0 border-r border-gray-200`}
             >
-                {/* 1. HEADER (Logo) */}
+                {/* 1. HEADER (Logo) - MODIFICADO */}
                 <div className={`bg-white border-b border-gray-100 transition-all duration-300 flex items-center justify-center flex-shrink-0 relative z-10
-                    h-24 ${isHovered ? 'md:h-32' : 'md:h-20'}`}>
+                    /* Altura: En móvil 24 (96px), en Desktop cambia según hover */
+                    h-24 ${isHovered ? 'md:h-40' : 'md:h-24'}`}>
                     
                     <img
                         src={logoImg}
                         alt="Logo"
-                        className={`transition-all duration-300 object-contain p-2
-                            ${isHovered ? 'w-40 h-auto' : 'w-12 h-12'}
+                        className={`transition-all duration-300 object-contain
+                            /* 1. MÓVIL (Clase base): Siempre grande cuando el menú está abierto */
+                            w-40 h-auto
+                            
+                            /* 2. DESKTOP (md:): Lógica condicional */
+                            ${isHovered 
+                                ? 'md:w-48'      
+                                : 'md:w-16 md:h-16' 
+                            }
                         `}
                     />
                 </div>
@@ -157,10 +150,7 @@ const Sidebar = () => {
                         const isSubOpen = item.subs && openSection === item.section; 
                         const IconComponent = item.icon || DocumentTextIcon;
 
-                        // --- ESTILOS CLAVE (Blanco/Negro) ---
-                        // Activo: Fondo Negro, Texto Blanco
                         const activeClasses = "bg-black text-white shadow-lg shadow-gray-400/40 font-medium"; 
-                        // Inactivo: Texto Gris Oscuro, Hover Negro suave
                         const inactiveClasses = "text-gray-500 hover:text-black hover:bg-gray-100"; 
 
                         return (
