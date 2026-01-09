@@ -51,7 +51,7 @@ const AgregarCompra = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          // navigate('/admin/listar-compras');
+          navigate('/admin/listar-compras');
       }
     } catch (error) {
       setAlert(error);

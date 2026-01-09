@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getProductos } from 'services/productoService'; 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
-const ProductoSearchSelect = ({ form, setForm, disabled }) => {
+const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -11,7 +11,7 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
 
     const wrapperRef = useRef(null);
 
-    // 1. Función para buscar Productos en el Backend
+    // 1. Buscar Productos
     const fetchProductos = async (searchTerm = '') => {
         setLoading(true);
         try {
@@ -29,7 +29,7 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // 2. Sincronizar input si el formulario padre ya tiene datos
+    // 2. Sincronizar input visualmente
     useEffect(() => {
         if (form && form.productoNombre) {
             setInputValue(form.productoNombre);
@@ -49,22 +49,22 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [wrapperRef]);
 
-    // Manejar escritura
     const handleChange = (e) => {
         const texto = e.target.value;
         setInputValue(texto);
         setHasSearched(false);
 
+        // Si el usuario escribe, reseteamos la selección previa
         if (form.id_Producto) {
             setForm(prev => ({ 
                 ...prev, 
                 id_Producto: null, 
                 productoNombre: '',
+                unidad: '' // Limpiamos unidad también
             }));
         }
     };
 
-    // Buscar con Enter
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -72,19 +72,16 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // Seleccionar item de la lista
+    // --- AQUÍ GUARDAMOS LA UNIDAD ---
     const handleSelect = (producto) => {
         setInputValue(producto.nombre);
-        
-        // Actualizamos el estado del padre
         setForm(prev => ({ 
             ...prev, 
             id_Producto: producto.id, 
             productoNombre: producto.nombre,
-            // Guardamos el stock disponible del almacén por si quieres validar en el formulario
-            stockDisponible: producto.stock_almacen 
+            stockDisponible: producto.stock_almacen,
+            unidad: producto.unidad // <--- Guardamos la unidad para mostrarla
         }));
-        
         setShowSuggestions(false);
     };
 
@@ -99,11 +96,9 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
     };
 
     return (
-        <section className="relative" ref={wrapperRef}>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-                Buscar Producto <span className="text-red-500">*</span>
-            </label>
+        <section className="relative w-full" ref={wrapperRef}>
             
+            {/* Input y Botón */}
             <div className="relative flex items-center">
                 <input
                     type="text"
@@ -112,8 +107,9 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                     onKeyDown={handleKeyDown}
                     onClick={handleInputClick}
                     disabled={disabled || loading}
-                    placeholder="Nombre del producto..."
-                    className="w-full border-gray-300 rounded-md shadow-sm py-2 pl-3 pr-10 border focus:border-black focus:ring-black"
+                    placeholder="Buscar producto..."
+                    // Altura fija 38px para alinear con otros inputs
+                    className="w-full h-[38px] border-gray-300 rounded-md shadow-sm py-2 pl-3 pr-10 border focus:border-black focus:ring-black text-sm"
                     autoComplete="off"
                 />
 
@@ -125,7 +121,7 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                     title="Buscar"
                 >
                     {loading ? (
-                        <div className="w-5 h-5 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
                     ) : (
                         <MagnifyingGlassIcon className="w-5 h-5" />
                     )}
@@ -135,30 +131,49 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                 {showSuggestions && (
                     <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
-                            suggestions.map((prod) => (
-                                <li
-                                    key={prod.id}
-                                    onClick={() => handleSelect(prod)}
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm text-gray-700 border-b border-gray-50 last:border-none flex justify-between items-center"
-                                >
-                                    <div>
-                                        <div className="font-medium text-gray-900">{prod.nombre}</div>
-                                        <div className="text-xs text-gray-500">
-                                            {prod.categoria?.nombre || 'Sin Cat.'} | {prod.unidad}
+                            suggestions.map((prod) => {
+                                // Verificar si está excluido
+                                const isExcluded = excludeIds.includes(prod.id);
+
+                                return (
+                                    <li
+                                        key={prod.id}
+                                        onClick={() => {
+                                            if (!isExcluded) handleSelect(prod);
+                                        }}
+                                        className={`
+                                            px-4 py-2 border-b border-gray-50 last:border-none flex justify-between items-center text-sm
+                                            ${isExcluded 
+                                                ? 'bg-gray-100 opacity-60 cursor-not-allowed' 
+                                                : 'hover:bg-gray-100 cursor-pointer text-gray-700'
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-gray-900">{prod.nombre}</span>
+                                                {isExcluded && (
+                                                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold border border-red-200 flex items-center gap-1">
+                                                        <ExclamationCircleIcon className="w-3 h-3"/> Ya agregado
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                {prod.categoria?.nombre || 'Sin Cat.'} | {prod.unidad}
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    {/* CORRECCIÓN: MOSTRAR STOCK ALMACÉN */}
-                                    <div className="text-right flex flex-col items-end">
-                                        <div className="text-xs font-bold text-blue-600" title="Stock en Almacén">
-                                            Almacen: {prod.stock_almacen}
+                                        
+                                        <div className="text-right flex flex-col items-end pl-2">
+                                            <div className="text-xs font-bold text-blue-600">
+                                                Almacén: {prod.stock_almacen}
+                                            </div>
+                                            <div className="text-[10px] text-gray-400">
+                                                Bodega: {prod.stock_bodega}
+                                            </div>
                                         </div>
-                                        <div className="text-[10px] text-gray-400" title="Stock en Bodega">
-                                            Bodega: {prod.stock_bodega}
-                                        </div>
-                                    </div>
-                                </li>
-                            ))
+                                    </li>
+                                );
+                            })
                         ) : (
                             <li className="px-4 py-2 text-gray-500 text-sm italic">
                                 {loading ? 'Buscando...' : 'No se encontraron productos.'}
@@ -168,18 +183,20 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                 )}
             </div>
 
-            {/* Feedback */}
+            {/* --- TEXTO DE CONFIRMACIÓN RESTAURADO Y MEJORADO --- */}
             <div className="mt-1 text-xs h-4">
                 {form.id_Producto ? (
-                    <span className="text-green-600 font-semibold flex items-center gap-1">
-                        ✓ Seleccionado: {form.productoNombre} (ID: {form.id_Producto})
+                    <span className="text-green-600 font-semibold flex items-center gap-1 truncate">
+                        {/* AHORA MOSTRAMOS LA UNIDAD AQUÍ */}
+                        ✓ {form.productoNombre} ({form.unidad || 'U'}) [ID: {form.id_Producto}]
                     </span>
                 ) : (
-                    <span className="text-gray-400">
-                        {inputValue && !loading && hasSearched ? 'Selecciona una opción' : ''}
+                    <span className="text-gray-400 italic">
+                        {inputValue && !loading && hasSearched ? 'Selecciona una opción de la lista' : ''}
                     </span>
                 )}
             </div>
+            
         </section>
     );
 };

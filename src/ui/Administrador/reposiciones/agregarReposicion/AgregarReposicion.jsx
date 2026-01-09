@@ -42,7 +42,7 @@ const AgregarReposicion = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          // navigate('/admin/listar-reposiciones');
+          navigate('/admin/listar-reposiciones');
       }
     } catch (error) {
       setAlert(error);
