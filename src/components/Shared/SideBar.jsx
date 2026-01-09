@@ -17,7 +17,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { ShoppingBasket } from 'lucide-react';
+import { ShoppingBasket, UserCircle2Icon } from 'lucide-react';
 
 const menus = {
     admin: [
@@ -32,6 +32,14 @@ const menus = {
             subs: [
                 { name: 'Agregar Cliente', link: '/admin/agregar-cliente' },
                 { name: 'Listar Clientes', link: '/admin/listar-clientes' },
+            ]
+        },
+        {
+            section: 'Cajeros',
+            icon: UserCircle2Icon,
+            subs: [
+                { name: 'Agregar Cajero', link: '/admin/agregar-cajero' },
+                { name: 'Listar Cajeros', link: '/admin/listar-cajeros' },
             ]
         },
         {

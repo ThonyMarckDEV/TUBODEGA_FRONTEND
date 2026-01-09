@@ -28,6 +28,10 @@ import AgregarCliente from 'ui/Administrador/clientes/agregarCliente/AgregarClie
 import ListarClientes from 'ui/Administrador/clientes/listarClientes/ListarClientes';
 import EditarCliente from 'ui/Administrador/clientes/editarCliente/EditarCliente';
 
+import AgregarCajero from 'ui/Administrador/cajeros/agregarCajero/AgregarCajero';
+import ListarCajeros from 'ui/Administrador/cajeros/listarCajeros/ListarCajeros';
+import EditarCajero from 'ui/Administrador/cajeros/editarCajero/EditarCajero';
+
 import AgregarCategoria from 'ui/Administrador/categorias/agregarCategoria/AgregarCategoria';
 import ListarCategorias from 'ui/Administrador/categorias/listarCategorias/ListarCategorias';
 import Editarategoria from 'ui/Administrador/categorias/editarCategoria/EditarCategoria';
@@ -88,6 +92,15 @@ function AppContent() {
           <Route path="listar-clientes" element={<ListarClientes />} />
           {/* Ruta Editar Cliente */}
           <Route path="editar-cliente/:id" element={<EditarCliente />} />
+
+        {/* RUTAS CAJEROS */}
+          {/* Ruta Agregar Cajero */}
+          <Route path="agregar-cajero" element={<AgregarCajero />} />
+          {/* Ruta Listar Cajero */}
+          <Route path="listar-cajeros" element={<ListarCajeros />} />
+          {/* Ruta Editar Cajero */}
+          <Route path="editar-cajero/:id" element={<EditarCajero />} />
+
 
         {/* RUTAS CATEGORIAS */}
           {/* Ruta Agregar Categoria */}
