@@ -40,6 +40,10 @@ import AgregarProducto from 'ui/Administrador/Productos/agregarProducto/AgregarP
 import ListarProductos from 'ui/Administrador/Productos/listarProductos/ListarProductos';
 import EditarProducto from 'ui/Administrador/Productos/editarProducto/EditarProducto';
 
+import AgregarCompra from 'ui/Administrador/compras/agregarCompra/AgregarCompra';
+import ListarCompras from 'ui/Administrador/compras/listarCompras/ListarCompras';
+import EditarCompra from 'ui/Administrador/compras/editarCompra/EditarCompra';
+
 // UIS USUARIO
 
 
@@ -102,6 +106,14 @@ function AppContent() {
           <Route path="listar-productos" element={<ListarProductos />} />
           {/* Ruta Editar Producto */}
           <Route path="editar-producto/:id" element={<EditarProducto />} />
+
+        {/* RUTAS COMPRA */}
+          {/* Ruta Agregar Compra */}
+          <Route path="agregar-compra" element={<AgregarCompra />} />
+          {/* Ruta Listar Compra */}
+          <Route path="listar-compras" element={<ListarCompras />} />
+          {/* Ruta Editar Compra */}
+          <Route path="editar-compra/:id" element={<EditarCompra />} />
         
 
       </Route>

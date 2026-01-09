@@ -17,6 +17,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
+import { ShoppingBasket } from 'lucide-react';
 
 const menus = {
     admin: [
@@ -55,6 +56,14 @@ const menus = {
             subs: [
                 { name: 'Agregar Producto', link: '/admin/agregar-producto' },
                 { name: 'Listar Productos', link: '/admin/listar-productos' },
+            ]
+        },
+        {
+            section: 'Compras',
+            icon: ShoppingBasket,
+            subs: [
+                { name: 'Agregar Compra', link: '/admin/agregar-compra' },
+                { name: 'Listar Compras', link: '/admin/listar-compras' },
             ]
         },
     ],
