@@ -7,6 +7,7 @@ import {
     // ICONOS
     UserGroupIcon, 
     UsersIcon, 
+    ListBulletIcon,
     BanknotesIcon, 
     ChartBarIcon, 
     ClipboardDocumentCheckIcon, 
@@ -31,6 +32,14 @@ const menus = {
             subs: [
                 { name: 'Agregar Cliente', link: '/admin/agregar-cliente' },
                 { name: 'Listar Clientes', link: '/admin/listar-clientes' },
+            ]
+        },
+    {
+            section: 'Categorías',
+            icon: ListBulletIcon,
+            subs: [
+                { name: 'Agregar Categoría', link: '/admin/agregar-categoria' },
+                { name: 'Listar Categorías', link: '/admin/listar-categorias' },
             ]
         },
     ],

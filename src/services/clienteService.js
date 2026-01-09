@@ -9,7 +9,7 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
  */
 export const createCliente = async (clienteData) => {
   // El endpoint que crearemos en Laravel
-  const url = `${API_BASE_URL}/api/cliente/store`;
+  const url = `${API_BASE_URL}/api/clientes/store`;
 
   const response = await fetchWithAuth(url, {
     method: 'POST',
@@ -48,7 +48,7 @@ export const getClientes = async (page = 1) => {
  * Obtiene toda la información de un cliente por su ID.
  */
 export const showCliente = async (id) => {
-  const url = `${API_BASE_URL}/api/cliente/show/${id}`;
+  const url = `${API_BASE_URL}/api/clientes/show/${id}`;
   const response = await fetchWithAuth(url, { method: 'GET' });
   return handleResponse(response);
 };
@@ -57,7 +57,7 @@ export const showCliente = async (id) => {
  * Envía los datos actualizados de un cliente al backend.
  */
 export const updateCliente = async (id, clienteData) => {
-  const url = `${API_BASE_URL}/api/cliente/update/${id}`;
+  const url = `${API_BASE_URL}/api/clientes/update/${id}`;
   const response = await fetchWithAuth(url, {
     method: 'PUT',
     headers: {
@@ -77,7 +77,7 @@ export const updateCliente = async (id, clienteData) => {
  * @returns {Promise<object>} - El resultado de la operación.
  */
 export const toggleClienteEstado = async (id, nuevoEstado) => {
-    const url = `${API_BASE_URL}/api/cliente/cambiar-estado/${id}`;
+    const url = `${API_BASE_URL}/api/clientes/cambiar-estado/${id}`;
     
     // Usamos PATCH para actualizar solo un campo
     const response = await fetchWithAuth(url, {

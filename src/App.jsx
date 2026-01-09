@@ -28,6 +28,10 @@ import AgregarCliente from 'ui/Administrador/clientes/agregarCliente/AgregarClie
 import ListarClientes from 'ui/Administrador/clientes/listarClientes/ListarClientes';
 import EditarCliente from 'ui/Administrador/clientes/editarCliente/EditarCliente';
 
+import AgregarCategoria from 'ui/Administrador/categorias/agregarCategoria/AgregarCategoria';
+import ListarCategorias from 'ui/Administrador/categorias/listarCategorias/ListarCategorias';
+import Editarategoria from 'ui/Administrador/categorias/editarCategoria/EditarCategoria';
+
 // UIS USUARIO
 
 
@@ -66,6 +70,14 @@ function AppContent() {
           <Route path="listar-clientes" element={<ListarClientes />} />
           {/* Ruta Editar Cliente */}
           <Route path="editar-cliente/:id" element={<EditarCliente />} />
+
+        {/* RUTAS CATEGORIAS */}
+          {/* Ruta Agregar Categoria */}
+          <Route path="agregar-categoria" element={<AgregarCategoria />} />
+          {/* Ruta Listar Categoria */}
+          <Route path="listar-categorias" element={<ListarCategorias />} />
+          {/* Ruta Editar Categoria */}
+          <Route path="editar-categoria/:id" element={<Editarategoria />} />
 
       </Route>
 
