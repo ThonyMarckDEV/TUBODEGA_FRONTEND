@@ -88,6 +88,18 @@ const ReporteKardex = () => {
             )
         },
         {
+            header: 'Ubicación',
+            render: (row) => (
+                <div className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    row.ubicacion === 'ALMACEN' 
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-orange-50 text-orange-700 border-orange-200'
+                }`}>
+                    {row.ubicacion}
+                </div>
+            )
+        },
+        {
             header: 'Cantidad',
             render: (row) => (
                 <span className={`font-bold ${row.tipo_movimiento === 'ENTRADA' ? 'text-green-600' : 'text-red-600'}`}>

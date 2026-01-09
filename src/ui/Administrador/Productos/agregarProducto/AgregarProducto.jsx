@@ -51,7 +51,7 @@ const AgregarProducto = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          // navigate('/admin/listar-productos'); // Descomentar si quieres redirigir
+          navigate('/admin/listar-productos'); 
       }
     } catch (error) {
       setAlert(error);
