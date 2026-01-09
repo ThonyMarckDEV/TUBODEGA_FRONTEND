@@ -20,7 +20,6 @@ const ListarCategorias = () => {
     
     // Paginación
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const [currentPage, setCurrentPage] = useState(1);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -111,7 +110,7 @@ const ListarCategorias = () => {
         try {
             const res = await toggleCategoriaEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            await fetchCategorias(currentPage); 
+            await fetchCategorias(paginationInfo.currentPage, searchTerm);
         } catch (err) {
             setAlert(err);
             setLoading(false);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getReposiciones, showReposicion } from 'services/reposicionService'; 
-import LoadingScreen from 'components/Shared/LoadingScreen';
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import { EyeIcon, PencilSquareIcon } from '@heroicons/react/24/outline';

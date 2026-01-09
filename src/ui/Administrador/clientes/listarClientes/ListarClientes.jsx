@@ -27,7 +27,6 @@ const ListarCliente = () => {
         totalPages: 1, 
         totalItems: 0 
     });
-    const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
 
     // --- FUNCIÓN PARA VER DETALLES ---
@@ -163,7 +162,7 @@ const ListarCliente = () => {
         try {
             const response = await toggleClienteEstado(id, nuevoEstado);
             setAlert(response);
-            await fetchClientes(currentPage); 
+            await fetchClientes(paginationInfo.currentPage, searchTerm); 
         } catch (err) {
             console.error("Error al cambiar estado:", err);
             setAlert(err); 

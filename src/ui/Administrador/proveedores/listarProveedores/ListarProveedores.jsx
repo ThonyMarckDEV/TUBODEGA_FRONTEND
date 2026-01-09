@@ -20,7 +20,6 @@ const ListarProveedores = () => {
     
     // Paginación y Búsqueda
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
 
     // --- COLUMNAS ---
@@ -116,7 +115,7 @@ const ListarProveedores = () => {
         try {
             const res = await toggleProveedorEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            await fetchProveedores(currentPage, searchTerm); 
+            await fetchProveedores(paginationInfo.currentPage, searchTerm); 
         } catch (err) {
             setAlert(err);
             setLoading(false);

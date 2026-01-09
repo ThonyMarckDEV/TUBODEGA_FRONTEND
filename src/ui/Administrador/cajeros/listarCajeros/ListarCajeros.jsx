@@ -11,7 +11,6 @@ import { EyeIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 const ListarCajero = () => {
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [alert, setAlert] = useState(null);
     const [cajeroToToggle, setCajeroToToggle] = useState(null);
     const [cajeros, setCajeros] = useState([]);
@@ -91,7 +90,10 @@ const ListarCajero = () => {
                 totalItems: response.total,
             });
         } catch (err) {
-            setError('Error al cargar cajeros.');
+            setAlert({
+                type: 'error',
+                message: 'Error al cargar cajeros.'
+            });
         } finally {
             setLoading(false);
         }
