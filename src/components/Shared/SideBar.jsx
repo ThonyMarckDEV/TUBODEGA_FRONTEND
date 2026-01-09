@@ -49,6 +49,14 @@ const menus = {
                 { name: 'Listar Proveedores', link: '/admin/listar-proveedores' },
             ]
         },
+       {
+            section: 'Productos',
+            icon: DocumentTextIcon,
+            subs: [
+                { name: 'Agregar Producto', link: '/admin/agregar-producto' },
+                { name: 'Listar Productos', link: '/admin/listar-productos' },
+            ]
+        },
     ],
     cajero: [
         { 

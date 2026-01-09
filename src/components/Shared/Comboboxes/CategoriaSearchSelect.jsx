@@ -1,32 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getCategorias } from 'services/categoriaService';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Asegúrate de tener heroicons
 
 const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
     const [inputValue, setInputValue] = useState('');
-    const [allCategorias, setAllCategorias] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const wrapperRef = useRef(null);
 
-    // 1. Cargar todas las categorías al iniciar
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                const response = await getCategorias(1);
-                // Extraemos el array ya sea paginado o directo
-                const lista = response.data?.data || response.data || [];
-                setAllCategorias(lista);
-            } catch (error) {
-                console.error("Error al cargar categorías", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, []);
+    // 1. Cargar datos iniciales (o buscar cuando el usuario lo pida)
+    const fetchCategorias = async (searchTerm = '') => {
+        setLoading(true);
+        try {
+            // Llamamos al servicio pasando el término de búsqueda
+            // Esto activará el filtro WHERE LIKE en el backend
+            const response = await getCategorias(1, searchTerm);
+            
+            // Extraemos los datos
+            const lista = response.data?.data || response.data || [];
+            
+            setSuggestions(lista);
+            setShowSuggestions(true);
+            setHasSearched(true);
+        } catch (error) {
+            console.error("Error al buscar categorías", error);
+            setSuggestions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // 2. Sincronizar input si viene un valor del formulario (ej. al Editar)
     useEffect(() => {
@@ -52,25 +57,23 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
     const handleChange = (e) => {
         const texto = e.target.value;
         setInputValue(texto);
+        setHasSearched(false); // Reiniciamos estado de búsqueda
 
-        // Si el usuario escribe, borramos el ID seleccionado porque ya no coincide
+        // Si el usuario modifica el texto, borramos la selección previa
         if (form.id_Categoria) {
             setForm(prev => ({ ...prev, id_Categoria: null, categoriaNombre: '' }));
         }
+    };
 
-        if (texto.length > 0) {
-            // Filtrar localmente
-            const filtrado = allCategorias.filter(cat => 
-                cat.nombre.toLowerCase().includes(texto.toLowerCase())
-            );
-            setSuggestions(filtrado);
-            setShowSuggestions(true);
-        } else {
-            setShowSuggestions(false);
+    // Al presionar Enter
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Evita enviar el formulario principal
+            fetchCategorias(inputValue);
         }
     };
 
-    // Al seleccionar una opción de la lista
+    // Al seleccionar una opción
     const handleSelect = (categoria) => {
         setInputValue(categoria.nombre);
         setForm(prev => ({ 
@@ -81,18 +84,16 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
         setShowSuggestions(false);
     };
 
-    // Al hacer clic en el input (para ver opciones si está vacío o lleno)
+    // Al hacer clic en el botón de buscar
+    const handleSearchClick = () => {
+        fetchCategorias(inputValue);
+    };
+
+    // Al hacer clic para abrir (carga las default si está vacío)
     const handleInputClick = () => {
-        if (allCategorias.length > 0) {
-            // Si el input está vacío mostramos todo, si tiene texto filtramos
-            if (inputValue.trim() === '') {
-                setSuggestions(allCategorias);
-            } else {
-                const filtrado = allCategorias.filter(cat => 
-                    cat.nombre.toLowerCase().includes(inputValue.toLowerCase())
-                );
-                setSuggestions(filtrado);
-            }
+        if (!showSuggestions && !hasSearched) {
+            fetchCategorias(''); // Carga inicial
+        } else {
             setShowSuggestions(true);
         }
     };
@@ -100,24 +101,39 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
     return (
         <section className="relative" ref={wrapperRef}>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-                Buscar Categoría
+                Buscar Categoría <span className="text-red-500">*</span>
             </label>
             
-            <div className="relative">
+            <div className="relative flex items-center">
                 <input
                     type="text"
                     value={inputValue}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     onClick={handleInputClick}
                     disabled={disabled || loading}
-                    placeholder={loading ? "Cargando..." : "Escribe para buscar..."}
-                    className="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:border-black focus:ring-black"
+                    placeholder="Escribe y presiona Enter..."
+                    className="w-full border-gray-300 rounded-md shadow-sm py-2 pl-3 pr-10 border focus:border-black focus:ring-black"
                     autoComplete="off"
                 />
 
+                {/* Botón de Acción (Lupa o Loading) */}
+                <button
+                    type="button"
+                    onClick={handleSearchClick}
+                    className="absolute right-2 text-gray-400 hover:text-black"
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <div className="w-5 h-5 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
+                    ) : (
+                        <MagnifyingGlassIcon className="w-5 h-5" />
+                    )}
+                </button>
+
                 {/* Lista Flotante */}
                 {showSuggestions && (
-                    <ul className="absolute z-50 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
+                    <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
                             suggestions.map((cat) => (
                                 <li
@@ -130,19 +146,23 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
                             ))
                         ) : (
                             <li className="px-4 py-2 text-gray-500 text-sm italic">
-                                No se encontraron resultados.
+                                {loading ? 'Buscando...' : 'No se encontraron resultados.'}
                             </li>
                         )}
                     </ul>
                 )}
             </div>
 
-            {/* Texto de ayuda / Estado */}
-            <div className="mt-1 text-xs">
+            {/* Estado de selección */}
+            <div className="mt-1 text-xs h-4">
                 {form.id_Categoria ? (
-                    <span className="text-green-600 font-semibold">✓ Seleccionado: ID {form.id_Categoria}</span>
+                    <span className="text-green-600 font-semibold flex items-center gap-1">
+                        ✓ Seleccionado: {form.categoriaNombre} (ID: {form.id_Categoria})
+                    </span>
                 ) : (
-                    <span className="text-gray-400">Selecciona una opción de la lista</span>
+                    <span className="text-gray-400">
+                        {inputValue && !loading && hasSearched ? 'Selecciona una opción de la lista' : ''}
+                    </span>
                 )}
             </div>
         </section>

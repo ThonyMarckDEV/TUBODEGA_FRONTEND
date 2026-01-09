@@ -36,6 +36,10 @@ import AgregarProveedor from 'ui/Administrador/proveedores/agregarProveedor/Agre
 import ListarProveedores from 'ui/Administrador/proveedores/listarProveedores/ListarProveedores';
 import EditarProveedor from 'ui/Administrador/proveedores/editarProveedor/EditarProveedor'; 
 
+import AgregarProducto from 'ui/Administrador/Productos/agregarProducto/AgregarProducto';
+import ListarProductos from 'ui/Administrador/Productos/listarProductos/ListarProductos';
+import EditarProducto from 'ui/Administrador/Productos/editarProducto/EditarProducto';
+
 // UIS USUARIO
 
 
@@ -90,6 +94,14 @@ function AppContent() {
           <Route path="listar-proveedores" element={<ListarProveedores />} />
           {/* Ruta Editar Proveedor */}
           <Route path="editar-proveedor/:id" element={<EditarProveedor />} />
+
+        {/* RUTAS PRODUCTOS */}
+          {/* Ruta Agregar Producto */}
+          <Route path="agregar-producto" element={<AgregarProducto />} />
+          {/* Ruta Listar Producto */}
+          <Route path="listar-productos" element={<ListarProductos />} />
+          {/* Ruta Editar Producto */}
+          <Route path="editar-producto/:id" element={<EditarProducto />} />
         
 
       </Route>
