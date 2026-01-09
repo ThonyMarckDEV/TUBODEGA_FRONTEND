@@ -16,7 +16,7 @@ const ListarProductos = () => {
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [searchTerm, setSearchTerm] = useState('');
 
-    // --- COLUMNAS ---
+    // --- COLUMNAS ACTUALIZADAS ---
     const columns = useMemo(() => [
         {
             header: 'Producto',
@@ -29,13 +29,31 @@ const ListarProductos = () => {
         },
         {
             header: 'Precio Venta',
-            render: (row) => `S/. ${parseFloat(row.precio_venta).toFixed(2)}`
+            render: (row) => <span className="text-gray-700 font-medium">S/. {parseFloat(row.precio_venta).toFixed(2)}</span>
         },
+        // COLUMNA 1: STOCK BODEGA (Donde se vende)
         {
             header: 'Stock Bodega',
             render: (row) => (
-                <span className={`font-semibold ${row.stock_bodega <= row.stock_minimo ? 'text-red-600' : 'text-gray-700'}`}>
-                    {row.stock_bodega} {row.unidad}
+                <div className="flex flex-col">
+                    <span className={`font-bold ${row.stock_bodega <= row.stock_minimo ? 'text-red-600' : 'text-emerald-600'}`}>
+                        {row.stock_bodega} {row.unidad}
+                    </span>
+                    {/* Alerta visual si hay poco stock */}
+                    {row.stock_bodega <= row.stock_minimo && (
+                        <span className="text-[10px] uppercase font-bold text-red-500 bg-red-50 px-1 rounded w-fit">
+                            Bajo Stock
+                        </span>
+                    )}
+                </div>
+            )
+        },
+        // COLUMNA 2: STOCK ALMACÉN (Reserva)
+        {
+            header: 'Stock Almacén',
+            render: (row) => (
+                <span className="font-semibold text-blue-700">
+                    {row.stock_almacen} {row.unidad}
                 </span>
             )
         },
