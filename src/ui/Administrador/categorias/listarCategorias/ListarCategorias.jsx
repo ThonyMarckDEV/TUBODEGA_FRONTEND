@@ -5,6 +5,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
 const ListarCategorias = () => {
     const [loading, setLoading] = useState(true);
@@ -53,9 +54,10 @@ const ListarCategorias = () => {
             render: (row) => (
                 <Link 
                     to={`/admin/editar-categoria/${row.id}`} 
-                    className="text-indigo-600 hover:text-indigo-900 font-medium text-sm"
+                    className="w-fit flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-sm bg-indigo-50 px-2 py-1 rounded transition-colors"
+                    title="Editar Categoría"
                 >
-                    Editar
+                    <PencilSquareIcon className="w-4 h-4" /> Editar
                 </Link>
             )
         }
