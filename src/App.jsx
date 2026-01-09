@@ -44,6 +44,10 @@ import AgregarCompra from 'ui/Administrador/compras/agregarCompra/AgregarCompra'
 import ListarCompras from 'ui/Administrador/compras/listarCompras/ListarCompras';
 import EditarCompra from 'ui/Administrador/compras/editarCompra/EditarCompra';
 
+import AgregarReposicion from 'ui/Administrador/reposiciones/agregarReposicion/AgregarReposicion';
+import ListarReposiciones from 'ui/Administrador/reposiciones/listarReposiciones/ListarReposiciones';
+import EditarReposicion from 'ui/Administrador/reposiciones/editarReposicion/EditarReposicion';
+
 // UIS USUARIO
 
 
@@ -114,7 +118,15 @@ function AppContent() {
           <Route path="listar-compras" element={<ListarCompras />} />
           {/* Ruta Editar Compra */}
           <Route path="editar-compra/:id" element={<EditarCompra />} />
-        
+
+        {/* RUTAS REPOSICIONES */}
+          {/* Ruta Agregar Reposición */}
+          <Route path="agregar-reposicion" element={<AgregarReposicion />} />
+          {/* Ruta Listar Reposición */}
+          <Route path="listar-reposiciones" element={<ListarReposiciones />} />
+          {/* Ruta Editar Reposición */}
+          <Route path="editar-reposicion/:id" element={<EditarReposicion />} />
+
 
       </Route>
 

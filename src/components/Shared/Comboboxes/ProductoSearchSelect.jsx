@@ -15,10 +15,7 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
     const fetchProductos = async (searchTerm = '') => {
         setLoading(true);
         try {
-            // Llama al endpoint GET /api/productos?page=1&search=...
             const response = await getProductos(1, searchTerm);
-            
-            // Extraer array de datos
             const lista = response.data?.data || response.data || [];
             
             setSuggestions(lista);
@@ -34,7 +31,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
 
     // 2. Sincronizar input si el formulario padre ya tiene datos
     useEffect(() => {
-        // Busca 'productoNombre' en el form para mostrar el texto
         if (form && form.productoNombre) {
             setInputValue(form.productoNombre);
         } else if (form && !form.id_Producto) {
@@ -59,14 +55,11 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
         setInputValue(texto);
         setHasSearched(false);
 
-        // Si edita, limpiamos la selección previa
         if (form.id_Producto) {
             setForm(prev => ({ 
                 ...prev, 
                 id_Producto: null, 
                 productoNombre: '',
-                // Opcional: limpiar precio unitario si lo guardas en el form
-                // precio: '' 
             }));
         }
     };
@@ -83,27 +76,23 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
     const handleSelect = (producto) => {
         setInputValue(producto.nombre);
         
-        // Actualizamos el estado del padre con ID y Nombre
-        // Tip: Aquí podrías pasar también el precio si es para una Venta/Compra
+        // Actualizamos el estado del padre
         setForm(prev => ({ 
             ...prev, 
             id_Producto: producto.id, 
             productoNombre: producto.nombre,
-            // ejemplo: precioUnitario: producto.precio_venta 
+            // Guardamos el stock disponible del almacén por si quieres validar en el formulario
+            stockDisponible: producto.stock_almacen 
         }));
         
         setShowSuggestions(false);
     };
 
-    // Botón Lupa
-    const handleSearchClick = () => {
-        fetchProductos(inputValue);
-    };
+    const handleSearchClick = () => fetchProductos(inputValue);
 
-    // Clic en input (abrir historial o buscar todo)
     const handleInputClick = () => {
         if (!showSuggestions && !hasSearched) {
-            fetchProductos(''); // Carga los primeros 10
+            fetchProductos(''); 
         } else {
             setShowSuggestions(true);
         }
@@ -128,7 +117,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                     autoComplete="off"
                 />
 
-                {/* Icono Acción */}
                 <button
                     type="button"
                     onClick={handleSearchClick}
@@ -159,12 +147,14 @@ const ProductoSearchSelect = ({ form, setForm, disabled }) => {
                                             {prod.categoria?.nombre || 'Sin Cat.'} | {prod.unidad}
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-xs font-semibold text-slate-700">
-                                            Stock: {prod.stock_bodega}
+                                    
+                                    {/* CORRECCIÓN: MOSTRAR STOCK ALMACÉN */}
+                                    <div className="text-right flex flex-col items-end">
+                                        <div className="text-xs font-bold text-blue-600" title="Stock en Almacén">
+                                            Almacen: {prod.stock_almacen}
                                         </div>
-                                        <div className="text-xs text-slate-500">
-                                            S/. {parseFloat(prod.precio_venta).toFixed(2)}
+                                        <div className="text-[10px] text-gray-400" title="Stock en Bodega">
+                                            Bodega: {prod.stock_bodega}
                                         </div>
                                     </div>
                                 </li>

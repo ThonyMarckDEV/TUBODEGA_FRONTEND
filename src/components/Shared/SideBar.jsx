@@ -66,6 +66,14 @@ const menus = {
                 { name: 'Listar Compras', link: '/admin/listar-compras' },
             ]
         },
+        {
+            section: 'Reposiciones',
+            icon: ChartBarIcon,
+            subs: [
+                { name: 'Agregar Reposición', link: '/admin/agregar-reposicion' },
+                { name: 'Listar Reposiciones', link: '/admin/listar-reposiciones' },
+            ]
+        },
     ],
     cajero: [
         { 
