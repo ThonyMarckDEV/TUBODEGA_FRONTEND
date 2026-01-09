@@ -30,8 +30,8 @@ export const createCliente = async (clienteData) => {
  * @param {number} page - El número de página a solicitar.
  * @returns {Promise<object>} - La respuesta paginada del backend.
  */
-export const getClientes = async (page = 1) => {
-  const url = `${API_BASE_URL}/api/clientes/index?page=${page}`;
+export const getClientes = async (page = 1 , search = '') => {
+  const url = `${API_BASE_URL}/api/clientes/index?page=${page}&search=${search}`;
 
   const response = await fetchWithAuth(url, {
     method: 'GET',

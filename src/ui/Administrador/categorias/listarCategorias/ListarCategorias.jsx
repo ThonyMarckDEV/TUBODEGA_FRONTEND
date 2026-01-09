@@ -21,6 +21,8 @@ const ListarCategorias = () => {
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [searchTerm, setSearchTerm] = useState('');
+
     // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
@@ -59,19 +61,21 @@ const ListarCategorias = () => {
         }
     ], []);
 
-    // --- CARGAR DATOS ---
-    const fetchData = useCallback(async (page) => {
+    // --- CARGAR DATOS  ---
+    const fetchData = useCallback(async (page, search = '') => {
         setLoading(true);
         setError(null);
         try {
-            const response = await getCategorias(page);
-            // Asumiendo que response es paginado tipo Laravel: { data: [...], current_page: 1, ... }
-            setCategorias(response.data);
+            const response = await getCategorias(page, search);
+
+            setCategorias(response.data || []); 
+
             setPaginationInfo({
                 currentPage: response.current_page,
                 totalPages: response.last_page,
                 totalItems: response.total,
             });
+
         } catch (err) {
             setError('Error al cargar categorías.');
             console.error(err);
@@ -80,29 +84,38 @@ const ListarCategorias = () => {
         }
     }, []);
 
+   // Carga inicial
     useEffect(() => {
-        fetchData(currentPage);
-    }, [currentPage, fetchData]);
+        fetchData(1, '');
+    }, [fetchData]);
+
+    const handleSearchTable = (term) => {
+        setSearchTerm(term); 
+        fetchData(1, term);
+    };
+    const handlePageChange = (page) => {
+        fetchData(page, searchTerm);
+    };
 
     // --- MANEJAR CAMBIO DE ESTADO ---
     const executeToggle = async () => {
         if (!itemToToggle) return;
         
-        // Invertir estado (Si es 1 pasa a 0, si es true pasa a false)
         const nuevoEstado = !itemToToggle.estado; 
         
         setLoading(true);
-        setItemToToggle(null); // Cerrar modal
+        setItemToToggle(null); 
 
         try {
             const res = await toggleCategoriaEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            await fetchData(currentPage); // Recargar tabla
+            await fetchData(currentPage); 
         } catch (err) {
             setAlert(err);
             setLoading(false);
         }
     };
+
 
     if (loading && categorias.length === 0) return <LoadingScreen />;
     if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
@@ -139,8 +152,10 @@ const ListarCategorias = () => {
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: (page) => setCurrentPage(page)
+                    onPageChange: handlePageChange
                 }}
+                onSearch={handleSearchTable} 
+                searchPlaceholder="Buscar por nombre..."
             />
         </div>
     );
