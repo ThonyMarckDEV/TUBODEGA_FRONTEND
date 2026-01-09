@@ -32,8 +32,13 @@ const AgregarProveedor = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          // Opcional: navigate('/admin/listar-proveedores');
+
+          setTimeout(() => {
+            navigate('/admin/listar-proveedores');
+          }, 3000);
+
       }
+
     } catch (error) {
       setAlert(error);
     } finally {

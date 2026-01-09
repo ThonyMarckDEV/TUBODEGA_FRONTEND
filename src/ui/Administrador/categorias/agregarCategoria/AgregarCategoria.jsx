@@ -31,8 +31,7 @@ const AgregarCategoria = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          // Opcional: Redirigir tras guardar
-          // setTimeout(() => navigate('/admin/listar-categorias'), 1500);
+          setTimeout(() => navigate('/admin/listar-categorias'), 3000);
       }
     } catch (error) {
       setAlert(error);

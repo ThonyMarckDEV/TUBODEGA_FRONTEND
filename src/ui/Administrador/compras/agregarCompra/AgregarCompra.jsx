@@ -51,7 +51,11 @@ const AgregarCompra = () => {
       
       if (response.type === 'success') {
           setFormData(initialFormData);
-          navigate('/admin/listar-compras');
+
+          setTimeout(() => {
+              navigate('/admin/listar-compras');
+          }, 3000);
+          
       }
     } catch (error) {
       setAlert(error);
