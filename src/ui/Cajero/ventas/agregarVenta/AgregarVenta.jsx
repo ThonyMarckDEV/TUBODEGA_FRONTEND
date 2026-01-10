@@ -12,14 +12,22 @@ const AgregarVenta = () => {
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
     
-    // Estado de la Venta
-    const [ventaData, setVentaData] = useState({
-        cliente_id: null,
-        clienteNombre: 'Público General', // Por defecto
+    const initialVentaData = {
+        cliente_id: null, // Se usará para el envío
+        id_Cliente: null, // El que usa tu SearchSelect
+        clienteNombre: 'Público General',
+        clienteData: {},  // Datos para el comprobante (RUC/DNI)
         metodo_pago: 'efectivo',
         tipo_venta: 'bodega',
         detalles: []
-    });
+    };
+
+    const [ventaData, setVentaData] = useState(initialVentaData);
+
+   const resetForm = () => {
+        setVentaData(initialVentaData);
+        setAlert({ type: 'success', message: 'Venta procesada correctamente.' });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,20 +39,26 @@ const AgregarVenta = () => {
         setLoading(true);
         try {
             const payload = {
-                ...ventaData,
+                cliente_id: ventaData.id_Cliente, 
+                cliente: ventaData.clienteData,
+                tipo_venta: ventaData.tipo_venta,
+                metodo_pago: ventaData.metodo_pago,
                 detalles: ventaData.detalles.map(d => ({
                     producto_id: d.id,
                     cantidad: d.cantidad,
                     precio: d.precio_venta
                 }))
             };
+
             const response = await storeVenta(payload);
-            setAlert(response);
+            
             if (response.type === 'success') {
-                setTimeout(() => navigate('/admin/listar-ventas'), 2000);
+                resetForm();
+            } else {
+                setAlert(response);
             }
         } catch (error) {
-            setAlert(error);
+            setAlert({ type: 'error', message: 'Error de conexión.' });
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getClientes } from 'services/clienteService';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, BuildingOfficeIcon, UserIcon } from '@heroicons/react/24/outline';
 
 const ClienteSearchSelect = ({ form, setForm, disabled }) => {
     const [inputValue, setInputValue] = useState('');
@@ -11,16 +11,11 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
 
     const wrapperRef = useRef(null);
 
-    // 1. Función para buscar en el Backend
     const fetchClientes = async (searchTerm = '') => {
         setLoading(true);
         try {
-            // Usamos tu servicio que ya tiene la ruta /api/clientes/index
             const response = await getClientes(1, searchTerm);
-            
-            // Laravel paginate devuelve la data en response.data
             const lista = response.data || [];
-            
             setSuggestions(lista);
             setShowSuggestions(true);
             setHasSearched(true);
@@ -32,7 +27,6 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // 2. Sincronizar si ya viene un cliente (Editar)
     useEffect(() => {
         if (form && form.clienteNombre) {
             setInputValue(form.clienteNombre);
@@ -41,7 +35,6 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
         }
     }, [form]);
 
-    // 3. Cerrar al hacer clic fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -57,7 +50,6 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
         setInputValue(texto);
         setHasSearched(false);
 
-        // Limpiar selección si el usuario borra/cambia el texto
         if (form.id_Cliente) {
             setForm(prev => ({ 
                 ...prev, 
@@ -75,21 +67,25 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
     };
 
     const handleSelect = (cliente) => {
-        // Concatenamos el nombre según tu estructura de Laravel
-        const nombreCompleto = `${cliente.datos.nombre} ${cliente.datos.apellidoPaterno} ${cliente.datos.apellidoMaterno}`;
+        // Lógica de nombre: Si es empresa (tiene RUC), usamos solo el nombre comercial.
+        // Si no, concatenamos los apellidos.
+        const esEmpresa = !!cliente.datos.ruc && cliente.datos.ruc !== '';
         
-        setInputValue(nombreCompleto);
+        const nombreMostrar = esEmpresa 
+            ? cliente.datos.nombre 
+            : `${cliente.datos.nombre} ${cliente.datos.apellidoPaterno} ${cliente.datos.apellidoMaterno}`;
+        
+        setInputValue(nombreMostrar);
         setForm(prev => ({ 
             ...prev, 
             id_Cliente: cliente.id, 
-            clienteNombre: nombreCompleto 
+            clienteNombre: nombreMostrar,
+            clienteData: cliente.datos // Guardamos los datos para saber si es B o F en el service
         }));
         setShowSuggestions(false);
     };
 
-    const handleSearchClick = () => {
-        fetchClientes(inputValue);
-    };
+    const handleSearchClick = () => fetchClientes(inputValue);
 
     const handleInputClick = () => {
         if (!showSuggestions && !hasSearched) {
@@ -113,7 +109,7 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
                     onKeyDown={handleKeyDown}
                     onClick={handleInputClick}
                     disabled={disabled || loading}
-                    placeholder="DNI o Nombre Completo..."
+                    placeholder="Buscar por DNI, RUC o Nombre..."
                     className="w-full border-gray-300 rounded-md shadow-sm py-2 pl-3 pr-10 border focus:border-black focus:ring-black"
                     autoComplete="off"
                 />
@@ -132,22 +128,43 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
                 </button>
 
                 {showSuggestions && (
-                    <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
+                    <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-64 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
-                            suggestions.map((cli) => (
-                                <li
-                                    key={cli.id}
-                                    onClick={() => handleSelect(cli)}
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm text-gray-700 border-b border-gray-50 last:border-none"
-                                >
-                                    <div className="font-medium text-gray-900">
-                                        {cli.datos.nombre} {cli.datos.apellidoPaterno} {cli.datos.apellidoMaterno}
-                                    </div>
-                                    <div className="text-xs text-gray-500">DNI: {cli.datos.dni}</div>
-                                </li>
-                            ))
+                            suggestions.map((cli) => {
+                                const esEmpresa = !!cli.datos.ruc && cli.datos.ruc !== '';
+                                return (
+                                    <li
+                                        key={cli.id}
+                                        onClick={() => handleSelect(cli)}
+                                        className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-gray-100 last:border-none flex items-start gap-3"
+                                    >
+                                        <div className="mt-1">
+                                            {esEmpresa ? (
+                                                <BuildingOfficeIcon className="w-5 h-5 text-blue-500" />
+                                            ) : (
+                                                <UserIcon className="w-5 h-5 text-gray-400" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900 uppercase">
+                                                {esEmpresa 
+                                                    ? cli.datos.nombre 
+                                                    : `${cli.datos.nombre} ${cli.datos.apellidoPaterno} ${cli.datos.apellidoMaterno}`}
+                                            </div>
+                                            <div className="text-xs text-gray-500 flex gap-2 mt-0.5">
+                                                {esEmpresa ? (
+                                                    <span className="bg-blue-50 text-blue-700 px-1.5 rounded font-medium">RUC: {cli.datos.ruc}</span>
+                                                ) : (
+                                                    <span className="bg-gray-100 text-gray-700 px-1.5 rounded font-medium">DNI: {cli.datos.dni}</span>
+                                                )}
+                                                <span className="text-gray-400">| {esEmpresa ? 'Empresa' : 'Cliente'}</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                );
+                            })
                         ) : (
-                            <li className="px-4 py-2 text-gray-500 text-sm italic">
+                            <li className="px-4 py-3 text-gray-500 text-sm italic">
                                 {loading ? 'Buscando...' : 'No se encontraron resultados.'}
                             </li>
                         )}
@@ -158,11 +175,11 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
             <div className="mt-1 text-xs h-4">
                 {form.id_Cliente ? (
                     <span className="text-green-600 font-semibold flex items-center gap-1">
-                        ✓ Cliente: {form.clienteNombre}
+                        ✓ Seleccionado: {form.clienteNombre}
                     </span>
                 ) : (
-                    <span className="text-gray-400">
-                        {inputValue && !loading && hasSearched ? 'Selecciona un cliente de la lista' : ''}
+                    <span className="text-gray-400 italic">
+                        {inputValue && !loading && hasSearched ? '⚠️ Selecciona un resultado de la lista' : 'Ingresa datos para buscar'}
                     </span>
                 )}
             </div>

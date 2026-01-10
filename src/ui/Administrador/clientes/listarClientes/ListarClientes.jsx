@@ -57,14 +57,42 @@ const ListarCliente = () => {
     // DEFINICIÓN DE COLUMNAS
     const columns = useMemo(() => [
         {
-            header: 'DNI',
-            render: (cliente) => cliente.datos?.dni || 'N/A'
+            header: 'Documento',
+            render: (cliente) => {
+                const esEmpresa = !!cliente.datos?.ruc;
+                return (
+                    <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">
+                            {esEmpresa ? cliente.datos.ruc : cliente.datos?.dni || 'N/A'}
+                        </span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            {esEmpresa ? 'RUC (Empresa)' : 'DNI (Persona)'}
+                        </span>
+                    </div>
+                );
+            }
         },
         {
-            header: 'Nombre Completo',
+            header: 'Cliente / Razón Social',
             render: (cliente) => {
-                const { nombre, apellidoPaterno, apellidoMaterno } = cliente.datos || {};
-                return <span className="font-semibold text-gray-700">{`${nombre || ''} ${apellidoPaterno || ''} ${apellidoMaterno || ''}`}</span>;
+                const { nombre, apellidoPaterno, apellidoMaterno, ruc } = cliente.datos || {};
+                const esEmpresa = !!ruc;
+                
+                // Si es empresa, solo mostramos el nombre. Si es persona, nombre + apellidos.
+                const nombreMostrar = esEmpresa 
+                    ? nombre 
+                    : `${nombre || ''} ${apellidoPaterno || ''} ${apellidoMaterno || ''}`;
+
+                return (
+                    <div className="max-w-xs overflow-hidden">
+                        <div className="font-semibold text-gray-700 truncate uppercase">
+                            {nombreMostrar}
+                        </div>
+                        {esEmpresa && (
+                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1 rounded">EMPRESA</span>
+                        )}
+                    </div>
+                );
             }
         },
         {
@@ -91,7 +119,6 @@ const ListarCliente = () => {
             header: 'Acciones',
             render: (cliente) => (
                 <div className="flex gap-2">
-                    {/* BOTÓN VER */}
                     <button
                         onClick={() => handleViewDetails(cliente.id)}
                         className="flex items-center gap-1 text-emerald-600 hover:text-emerald-800 font-medium text-sm bg-emerald-50 px-2 py-1 rounded transition-colors"
@@ -100,7 +127,6 @@ const ListarCliente = () => {
                         <EyeIcon className="w-4 h-4" /> Ver
                     </button>
 
-                    {/* BOTÓN EDITAR */}
                     <Link 
                         to={`/admin/editar-cliente/${cliente.id}`} 
                         className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-sm bg-indigo-50 px-2 py-1 rounded transition-colors"
@@ -111,7 +137,7 @@ const ListarCliente = () => {
                 </div>
             )
         }
-    ], [loading]); 
+    ], [loading]);
 
     const fetchClientes = useCallback(async (page , search = '') => {
         setLoading(true);
