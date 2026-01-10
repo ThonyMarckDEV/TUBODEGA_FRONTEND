@@ -54,7 +54,10 @@ import EditarReposicion from 'ui/Administrador/reposiciones/editarReposicion/Edi
 
 import ReporteKardex from 'ui/Administrador/kardex/reporteKardex/ReporteKardex';
 
-// UIS USUARIO
+// UIS CAJERO
+
+import AgregarVenta from 'ui/Cajero/ventas/agregarVenta/AgregarVenta';
+import ListarVentas from 'ui/Cajero/ventas/listarVentas/ListarVentas';
 
 
 // Utilities
@@ -161,7 +164,11 @@ function AppContent() {
         {/* Ruta Home (cuando solo pones /cajero) */}
         <Route index element={<Home />} />
 
-        {/* Aquí agregas más módulos */}
+        {/* RUTAS VENTAS */}
+          {/* Ruta Agregar Venta */}
+          <Route path="agregar-venta" element={<AgregarVenta />} />
+          {/* Ruta Listar Venta */}
+          <Route path="listar-ventas" element={<ListarVentas />} />
 
       </Route>
 
