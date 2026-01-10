@@ -23,11 +23,11 @@ export const createProducto = async (productoData) => {
 
 /**
  * Obtiene lista paginada de productos.
- * Endpoint: GET /api/productos?page={page}&search={search}&id_Categoria={id_Categoria}
+ * Endpoint: GET /api/productos?page={page}&search={search}
  */
-export const getProductos = async (page = 1, search = '' , id_Categoria = '') => {
+export const getProductos = async (page = 1, search = '') => {
   const term = encodeURIComponent(search);
-  const url = `${API_BASE_URL}/api/productos/index?page=${page}&search=${term}&id_Categoria=${id_Categoria || ''}`;
+  const url = `${API_BASE_URL}/api/productos/index?page=${page}&search=${term}`;
 
   const response = await fetchWithAuth(url, {
     method: 'GET',
