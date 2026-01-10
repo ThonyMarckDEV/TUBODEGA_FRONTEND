@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getVentas, showVenta } from 'services/ventaService'; 
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
-import { EyeIcon, MagnifyingGlassIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const ListarVentas = () => {
     const [loading, setLoading] = useState(true);
