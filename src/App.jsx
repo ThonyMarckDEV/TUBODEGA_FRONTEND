@@ -59,6 +59,8 @@ import ReporteKardex from 'ui/Administrador/kardex/reporteKardex/ReporteKardex';
 import AgregarVenta from 'ui/Cajero/ventas/agregarVenta/AgregarVenta';
 import ListarVentas from 'ui/Cajero/ventas/listarVentas/ListarVentas';
 
+import ListarComprobantes from 'ui/Cajero/comprobantes/listarComprobantes/ListarComprobantes';
+
 
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
@@ -169,6 +171,10 @@ function AppContent() {
           <Route path="agregar-venta" element={<AgregarVenta />} />
           {/* Ruta Listar Venta */}
           <Route path="listar-ventas" element={<ListarVentas />} />
+
+        {/* RUTAS COMPROBANTES */}
+          {/* Ruta Listar Comprobante */}
+          <Route path="listar-comprobantes" element={<ListarComprobantes />} />
 
       </Route>
 

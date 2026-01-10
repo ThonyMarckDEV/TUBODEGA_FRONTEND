@@ -100,6 +100,13 @@ const menus = {
                 { name: 'Listar Ventas', link: '/cajero/listar-ventas' },
             ]
         },
+        {
+            section: 'Comprobantes',
+            icon: ListBulletIcon,
+            subs: [
+                { name: 'Listar Comprobantes', link: '/cajero/listar-comprobantes' },
+            ]
+        },
     ],
 };
 
