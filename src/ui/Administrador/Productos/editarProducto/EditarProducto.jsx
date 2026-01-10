@@ -26,6 +26,7 @@ const EditarProducto = () => {
             unidad: data.unidad,
             precio_compra: data.precio_compra,
             precio_venta: data.precio_venta,
+            precio_venta_mayorista: data.precio_venta_mayorista,
             stock_minimo: data.stock_minimo,
             // IMPORTANTE: Precargar el Select de Categoría
             id_Categoria: data.categoria_id,

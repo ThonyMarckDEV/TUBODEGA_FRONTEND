@@ -96,7 +96,7 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-slate-400 font-bold uppercase">Precio</span>
                                         <span className="font-black text-black text-lg leading-none">
-                                            S/ {parseFloat(tipoVenta === 'mayorista' ? (p.precio_mayorista || p.precio_venta) : p.precio_venta).toFixed(2)}
+                                            S/ {parseFloat(tipoVenta === 'mayorista' ? p.precio_venta_mayorista : p.precio_venta).toFixed(2)}
                                         </span>
                                     </div>
                                     <div className={`text-[10px] px-2 py-1 rounded-lg font-bold ${p.stock_bodega > 5 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>

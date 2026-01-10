@@ -111,6 +111,25 @@ const ProductoForm = ({ data, setData, handleChange, disabled = false }) => {
         />
       </div>
 
+      {/* Campo: Precio Venta Mayorista */}
+      <div>
+        <label htmlFor="precio_venta_mayorista" className="block text-sm font-medium text-slate-700 mb-1">
+          Precio Venta Mayorista (S/.) <span className="text-red-500">*</span>
+        </label>
+        <input 
+          id="precio_venta_mayorista" 
+          name="precio_venta_mayorista" 
+          type="number" 
+          step="0.01"
+          value={data.precio_venta_mayorista || ''} 
+          onChange={handleChange} 
+          placeholder="0.00" 
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm p-2 border"
+          required
+          disabled={disabled}
+        />
+      </div>
+
     </div>
   );
 };

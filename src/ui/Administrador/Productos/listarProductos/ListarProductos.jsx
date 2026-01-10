@@ -29,8 +29,13 @@ const ListarProductos = () => {
             )
         },
         {
-            header: 'Precio Venta',
-            render: (row) => <span className="text-gray-700 font-medium">S/. {parseFloat(row.precio_venta).toFixed(2)}</span>
+            header: 'Precios (S/.)',
+            render: (row) => (
+                <div className="flex flex-col text-xs">
+                    <span className="text-slate-500">Normal: <b className="text-slate-800">S/. {parseFloat(row.precio_venta).toFixed(2)}</b></span>
+                    <span className="text-indigo-500 font-medium">Mayorista: <b className="text-indigo-700">S/. {parseFloat(row.precio_venta_mayorista).toFixed(2)}</b></span>
+                </div>
+            )
         },
         // COLUMNA 1: STOCK BODEGA (Donde se vende)
         {

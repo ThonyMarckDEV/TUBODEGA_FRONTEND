@@ -10,6 +10,7 @@ const initialFormData = {
   unidad: 'unidad',
   precio_compra: '',
   precio_venta: '',
+  precio_venta_mayorista: '',
   stock_minimo: 5,
   // Campos especiales para CategoriaSearchSelect
   id_Categoria: null, 
