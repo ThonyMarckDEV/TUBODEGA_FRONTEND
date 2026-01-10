@@ -113,9 +113,9 @@ const ListarVentas = () => {
                     >
                         <EyeIcon className="w-4 h-4" /> Ver
                     </button>
-                    <button className="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded">
+                    {/* <button className="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded">
                         <PrinterIcon className="w-4 h-4" />
-                    </button>
+                    </button> */}
                 </div>
             )
         }
