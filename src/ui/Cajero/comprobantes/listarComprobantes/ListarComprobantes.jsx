@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react'; // 1. Agregado useCallback
 import { getComprobantePdf, getComprobantes, updateSunatStatus } from 'services/comprobanteService';
 import Table from 'components/Shared/Tables/Table';
 import PdfModal from 'components/Shared/Modals/PdfModal';
@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 const ListarComprobantes = () => {
     const [loading, setLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState(null); // Guarda el ID del comprobante actualizándose
+    const [isUpdating, setIsUpdating] = useState(null);
     const [comprobantes, setComprobantes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
@@ -17,12 +17,13 @@ const ListarComprobantes = () => {
     const [pdfConfig, setPdfConfig] = useState({ url: '', title: '' });
     const [alert, setAlert] = useState(null);
 
-    const showAlert = (type, message) => {
+    const showAlert = useCallback((type, message) => {
         setAlert({ type, message });
         setTimeout(() => setAlert(null), 3000);
-    };
+    }, []);
 
-    const fetchComprobantes = async (page = 1, search = '') => {
+    // 2. fetchComprobantes envuelto en useCallback
+    const fetchComprobantes = useCallback(async (page = 1, search = '') => {
         setLoading(true);
         try {
             const response = await getComprobantes(page, search);
@@ -36,12 +37,16 @@ const ListarComprobantes = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [showAlert]); // Depende de showAlert
 
-    useEffect(() => { fetchComprobantes(1); }, []);
+    // 3. useEffect ahora tiene fetchComprobantes como dependencia segura
+    useEffect(() => { 
+        fetchComprobantes(1); 
+    }, [fetchComprobantes]);
 
-    const handleUpdateStatus = async (id, newStatus) => {
-        setIsUpdating(id); // Bloqueamos visualmente esta fila
+    // 4. handleUpdateStatus envuelto para ser usado en useMemo
+    const handleUpdateStatus = useCallback(async (id, newStatus) => {
+        setIsUpdating(id);
         try {
             await updateSunatStatus(id, newStatus);
             setComprobantes(prev => 
@@ -51,9 +56,9 @@ const ListarComprobantes = () => {
         } catch (e) {
             showAlert('error', 'Error al actualizar estado');
         } finally {
-            setIsUpdating(null); // Liberamos la fila
+            setIsUpdating(null);
         }
-    };
+    }, [showAlert]);
 
     const openPdf = async (row) => {
         Swal.fire({
@@ -81,6 +86,7 @@ const ListarComprobantes = () => {
         setIsPdfOpen(false);
     };
 
+    // 5. columns ahora incluye handleUpdateStatus en sus dependencias
     const columns = useMemo(() => [
         { 
             header: 'Documento', 
@@ -148,7 +154,7 @@ const ListarComprobantes = () => {
                 </button>
             )
         }
-    ], [isUpdating]);
+    ], [isUpdating, handleUpdateStatus]); // Se agregó handleUpdateStatus aquí
 
     return (
         <div className="container mx-auto p-4 md:p-6 min-h-screen">

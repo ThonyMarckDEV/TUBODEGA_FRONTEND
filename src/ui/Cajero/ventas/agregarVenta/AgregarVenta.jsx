@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { storeVenta } from 'services/ventaService';
 // Componentes que crearemos
@@ -8,7 +7,6 @@ import VentaCatalogo from '../components/VentaCatalogo';
 import ClienteSearchSelect from 'components/Shared/Comboboxes/ClienteSearchSelect';
 
 const AgregarVenta = () => {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
     
