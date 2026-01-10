@@ -40,7 +40,6 @@ const AgregarVenta = () => {
         try {
             const payload = {
                 cliente_id: ventaData.id_Cliente, 
-                cliente: ventaData.clienteData,
                 tipo_venta: ventaData.tipo_venta,
                 metodo_pago: ventaData.metodo_pago,
                 detalles: ventaData.detalles.map(d => ({
@@ -54,11 +53,20 @@ const AgregarVenta = () => {
             
             if (response.type === 'success') {
                 resetForm();
-            } else {
-                setAlert(response);
-            }
+                setAlert({ type: 'success', message: response.message || 'Venta procesada con éxito.' });
+            } 
         } catch (error) {
-            setAlert({ type: 'error', message: 'Error de conexión.' });
+            // 'error' aquí es el objeto que lanzó tu handleResponse original
+            console.error("Error capturado:", error);
+            
+            const errorMessage = (error.details && error.details.length > 0) 
+                ? error.details[0] 
+                : (error.message || 'Error inesperado en el servidor');
+
+            setAlert({
+                type: 'error',
+                message: errorMessage
+            });
         } finally {
             setLoading(false);
         }
