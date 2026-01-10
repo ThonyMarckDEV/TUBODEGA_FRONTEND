@@ -35,6 +35,20 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
         }
     }, [search]);
 
+    // Función crucial: Prepara el producto con el precio seleccionado antes de agregarlo
+    const handleAddToCarrito = (producto) => {
+        const precioAplicado = tipoVenta === 'mayorista' 
+            ? producto.precio_venta_mayorista 
+            : producto.precio_venta;
+
+        // Enviamos una copia del producto pero sobreescribiendo 'precio_venta' 
+        // con el valor que corresponde al tipo de venta actual.
+        onAdd({
+            ...producto,
+            precio_venta: precioAplicado 
+        });
+    };
+
     useEffect(() => { loadProds(1); }, [loadProds]);
 
     useEffect(() => {
@@ -84,7 +98,8 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
                         {productos.map(p => (
                             <button
                                 key={p.id}
-                                onClick={() => onAdd(p)}
+                                // USAMOS LA NUEVA FUNCIÓN AQUÍ
+                                onClick={() => handleAddToCarrito(p)}
                                 disabled={p.stock_bodega <= 0}
                                 className="p-3 border rounded-xl hover:border-black hover:shadow-md transition-all text-left flex flex-col justify-between h-36 group relative bg-white border-slate-100 disabled:opacity-50 disabled:hover:border-slate-100"
                             >
@@ -94,7 +109,9 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
                                 </div>
                                 <div className="flex justify-between items-end">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] text-slate-400 font-bold uppercase">Precio</span>
+                                        <span className={`text-[10px] font-bold uppercase ${tipoVenta === 'mayorista' ? 'text-indigo-500' : 'text-slate-400'}`}>
+                                            {tipoVenta === 'mayorista' ? 'P. Mayorista' : 'Precio'}
+                                        </span>
                                         <span className="font-black text-black text-lg leading-none">
                                             S/ {parseFloat(tipoVenta === 'mayorista' ? p.precio_venta_mayorista : p.precio_venta).toFixed(2)}
                                         </span>
@@ -117,7 +134,6 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
                 )}
             </div>
 
-            {/* Uso del nuevo componente de Paginación */}
             <Pagination 
                 current={pagination.current_page}
                 last={pagination.last_page}
