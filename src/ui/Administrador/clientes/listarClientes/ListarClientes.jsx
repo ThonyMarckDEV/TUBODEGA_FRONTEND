@@ -37,8 +37,6 @@ const ListarCliente = () => {
 
         try {
             const response = await showCliente(id);
-            // Tu backend devuelve la data en: response.data
-            // Estructura: { id, username, datos: {...}, contactos: [...] }
             setSelectedCliente(response.data);
         } catch (error) {
             console.error("Error al cargar detalles del cliente", error);

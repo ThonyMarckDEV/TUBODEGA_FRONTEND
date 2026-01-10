@@ -56,7 +56,7 @@ const ListarVentas = () => {
 
     const columns = useMemo(() => [
         { 
-            header: 'Correlativo', 
+            header: 'VENTA N°', 
             render: (row) => <span className="font-bold"># {String(row.id).padStart(6, '0')}</span>
         },
         { 
@@ -70,7 +70,25 @@ const ListarVentas = () => {
         },
         {
             header: 'Cliente',
-            render: (row) => row.cliente ? row.cliente.nombre : <span className="text-gray-400">Público General</span>
+            render: (row) => {
+                if (!row.cliente) return <span className="text-gray-400">Público General</span>;
+                
+                const { datos } = row.cliente;
+                const esEmpresa = !!datos?.ruc;
+                const documento = esEmpresa ? datos.ruc : datos?.dni;
+                const nombreFull = esEmpresa 
+                    ? datos.nombre 
+                    : `${datos?.nombre} ${datos?.apellidoPaterno}`;
+
+                return (
+                    <div className="flex flex-col">
+                        <span className="font-semibold text-gray-800 uppercase text-xs">{nombreFull}</span>
+                        <span className="text-[10px] text-gray-500 font-mono">
+                            {esEmpresa ? 'RUC: ' : 'DNI: '}{documento || 'N/A'}
+                        </span>
+                    </div>
+                );
+            }
         },
         {
             header: 'Tipo/Pago',
@@ -119,7 +137,7 @@ const ListarVentas = () => {
                         />
                         <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
                     </div>
-                    <Link to="/admin/agregar-venta" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap">
+                    <Link to="/cajero/agregar-venta" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap">
                         + Nueva Venta
                     </Link>
                 </form>
@@ -136,7 +154,7 @@ const ListarVentas = () => {
                 }}
             />
 
-            {/* MODAL DETALLE DE VENTA */}
+           {/* MODAL DETALLE DE VENTA */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
@@ -145,17 +163,45 @@ const ListarVentas = () => {
             >
                 {selectedVenta && (
                     <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg">
+                        {/* Cabecera del detalle con lógica de Cliente/Empresa */}
+                        <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
                             <div>
-                                <p className="text-gray-500 uppercase text-[10px] font-bold">Cliente</p>
-                                <p className="font-medium">{selectedVenta.cliente?.nombre || 'Público General'}</p>
+                                <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Información del Cliente</p>
+                                {selectedVenta.cliente ? (
+                                    <>
+                                        <p className="font-bold text-indigo-900 uppercase">
+                                            {selectedVenta.cliente.datos?.nombre} 
+                                            {/* Si no tiene RUC, es persona, mostramos apellido */}
+                                            {!selectedVenta.cliente.datos?.ruc && ` ${selectedVenta.cliente.datos?.apellidoPaterno || ''}`}
+                                        </p>
+                                        <p className="text-xs text-slate-600 mt-1">
+                                            <span className="font-semibold">
+                                                {selectedVenta.cliente.datos?.ruc ? 'RUC: ' : 'DNI: '}
+                                            </span>
+                                            {selectedVenta.cliente.datos?.ruc || selectedVenta.cliente.datos?.dni || 'No registrado'}
+                                        </p>
+                                        {selectedVenta.cliente.datos?.ruc && (
+                                            <span className="inline-block mt-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded">
+                                                EMPRESA
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="font-medium text-gray-400 italic">Público General</p>
+                                )}
                             </div>
-                            <div className="text-right">
-                                <p className="text-gray-500 uppercase text-[10px] font-bold">Método Pago</p>
-                                <p className="font-medium uppercase">{selectedVenta.metodo_pago}</p>
+                            <div className="text-right border-l pl-4 border-slate-200">
+                                <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Detalles del Pago</p>
+                                <p className="font-medium text-slate-700">
+                                    Tipo: <span className="uppercase text-blue-600 font-bold">{selectedVenta.tipo}</span>
+                                </p>
+                                <p className="font-medium text-slate-700 uppercase">
+                                    {selectedVenta.metodo_pago}
+                                </p>
                             </div>
                         </div>
 
+                        {/* Tabla de Productos */}
                         <div>
                             <h4 className="font-bold text-sm mb-3 border-b pb-1">Productos</h4>
                             <table className="min-w-full text-sm">
@@ -188,6 +234,7 @@ const ListarVentas = () => {
                     </div>
                 )}
             </ViewModal>
+
         </div>
     );
 };
