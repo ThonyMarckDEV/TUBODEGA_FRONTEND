@@ -82,7 +82,7 @@ const Login = () => {
         </div>
         
         <p className="text-center mt-6 text-[10px] text-gray-400 uppercase tracking-[0.2em]">
-          Powered by Tu Bodega System v1.0
+          Powered by ThonyMarckDEV v1.0
         </p>
       </div>
     </div>

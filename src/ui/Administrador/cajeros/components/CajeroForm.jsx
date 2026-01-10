@@ -26,11 +26,6 @@ const CajeroForm = ({ data, handleChange }) => {
           <label htmlFor="dni" className="block text-sm font-medium text-slate-600 mb-1">DNI</label>
           <input id="dni" name="dni" type="text" value={data.dni} onChange={handleChange} placeholder="########" className="input-style" maxLength="8" />
         </div>
-
-        <div>
-          <label htmlFor="ruc" className="block text-sm font-medium text-slate-600 mb-1">RUC <span className="text-slate-400">(Opcional)</span></label>
-          <input id="ruc" name="ruc" type="text" value={data.ruc} onChange={handleChange} placeholder="###########" className="input-style" maxLength="11" />
-        </div>
         
         {/* --- Fila 3: Datos Personales --- */}
         <div>

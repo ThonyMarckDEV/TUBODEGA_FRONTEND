@@ -14,12 +14,12 @@ import { createCajero } from 'services/cajeroService';
 const initialFormData = {
   datos: {
     nombre: '', apellidoPaterno: '', apellidoMaterno: '',
-    sexo: '', dni: '', fechaNacimiento: '', ruc: '',
+    sexo: '', dni: '', fechaNacimiento: ''
   },
   contactos: {
     telefonoMovil: '', telefonoFijo: '', correo: '',
   },
-  accesos: {
+  usuario: {
     username: '', password: '', password_confirmation: ''
   }
 };
@@ -72,7 +72,7 @@ const AgregarCajero = () => {
       case 2:
         return <ContactosForm data={formData.contactos} handleChange={(e) => handleChange(e, 'contactos')} />;
       case 3:
-        return <DatosAccesoForm data={formData.accesos} handleChange={(e) => handleChange(e, 'accesos')} />;
+        return <DatosAccesoForm data={formData.usuario} handleChange={(e) => handleChange(e, 'usuario')} />;
       default:
         return null;
     }

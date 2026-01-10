@@ -201,10 +201,6 @@ const ListarCajero = () => {
                                         <span className="text-gray-500">Fecha Nacimiento:</span>
                                         <span className="font-medium text-gray-900">{selectedCajero.datos?.fechaNacimiento || 'N/A'}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">RUC:</span>
-                                        <span className="font-medium text-gray-900">{selectedCajero.datos?.ruc || 'N/A'}</span>
-                                    </div>
                                 </div>
                             </div>
 

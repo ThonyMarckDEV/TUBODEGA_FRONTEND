@@ -12,10 +12,10 @@ import DatosAccesoForm from '../components/DatosAccesoForm';
 const initialFormData = {
   datos: {
     nombre: '', apellidoPaterno: '', apellidoMaterno: '',
-    sexo: '', dni: '', fechaNacimiento: '', ruc: ''
+    sexo: '', dni: '', fechaNacimiento: ''
   },
   contactos: { telefonoMovil: '', telefonoFijo: '', correo: '' },
-  accesos: { username: '', password: '', password_confirmation: '' }
+  usuario: { username: '', password: '', password_confirmation: '' }
 };
 
 const cleanNulls = (obj) => {
@@ -52,7 +52,7 @@ const EditarCajero = () => {
         const structuredData = {
           datos: { ...initialFormData.datos, ...datosApi, sexo: datosApi.sexo === 'Masculino' ? 'Masculino' : 'Femenino' },
           contactos: { ...initialFormData.contactos, ...contactosApi },
-          accesos: { 
+          usuario: { 
              username: usernameApi, 
              password: '', // Siempre vacía al editar
              password_confirmation: '' 
@@ -117,7 +117,7 @@ const EditarCajero = () => {
             <>
               <div className="bg-white p-8 rounded-lg shadow-md"><CajeroForm data={formData.datos} handleChange={(e) => handleChange(e, 'datos')} /></div>
               <div className="bg-white p-8 rounded-lg shadow-md"><ContactosForm data={formData.contactos} handleChange={(e) => handleChange(e, 'contactos')} /></div>
-              <div className="bg-white p-8 rounded-lg shadow-md"><DatosAccesoForm data={formData.accesos} handleChange={(e) => handleChange(e, 'accesos')} isEditing={true} /></div>
+              <div className="bg-white p-8 rounded-lg shadow-md"><DatosAccesoForm data={formData.usuario} handleChange={(e) => handleChange(e, 'usuario')} isEditing={true} /></div>
             </>
           )}
         </div>
