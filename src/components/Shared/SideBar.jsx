@@ -11,13 +11,14 @@ import {
     UserIcon, 
     ChartBarIcon, 
     ClipboardDocumentCheckIcon, 
-    DocumentTextIcon 
+    DocumentTextIcon ,
+    ShoppingCartIcon
 } from '@heroicons/react/24/outline'; 
 import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { ShoppingBasket, UserCircle2Icon } from 'lucide-react';
+import { ShoppingBasket, ShoppingCart, UserCircle2Icon } from 'lucide-react';
 
 const menus = {
     admin: [
@@ -91,17 +92,12 @@ const menus = {
         },
     ],
     cajero: [
-        { 
-            section: 'Dashboard', 
-            link: '/asesor/dashboard',
-            icon: ChartBarIcon
-        },
         {
-            section: 'Evaluaciones',
-            icon: ClipboardDocumentCheckIcon,
-            subs:[
-                { name: 'Evaluar Cliente', link: '/asesor/evaluacion-cliente' },
-                { name: 'Evaluaciones Enviadas', link: '/asesor/evaluaciones-enviadas' }
+            section: 'Ventas',
+            icon: ShoppingCartIcon,
+            subs: [
+                { name: 'Agregar Venta', link: '/cajero/agregar-venta' },
+                { name: 'Listar Ventas', link: '/cajero/listar-ventas' },
             ]
         },
     ],
