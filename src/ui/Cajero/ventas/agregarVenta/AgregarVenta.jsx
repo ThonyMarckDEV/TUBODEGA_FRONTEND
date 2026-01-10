@@ -119,7 +119,7 @@ const AgregarVenta = () => {
                                     >
                                         <option value="efectivo">Efectivo</option>
                                         <option value="transferencia">Transferencia / Yape</option>
-                                        <option value="credito">Crédito</option>
+                                        <option value="tarjeta">Tarjeta </option>
                                     </select>
                                 </div>
                                 <div>
