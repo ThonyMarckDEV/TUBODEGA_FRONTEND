@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getCategorias } from 'services/categoriaService';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Asegúrate de tener heroicons
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
     const [inputValue, setInputValue] = useState('');

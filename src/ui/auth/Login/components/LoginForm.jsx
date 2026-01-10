@@ -7,74 +7,64 @@ const LoginForm = ({
   setPassword,
   handleLogin,
   rememberMe,
-  setRememberMe,
-  setShowForgotPassword
+  setRememberMe
 }) => {
   return (
-    <div className="w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-        Iniciar Sesión
-      </h2>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-            Nombre de usuario
-          </label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-            placeholder="Ingresa tu nombre de usuario"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Contraseña
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-            placeholder="Ingresa tu contraseña"
-            required
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-              Recordarme
-            </label>
-          </div>
-          <div className="text-sm">
-            <button
-              type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className="font-medium text-red-600 hover:text-red-500"
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Iniciar Sesión
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleLogin} className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-lg font-medium text-gray-800 uppercase tracking-wider">
+          Acceso al Sistema
+        </h2>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+          Usuario
+        </label>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-none focus:outline-none focus:border-black transition-colors duration-300"
+          placeholder="Ingrese usuario"
+          required
+        />
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+          Contraseña
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-none focus:outline-none focus:border-black transition-colors duration-300"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <div className="flex items-center">
+        <input
+          id="remember-me"
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="h-4 w-4 accent-black border-gray-300 rounded-none"
+        />
+        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">
+          Mantener sesión iniciada
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-4 bg-black text-white text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all duration-300 shadow-lg active:scale-[0.98]"
+      >
+        Entrar
+      </button>
+    </form>
   );
 };
 
