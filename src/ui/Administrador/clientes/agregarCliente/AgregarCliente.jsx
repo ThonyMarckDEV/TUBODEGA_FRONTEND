@@ -12,6 +12,7 @@ import { createCliente } from 'services/clienteService';
 
 const initialFormData = {
   datos: {
+    tipo: 'Persona',
     nombre: '',
     apellidoPaterno: '',
     apellidoMaterno: '',
@@ -75,7 +76,7 @@ const AgregarCliente = () => {
   const renderFormStep = () => {
     switch (currentStep) {
       case 1:
-        return <ClienteForm data={formData.datos} handleChange={(e) => handleChange(e, 'datos')} />;
+        return <ClienteForm data={formData.datos} handleChange={(e) => handleChange(e, 'datos')} isEdit={false} />;
       case 2:
         return (
           <>

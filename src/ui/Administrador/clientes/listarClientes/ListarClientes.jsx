@@ -239,86 +239,113 @@ const ListarCliente = () => {
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={closeModal} 
-                title="Información del Cliente"
+                title="Información Detallada"
                 isLoading={detailsLoading}
             >
-                {selectedCliente && (
-                    <div className="space-y-6">
-                        
-                        {/* 1. Encabezado con Avatar y Estado */}
-                        <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
-                            <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl">
-                                {selectedCliente.datos?.nombre?.charAt(0) || 'U'}
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900">
-                                    {selectedCliente.datos?.nombre} {selectedCliente.datos?.apellidoPaterno} {selectedCliente.datos?.apellidoMaterno}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                                    <span>Usuario: {selectedCliente.username}</span>
-                                    <span className="text-gray-300">|</span>
-                                    <span className={`font-semibold ${selectedCliente.estado === 1 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {selectedCliente.estado === 1 ? 'Activo' : 'Inactivo'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                {selectedCliente && (() => {
+                    // Detectamos si es empresa para adaptar el modal
+                    const esEmpresa = !!selectedCliente.datos?.ruc;
+                    const d = selectedCliente.datos;
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    return (
+                        <div className="space-y-6">
                             
-                            {/* 2. Datos Personales */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
-                                    Datos Personales
-                                </h4>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">DNI:</span>
-                                        <span className="font-medium text-gray-900">{selectedCliente.datos?.dni}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Sexo:</span>
-                                        <span className="font-medium text-gray-900">{selectedCliente.datos?.sexo}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Fecha Nacimiento:</span>
-                                        <span className="font-medium text-gray-900">{selectedCliente.datos?.fechaNacimiento || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">RUC:</span>
-                                        <span className="font-medium text-gray-900">{selectedCliente.datos?.ruc || 'N/A'}</span>
+                            {/* 1. Encabezado Dinámico */}
+                            <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
+                                <div className={`h-16 w-16 rounded-full flex items-center justify-center font-bold text-2xl ${esEmpresa ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                                    {d?.nombre?.charAt(0) || 'C'}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900 uppercase">
+                                        {esEmpresa ? d?.nombre : `${d?.nombre} ${d?.apellidoPaterno} ${d?.apellidoMaterno}`}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${esEmpresa ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                                            {esEmpresa ? 'PERSONA JURÍDICA' : 'PERSONA NATURAL'}
+                                        </span>
+                                        <span className="text-gray-300">|</span>
+                                        <span className={`font-semibold ${selectedCliente.estado === 1 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {selectedCliente.estado === 1 ? 'Activo' : 'Inactivo'}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 3. Información de Contacto */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
-                                    Información de Contacto
-                                </h4>
-                                <div className="space-y-3">
-                                    {selectedCliente.contactos && selectedCliente.contactos.length > 0 ? (
-                                        selectedCliente.contactos.map((contacto, index) => (
-                                            <div key={index} className="text-sm bg-white p-2 rounded shadow-sm border border-gray-100">
-                                                <div className="flex flex-col">
-                                                    <span className="text-gray-500 text-xs uppercase">Email</span>
-                                                    <span className="font-medium text-gray-800">{contacto.correo || 'N/A'}</span>
-                                                </div>
-                                                <div className="flex flex-col mt-1">
-                                                    <span className="text-gray-500 text-xs uppercase">Teléfono</span>
-                                                    <span className="font-medium text-gray-800">{contacto.telefonoMovil || 'N/A'}</span>
-                                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                
+                                {/* 2. Datos Principales (Adaptado) */}
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
+                                        Información Legal
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                        {/* Mostrar RUC o DNI según corresponda */}
+                                        {esEmpresa ? (
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">RUC:</span>
+                                                <span className="font-medium text-gray-900">{d?.ruc}</span>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-gray-500 italic">No hay información de contacto registrada.</p>
-                                    )}
+                                        ) : (
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">DNI:</span>
+                                                <span className="font-medium text-gray-900">{d?.dni}</span>
+                                            </div>
+                                        )}
+
+                                        {/* Solo mostrar Sexo si no es empresa */}
+                                        {!esEmpresa && (
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Sexo:</span>
+                                                <span className="font-medium text-gray-900">{d?.sexo}</span>
+                                            </div>
+                                        )}
+
+                                        {/* Etiqueta de fecha dinámica */}
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">
+                                                {esEmpresa ? 'Fecha de Constitución:' : 'Fecha de Nacimiento:'}
+                                            </span>
+                                            <span className="font-medium text-gray-900">
+                                                {d?.fechaNacimiento ? new Date(d.fechaNacimiento).toLocaleDateString() : 'N/A'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 3. Información de Contacto */}
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
+                                        Información de Contacto
+                                    </h4>
+                                    <div className="space-y-3">
+                                        {selectedCliente.contactos && selectedCliente.contactos.length > 0 ? (
+                                            selectedCliente.contactos.map((contacto, index) => (
+                                                <div key={index} className="text-sm bg-white p-2 rounded shadow-sm border border-gray-100">
+                                                    <div className="flex flex-col mb-2">
+                                                        <span className="text-gray-400 text-[10px] font-bold uppercase">Correo Electrónico</span>
+                                                        <span className="font-medium text-gray-800 break-all">{contacto.correo || 'No registrado'}</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-gray-400 text-[10px] font-bold uppercase">Móvil</span>
+                                                            <span className="font-medium text-gray-800">{contacto.telefonoMovil || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-gray-400 text-[10px] font-bold uppercase">Fijo</span>
+                                                            <span className="font-medium text-gray-800">{contacto.telefonoFijo || 'N/A'}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-gray-500 italic">Sin contactos.</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
-                    </div>
-                )}
+                    );
+                })()}
             </ViewModal>
         </div>
     );

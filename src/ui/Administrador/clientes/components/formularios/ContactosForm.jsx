@@ -4,10 +4,13 @@ import React from 'react';
 const ContactosForm = ({ data, handleChange }) => {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-slate-700 mb-6 border-b pb-2">2. Datos de Contacto</h2>
-      {/* Usamos una grilla de 2 columnas para una mejor distribución */}
+      <h2 className="text-xl font-semibold text-slate-700 mb-6 border-b pb-2">
+        2. Datos de Contacto
+      </h2>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         
+        {/* Teléfono Móvil */}
         <div>
           <label htmlFor="telefonoMovil" className="block text-sm font-medium text-slate-600 mb-1">
             Teléfono Móvil
@@ -19,13 +22,15 @@ const ContactosForm = ({ data, handleChange }) => {
             value={data.telefonoMovil}
             onChange={handleChange}
             placeholder="Ej. 987654321"
-            className="input-style"
+            maxLength="9"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
           />
         </div>
 
+        {/* Teléfono Fijo */}
         <div>
           <label htmlFor="telefonoFijo" className="block text-sm font-medium text-slate-600 mb-1">
-            Teléfono Fijo <span className="text-slate-400">(Opcional)</span>
+            Teléfono Fijo <span className="text-slate-400 font-normal">(Opcional)</span>
           </label>
           <input
             id="telefonoFijo"
@@ -34,14 +39,14 @@ const ContactosForm = ({ data, handleChange }) => {
             value={data.telefonoFijo}
             onChange={handleChange}
             placeholder="Ej. 073123456"
-            className="input-style"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
           />
         </div>
 
-        {/* Hacemos que el correo ocupe las 2 columnas para un mejor orden */}
+        {/* Correo Electrónico */}
         <div className="md:col-span-2">
           <label htmlFor="correo" className="block text-sm font-medium text-slate-600 mb-1">
-            Correo Electrónico <span className="text-slate-400">(Opcional)</span>
+            Correo Electrónico <span className="text-slate-400 font-normal">(Opcional)</span>
           </label>
           <input
             id="correo"
@@ -50,7 +55,7 @@ const ContactosForm = ({ data, handleChange }) => {
             value={data.correo}
             onChange={handleChange}
             placeholder="ejemplo@correo.com"
-            className="input-style"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
           />
         </div>
         

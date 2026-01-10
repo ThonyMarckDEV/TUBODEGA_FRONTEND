@@ -44,24 +44,22 @@ const EditarCliente = () => {
     const fetchCliente = async () => {
       try {
         const response = await showCliente(id);
-        const clienteData = response.data; 
+        const clienteData = response.data;
 
-        if (!clienteData) {
-          throw new Error("La respuesta de la API no contiene los datos del cliente.");
-        }
-
-        // 1. Limpiamos los datos de la API para eliminar valores `null`
         const datosApi = cleanNulls(clienteData.datos);
         const contactosApi = cleanNulls(clienteData.contactos?.[0]);
-        
-        // 2. Preparamos los datos personales con las transformaciones necesarias
+
+        // LÓGICA DE DETECCIÓN:
+        // Si tiene RUC y no tiene DNI (o el RUC no está vacío), es Empresa.
+        const tipoDetectado = (datosApi.ruc && datosApi.ruc.trim() !== "") ? 'Empresa' : 'Persona';
+
         const datosLimpios = {
-            ...initialFormData.datos, // Empezamos con la plantilla
-            ...datosApi, // Sobrescribimos con los datos limpios de la API
-            sexo: datosApi.sexo === 'Masculino' ? 'Masculino' : 'Femenino',
+          ...initialFormData.datos,
+          ...datosApi,
+          tipo: tipoDetectado, // <--- Asignamos el tipo detectado
+          sexo: datosApi.sexo || '',
         };
 
-        // 3. Construimos el estado final del formulario
         const structuredData = {
           datos: datosLimpios,
           contactos: { ...initialFormData.contactos, ...contactosApi },
@@ -69,14 +67,14 @@ const EditarCliente = () => {
         
         setFormData(structuredData);
 
-      } catch (err) {
-        console.error("Error al procesar datos del cliente:", err);
-        setError("No se pudo cargar la información del cliente. Revisa la consola.");
-      } finally {
-        setLoading(false);
-      }
+        } catch (err) {
+          console.error("Error al procesar datos del cliente:", err);
+          setError("No se pudo cargar la información del cliente. Revisa la consola.");
+        } finally {
+          setLoading(false);
+        }
     };
-    fetchCliente();
+      fetchCliente();
   }, [id]);
 
   const handleChange = (e, section) => {
@@ -131,7 +129,7 @@ const EditarCliente = () => {
         <div className="space-y-12">
           {formData && (
             <>
-              <div className="bg-white p-8 rounded-lg shadow-md"><ClienteForm data={formData.datos} handleChange={(e) => handleChange(e, 'datos')} /></div>
+              <div className="bg-white p-8 rounded-lg shadow-md"><ClienteForm data={formData.datos} handleChange={(e) => handleChange(e, 'datos')} isEdit={true} /></div>
               <div className="bg-white p-8 rounded-lg shadow-md"><ContactosForm data={formData.contactos} handleChange={(e) => handleChange(e, 'contactos')} /></div>
             </>
           )}
