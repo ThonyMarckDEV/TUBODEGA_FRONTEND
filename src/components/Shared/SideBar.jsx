@@ -81,6 +81,20 @@ const menus = {
             ]
         },
         {
+            section: 'Ventas',
+            icon: ShoppingCartIcon,
+            subs: [
+                { name: 'Listar Ventas', link: '/admin/listar-ventas' },
+            ]
+        },
+        {
+            section: 'Comprobantes',
+            icon: ListBulletIcon,
+            subs: [
+                { name: 'Listar Comprobantes', link: '/admin/listar-comprobantes' },
+            ]
+        },
+        {
             section: 'Reposiciones',
             icon: ChartBarIcon,
             subs: [

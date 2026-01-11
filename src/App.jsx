@@ -147,6 +147,14 @@ function AppContent() {
           {/* Ruta Editar Compra */}
           <Route path="editar-compra/:id" element={<EditarCompra />} />
 
+          {/* RUTAS VENTAS */}
+          {/* Ruta Listar Ventas */}
+          <Route path="listar-ventas" element={<ListarVentas />} />
+
+        {/* RUTAS COMPROBANTES */}
+          {/* Ruta Listar Comprobantes */}
+          <Route path="listar-comprobantes" element={<ListarComprobantes />} />
+
         {/* RUTAS REPOSICIONES */}
           {/* Ruta Agregar Reposición */}
           <Route path="agregar-reposicion" element={<AgregarReposicion />} />
