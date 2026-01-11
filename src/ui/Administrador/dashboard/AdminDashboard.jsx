@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getDashboardMetrics } from 'services/adminDashboardService';
-// Importamos iconos
 import { 
     UsersIcon, CurrencyDollarIcon, ShoppingBagIcon, 
-    ExclamationTriangleIcon, UserGroupIcon, BanknotesIcon
+    ExclamationTriangleIcon, UserGroupIcon, BanknotesIcon,
+    CalendarIcon, XMarkIcon, MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 // IMPORTAMOS RECHARTS
@@ -12,9 +12,91 @@ import {
     PieChart, Pie, Cell, Legend
 } from 'recharts';
 
+// --- MODAL DE PRODUCTOS BAJO STOCK ---
+const LowStockModal = ({ isOpen, onClose, products }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100">
+                {/* Header Modal */}
+                <div className="bg-red-50 p-4 border-b border-red-100 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-100 text-red-600 rounded-lg">
+                            <ExclamationTriangleIcon className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-red-900">Alerta de Inventario</h3>
+                            <p className="text-sm text-red-700">Productos que requieren reposición inmediata</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-red-100 rounded-full text-red-500 transition-colors">
+                        <XMarkIcon className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Body Modal - Lista */}
+                <div className="p-0 max-h-[60vh] overflow-y-auto">
+                    {products.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500">
+                            ¡Todo en orden! No hay productos con bajo stock.
+                        </div>
+                    ) : (
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-600 font-bold sticky top-0">
+                                <tr>
+                                    <th className="px-6 py-3">Producto</th>
+                                    <th className="px-6 py-3 text-center">Stock Actual</th>
+                                    <th className="px-6 py-3 text-center">Mínimo</th>
+                                    <th className="px-6 py-3 text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {products.map((prod) => (
+                                    <tr key={prod.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-3 font-medium text-slate-800">{prod.nombre}</td>
+                                        <td className="px-6 py-3 text-center">
+                                            <span className="font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">
+                                                {prod.stock_bodega} {prod.unidad}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 text-center text-slate-500">{prod.stock_minimo} {prod.unidad}</td>
+                                        <td className="px-6 py-3 text-center">
+                                            {prod.stock_bodega === 0 ? (
+                                                <span className="text-xs font-bold text-red-700 uppercase">Agotado</span>
+                                            ) : (
+                                                <span className="text-xs font-bold text-orange-600 uppercase">Crítico</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+
+                {/* Footer Modal */}
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                    <button 
+                        onClick={onClose}
+                        className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-medium transition-colors"
+                    >
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- COMPONENTE DE TARJETA (METRIC CARD) ---
-const MetricCard = ({ title, value, subValue, icon: Icon, color }) => (
-    <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+const MetricCard = ({ title, value, subValue, icon: Icon, color, onClick, isClickable }) => (
+    <div 
+        onClick={isClickable ? onClick : undefined}
+        className={`bg-white p-6 rounded-xl border border-slate-100 shadow-sm transition-all
+            ${isClickable ? 'cursor-pointer hover:shadow-lg hover:border-red-200 hover:-translate-y-1' : 'hover:shadow-md'}
+        `}
+    >
         <div className="flex items-center justify-between mb-4">
             <div className={`p-3 rounded-lg ${color.bg} ${color.text}`}>
                 <Icon className="w-6 h-6" />
@@ -28,41 +110,62 @@ const MetricCard = ({ title, value, subValue, icon: Icon, color }) => (
         <div>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-wide">{title}</p>
             <h3 className="text-2xl font-extrabold text-slate-800 mt-1">{value}</h3>
+            {isClickable && (
+                <p className="text-xs text-red-500 mt-2 font-medium flex items-center gap-1">
+                    <MagnifyingGlassIcon className="w-3 h-3"/> Ver detalles
+                </p>
+            )}
         </div>
     </div>
 );
 
-// --- COLORES PARA GRÁFICO DE DONA ---
-const COLORS_PIE = ['#10B981', '#EF4444']; // Verde (Bien), Rojo (Bajo Stock)
+const COLORS_PIE = ['#10B981', '#EF4444'];
 
 const AdminDashboard = () => {
     const [metrics, setMetrics] = useState(null);
     const [loading, setLoading] = useState(true);
+    
+    // Estados para Filtros
+    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    
+    // Estado para Modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const fetchMetrics = async (start = '', end = '') => {
+        setLoading(true);
+        try {
+            const response = await getDashboardMetrics(start, end);
+            if (response.type === 'success') {
+                setMetrics(response.data);
+            }
+        } catch (error) {
+            console.error("Error cargando dashboard:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadMetrics = async () => {
-            try {
-                const response = await getDashboardMetrics();
-                if (response.type === 'success') {
-                    setMetrics(response.data);
-                }
-            } catch (error) {
-                console.error("Error cargando dashboard:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadMetrics();
+        fetchMetrics();
     }, []);
 
-    if (loading) return <div className="p-10 text-center text-slate-500 animate-pulse">Cargando métricas...</div>;
+    const handleFilterSubmit = (e) => {
+        e.preventDefault();
+        fetchMetrics(dateRange.start, dateRange.end);
+    };
+
+    const handleClearFilter = () => {
+        setDateRange({ start: '', end: '' });
+        fetchMetrics();
+    };
+
+    if (loading && !metrics) return <div className="p-10 text-center text-slate-500 animate-pulse">Cargando métricas...</div>;
     if (!metrics) return null;
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount || 0);
     };
 
-    // Datos para el Pie Chart (Inventario)
     const dataInventario = [
         { name: 'Stock Saludable', value: metrics.inventario.stock_saludable },
         { name: 'Bajo Stock', value: metrics.inventario.bajo_stock },
@@ -70,12 +173,46 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-6 mt-6 animate-fade-in-up pb-10">
-            <h2 className="text-lg font-bold text-slate-700">Resumen del Negocio</h2>
+            {/* --- HEADER CON FILTROS --- */}
+            <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
+                <div>
+                    <h2 className="text-lg font-bold text-slate-700">Resumen del Negocio</h2>
+                    <p className="text-xs text-slate-400 mt-1">{metrics.finanzas.rango || 'Histórico'}</p>
+                </div>
+
+                <form onSubmit={handleFilterSubmit} className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-2 px-2">
+                        <CalendarIcon className="w-4 h-4 text-slate-400" />
+                        <span className="text-xs font-bold text-slate-500">Filtrar:</span>
+                    </div>
+                    <input 
+                        type="date" 
+                        value={dateRange.start}
+                        onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                        className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-600"
+                    />
+                    <span className="text-slate-300">-</span>
+                    <input 
+                        type="date" 
+                        value={dateRange.end}
+                        onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                        className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-600"
+                    />
+                    <button type="submit" className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                        Aplicar
+                    </button>
+                    {(dateRange.start || dateRange.end) && (
+                         <button type="button" onClick={handleClearFilter} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Limpiar filtro">
+                            <XMarkIcon className="w-4 h-4"/>
+                         </button>
+                    )}
+                </form>
+            </div>
             
-            {/* --- SECCIÓN DE TARJETAS (KPIs) --- */}
+            {/* --- KPIs --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MetricCard 
-                    title="Ingresos Totales"
+                    title="Ingresos (Rango)"
                     value={formatCurrency(metrics.finanzas.ingresos_totales)}
                     subValue={`Hoy: ${formatCurrency(metrics.finanzas.ventas_hoy)}`}
                     icon={CurrencyDollarIcon}
@@ -84,7 +221,7 @@ const AdminDashboard = () => {
                 <MetricCard 
                     title="Utilidad Neta"
                     value={formatCurrency(metrics.finanzas.utilidad_neta)}
-                    subValue="Histórico"
+                    subValue="En rango seleccionado"
                     icon={BanknotesIcon}
                     color={{ bg: 'bg-indigo-50', text: 'text-indigo-600' }}
                 />
@@ -95,21 +232,25 @@ const AdminDashboard = () => {
                     icon={ShoppingBagIcon}
                     color={{ bg: 'bg-orange-50', text: 'text-orange-600' }}
                 />
+                
+                {/* --- TARJETA CLICKEABLE PARA MODAL --- */}
                  <MetricCard 
                     title="Bajo Stock (Bodega)"
                     value={metrics.inventario.bajo_stock}
                     subValue="Reponer urgente"
                     icon={ExclamationTriangleIcon}
                     color={{ bg: 'bg-red-50', text: 'text-red-600' }}
+                    isClickable={true}
+                    onClick={() => setIsModalOpen(true)}
                 />
             </div>
 
-            {/* --- SECCIÓN DE GRÁFICOS --- */}
+            {/* --- GRÁFICOS --- */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-                
-                {/* 1. GRÁFICO DE BALANCE SEMANAL (Ocupa 2 columnas) */}
-                <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm lg:col-span-2">
-                    <h3 className="text-slate-700 font-bold mb-4">Balance Semanal (Ventas vs Gastos)</h3>
+                <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm lg:col-span-2 relative">
+                    {loading && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-xl"><span className="text-sm font-bold text-slate-500">Actualizando...</span></div>}
+                    
+                    <h3 className="text-slate-700 font-bold mb-4">Balance Financiero</h3>
                     <div className="h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={metrics.graficos.balance_semanal}>
@@ -138,7 +279,6 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* 2. GRÁFICO DE ESTADO DE INVENTARIO (Ocupa 1 columna) */}
                 <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
                     <h3 className="text-slate-700 font-bold mb-4">Salud del Inventario</h3>
                     <div className="h-72 w-full flex items-center justify-center">
@@ -162,31 +302,18 @@ const AdminDashboard = () => {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    {/* Resumen rápido abajo del gráfico */}
                     <div className="text-center mt-2">
                         <p className="text-sm text-slate-500">Total: <span className="font-bold text-slate-800">{metrics.inventario.total_productos}</span> productos</p>
                     </div>
                 </div>
-
             </div>
 
-             {/* 3. USUARIOS (Tarjetas pequeñas extra) */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex justify-between items-center">
-                    <div>
-                        <p className="text-blue-600 font-bold">Clientes Totales</p>
-                        <p className="text-2xl font-bold text-blue-800">{metrics.clientes.total}</p>
-                    </div>
-                    <UserGroupIcon className="w-10 h-10 text-blue-300" />
-                 </div>
-                 <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 flex justify-between items-center">
-                    <div>
-                        <p className="text-purple-600 font-bold">Cajeros Totales</p>
-                        <p className="text-2xl font-bold text-purple-800">{metrics.cajeros.total}</p>
-                    </div>
-                    <UsersIcon className="w-10 h-10 text-purple-300" />
-                 </div>
-             </div>
+            {/* --- MODAL --- */}
+            <LowStockModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                products={metrics.inventario.lista_bajo_stock} 
+            />
         </div>
     );
 };
