@@ -25,7 +25,12 @@ const ConfiguracionNegocio = () => {
     const loadConfig = async () => {
         try {
             const response = await getConfig();
-            
+
+            // Si el backend manda un mensaje de advertencia, lo mostramos
+            if (response.message && response.message.includes('⚠️')) {
+                setAlert({ type: 'info', message: response.message });
+            }
+
             const configData = response.data ? response.data : response;
 
             if (configData && configData.nombre_negocio !== undefined) {

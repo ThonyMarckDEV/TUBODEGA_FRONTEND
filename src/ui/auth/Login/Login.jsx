@@ -33,8 +33,32 @@ const Login = () => {
       document.cookie = `access_token=${access_token}${baseCookie}`;
       document.cookie = `refresh_token=${refresh_token}${refreshExp}${baseCookie}`;
 
+      // --- LÓGICA DE MENSAJE DEMO ---
       const rol = jwtUtils.getUserRole(access_token);
-      toast.success(`Acceso concedido`);
+      
+      // Obtenemos los datos completos del token para ver los días
+      const trial_days = jwtUtils.getTrialDays(refresh_token); 
+      const diasRestantes = trial_days;
+
+      let mensaje = "Acceso concedido";
+      
+      // Si existen días de prueba y son válidos, los agregamos al mensaje
+      if (diasRestantes !== undefined && diasRestantes !== null) {
+          const dias = parseInt(diasRestantes);
+          if (dias >= 0) {
+              mensaje += ` (Demo: ${dias} días restantes)`;
+          }
+      }
+
+      toast.success(mensaje, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
       setTimeout(() => navigate(`/${rol}`), 1000);
 
     } catch (error) {

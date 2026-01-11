@@ -31,6 +31,9 @@ export const getEmail= (token) => jwtDecode(token)?.email ?? null;
 // Función para obtener el rol del usuario
 export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
 
+// Función para obtener los días de prueba restantes
+export const getTrialDays = (token) => jwtDecode(token)?.trial_days ?? null;
+
 
 // // Función para verificar si el token está expirado
 export const isTokenExpired = (token) => {
@@ -150,7 +153,8 @@ const jwtUtils = {
   getRefreshTokenFromCookie,
   setAccessTokenInCookie,
   getUserID,
-  isConfigurado
+  isConfigurado,
+  getTrialDays
 };
 
 export default jwtUtils;
