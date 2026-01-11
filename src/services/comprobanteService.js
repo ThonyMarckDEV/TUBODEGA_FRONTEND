@@ -2,8 +2,19 @@ import { fetchWithAuth } from 'js/authToken';
 import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
-export const getComprobantes = async (page = 1, search = '') => {
-  const url = `${API_BASE_URL}/api/comprobantes/index?page=${page}&search=${encodeURIComponent(search)}`;
+export const getComprobantes = async (page = 1, filters = {}) => {
+  // Mapeamos los filtros del state a los parámetros del backend
+  const params = new URLSearchParams({
+    page: page,
+    search: filters.search || '',
+    fecha_inicio: filters.fechaInicio || '',
+    fecha_fin: filters.fechaFin || '',
+    tipo_documento: filters.tipoDoc || '',
+    estado_sunat: filters.estadoSunat || ''
+  });
+
+  const url = `${API_BASE_URL}/api/comprobantes/index?${params.toString()}`;
+  
   const response = await fetchWithAuth(url, { 
       method: 'GET',
       headers: { 'Accept': 'application/json' }

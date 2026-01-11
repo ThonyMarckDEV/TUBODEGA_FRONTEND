@@ -3,23 +3,38 @@ import { Link } from 'react-router-dom';
 import { getVentas, showVenta } from 'services/ventaService'; 
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
-import { EyeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const ListarVentas = () => {
     const [loading, setLoading] = useState(true);
     const [ventas, setVentas] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
+    
+    // ESTADO DE FILTROS
+    const [filters, setFilters] = useState({
+        search: '',
+        fechaInicio: '',
+        fechaFin: '',
+        metodoPago: ''
+    });
     
     // Estados Modal Detalle
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    const fetchVentas = async (page = 1, search = '') => {
+    /**
+     * Función principal de carga.
+     * Recibe 'filtrosOverrides' para forzar filtros vacíos al limpiar
+     * sin esperar a que el estado de React se actualice.
+     */
+    const fetchVentas = async (page = 1, filtrosOverrides = null) => {
         setLoading(true);
         try {
-            const response = await getVentas(page, search);
+            // Usamos los filtros que nos pasan O el estado actual
+            const filtrosParaEnviar = filtrosOverrides || filters;
+            
+            const response = await getVentas(page, filtrosParaEnviar);
             setVentas(response.data || []); 
             setPaginationInfo({
                 currentPage: response.current_page,
@@ -34,11 +49,29 @@ const ListarVentas = () => {
 
     useEffect(() => {
         fetchVentas(1);
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSearch = (e) => {
+    // --- HANDLERS ---
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSearchSubmit = (e) => {
         e.preventDefault();
-        fetchVentas(1, searchTerm);
+        fetchVentas(1); // Usa el estado actual de filters
+    };
+
+    const clearFilters = () => {
+        const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', metodoPago: '' };
+        
+        // 1. Limpiamos visualmente los inputs
+        setFilters(emptyFilters);
+        
+        // 2. Forzamos la recarga inmediata pasando los filtros vacíos
+        // (No esperamos a que el setFilters termine)
+        fetchVentas(1, emptyFilters);
     };
 
     const handleViewDetails = async (id) => {
@@ -54,6 +87,7 @@ const ListarVentas = () => {
         }
     };
 
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         { 
             header: 'VENTA N°', 
@@ -113,9 +147,6 @@ const ListarVentas = () => {
                     >
                         <EyeIcon className="w-4 h-4" /> Ver
                     </button>
-                    {/* <button className="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded">
-                        <PrinterIcon className="w-4 h-4" />
-                    </button> */}
                 </div>
             )
         }
@@ -123,23 +154,84 @@ const ListarVentas = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Historial de Ventas</h1>
-                
-                <form onSubmit={handleSearch} className="flex w-full md:w-auto gap-2">
-                    <div className="relative flex-1 md:w-80">
-                        <input 
-                            type="text" 
-                            placeholder="Buscar por cliente o ID..."
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
-                    </div>
-                    <Link to="/cajero/agregar-venta" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap">
+            <div className="flex flex-col gap-6 mb-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Historial de Ventas</h1>
+                    <Link to="/cajero/agregar-venta" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md">
                         + Nueva Venta
                     </Link>
+                </div>
+                
+                {/* --- BARRA DE FILTROS --- */}
+                <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    
+                    {/* Buscador Texto */}
+                    <div className="md:col-span-4">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Buscar Cliente / ID / Doc</label>
+                        <div className="relative">
+                            <input 
+                                type="text" 
+                                name="search"
+                                placeholder="Nombre, DNI, RUC o ID..."
+                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                                value={filters.search}
+                                onChange={handleFilterChange}
+                            />
+                            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                        </div>
+                    </div>
+
+                    {/* Fecha Inicio */}
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Desde</label>
+                        <input 
+                            type="date" 
+                            name="fechaInicio"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
+                            value={filters.fechaInicio}
+                            onChange={handleFilterChange}
+                        />
+                    </div>
+
+                    {/* Fecha Fin */}
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
+                        <input 
+                            type="date" 
+                            name="fechaFin"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
+                            value={filters.fechaFin}
+                            onChange={handleFilterChange}
+                        />
+                    </div>
+
+                    {/* Método de Pago */}
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Método Pago</label>
+                        <select 
+                            name="metodoPago" 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none bg-white"
+                            value={filters.metodoPago}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">Todos</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="yape">Yape</option>
+                            <option value="plin">Plin</option>
+                            <option value="tarjeta">Tarjeta</option>
+                        </select>
+                    </div>
+
+                    {/* Botones Acción */}
+                    <div className="md:col-span-2 flex gap-2">
+                        <button type="submit" className="flex-1 bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-900 transition flex items-center justify-center gap-1">
+                            <FunnelIcon className="w-4 h-4" /> Filtrar
+                        </button>
+                        <button type="button" onClick={clearFilters} className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200" title="Limpiar filtros">
+                            <XMarkIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+
                 </form>
             </div>
 
@@ -150,11 +242,11 @@ const ListarVentas = () => {
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: (page) => fetchVentas(page, searchTerm)
+                    onPageChange: (page) => fetchVentas(page)
                 }}
             />
 
-           {/* MODAL DETALLE DE VENTA */}
+            {/* --- MODAL DETALLE --- */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
@@ -163,7 +255,7 @@ const ListarVentas = () => {
             >
                 {selectedVenta && (
                     <div className="space-y-6">
-                        {/* Cabecera del detalle con lógica de Cliente/Empresa */}
+                        {/* Cabecera del detalle */}
                         <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
                             <div>
                                 <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Información del Cliente</p>
@@ -171,7 +263,6 @@ const ListarVentas = () => {
                                     <>
                                         <p className="font-bold text-indigo-900 uppercase">
                                             {selectedVenta.cliente.datos?.nombre} 
-                                            {/* Si no tiene RUC, es persona, mostramos apellido */}
                                             {!selectedVenta.cliente.datos?.ruc && ` ${selectedVenta.cliente.datos?.apellidoPaterno || ''}`}
                                         </p>
                                         <p className="text-xs text-slate-600 mt-1">

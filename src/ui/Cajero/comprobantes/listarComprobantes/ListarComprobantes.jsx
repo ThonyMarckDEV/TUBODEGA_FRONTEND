@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'; // 1. Agregado useCallback
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getComprobantePdf, getComprobantes, updateSunatStatus } from 'services/comprobanteService';
 import Table from 'components/Shared/Tables/Table';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import { PrinterIcon, MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PrinterIcon, MagnifyingGlassIcon, ArrowPathIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import Swal from 'sweetalert2';
 
@@ -10,9 +10,17 @@ const ListarComprobantes = () => {
     const [loading, setLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(null);
     const [comprobantes, setComprobantes] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        search: '',
+        fechaInicio: '',
+        fechaFin: '',
+        tipoDoc: '',     // '' | 'F' | 'B'
+        estadoSunat: ''  // '' | '0' | '1' | '2'
+    });
+
     const [isPdfOpen, setIsPdfOpen] = useState(false);
     const [pdfConfig, setPdfConfig] = useState({ url: '', title: '' });
     const [alert, setAlert] = useState(null);
@@ -22,11 +30,12 @@ const ListarComprobantes = () => {
         setTimeout(() => setAlert(null), 3000);
     }, []);
 
-    // 2. fetchComprobantes envuelto en useCallback
-    const fetchComprobantes = useCallback(async (page = 1, search = '') => {
+    // --- FUNCIÓN DE CARGA ---
+    const fetchComprobantes = useCallback(async (page = 1, filtersOverrides = null) => {
         setLoading(true);
         try {
-            const response = await getComprobantes(page, search);
+            const filtersToSend = filtersOverrides || filters;
+            const response = await getComprobantes(page, filtersToSend);
             setComprobantes(response.data || []);
             setPaginationInfo({
                 currentPage: response.current_page,
@@ -37,14 +46,31 @@ const ListarComprobantes = () => {
         } finally {
             setLoading(false);
         }
-    }, [showAlert]); // Depende de showAlert
+    }, [filters, showAlert]); // Depende de 'filters' actual
 
-    // 3. useEffect ahora tiene fetchComprobantes como dependencia segura
+    // --- EFECTO INICIAL ---
     useEffect(() => { 
         fetchComprobantes(1); 
-    }, [fetchComprobantes]);
+    }, []); // Carga inicial única (los filtros tienen sus propios triggers si quisieras, pero aquí usamos submit manual)
 
-    // 4. handleUpdateStatus envuelto para ser usado en useMemo
+    // --- HANDLERS FILTROS ---
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        fetchComprobantes(1);
+    };
+
+    const clearFilters = () => {
+        const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', tipoDoc: '', estadoSunat: '' };
+        setFilters(emptyFilters);
+        fetchComprobantes(1, emptyFilters); // Forzamos carga con filtros vacíos
+    };
+
+    // --- UPDATE STATUS ---
     const handleUpdateStatus = useCallback(async (id, newStatus) => {
         setIsUpdating(id);
         try {
@@ -60,6 +86,7 @@ const ListarComprobantes = () => {
         }
     }, [showAlert]);
 
+    // --- PDF LOGIC ---
     const openPdf = async (row) => {
         Swal.fire({
             title: 'Generando PDF...',
@@ -86,7 +113,7 @@ const ListarComprobantes = () => {
         setIsPdfOpen(false);
     };
 
-    // 5. columns ahora incluye handleUpdateStatus en sus dependencias
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         { 
             header: 'Documento', 
@@ -154,7 +181,7 @@ const ListarComprobantes = () => {
                 </button>
             )
         }
-    ], [isUpdating, handleUpdateStatus]); // Se agregó handleUpdateStatus aquí
+    ], [isUpdating, handleUpdateStatus]);
 
     return (
         <div className="container mx-auto p-4 md:p-6 min-h-screen">
@@ -164,23 +191,72 @@ const ListarComprobantes = () => {
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col gap-6 mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Comprobantes</h1>
-                    <p className="text-slate-500 text-sm">Facturación electrónica y reportes</p>
+                    <p className="text-slate-500 text-sm">Gestión de Facturación Electrónica</p>
                 </div>
                 
-                <div className="relative w-full md:w-96">
-                    <input 
-                        type="text" 
-                        placeholder="Buscar por serie o correlativo..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-black focus:border-black outline-none transition-all"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && fetchComprobantes(1, searchTerm)}
-                    />
-                    <MagnifyingGlassIcon className="w-5 h-5 absolute left-3.5 top-3 text-slate-400" />
-                </div>
+                {/* --- BARRA DE FILTROS --- */}
+                <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    
+                    {/* Búsqueda Texto */}
+                    <div className="md:col-span-4">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Buscar (Serie, Cliente, RUC)</label>
+                        <div className="relative">
+                            <input 
+                                type="text" 
+                                name="search"
+                                placeholder="F001-23, Cliente..."
+                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
+                                value={filters.search}
+                                onChange={handleFilterChange}
+                            />
+                            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                        </div>
+                    </div>
+
+                    {/* Fechas */}
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Desde</label>
+                        <input type="date" name="fechaInicio" className="w-full px-2 py-2 border rounded-lg text-sm" value={filters.fechaInicio} onChange={handleFilterChange} />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
+                        <input type="date" name="fechaFin" className="w-full px-2 py-2 border rounded-lg text-sm" value={filters.fechaFin} onChange={handleFilterChange} />
+                    </div>
+
+                    {/* Tipo Doc */}
+                    <div className="md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Tipo</label>
+                        <select name="tipoDoc" className="w-full px-2 py-2 border rounded-lg text-sm bg-white" value={filters.tipoDoc} onChange={handleFilterChange}>
+                            <option value="">Todos</option>
+                            <option value="B">Boleta</option>
+                            <option value="F">Factura</option>
+                        </select>
+                    </div>
+
+                    {/* Estado SUNAT */}
+                    <div className="md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Estado</label>
+                        <select name="estadoSunat" className="w-full px-2 py-2 border rounded-lg text-sm bg-white" value={filters.estadoSunat} onChange={handleFilterChange}>
+                            <option value="">Todos</option>
+                            <option value="0">Pendiente</option>
+                            <option value="1">Enviado</option>
+                            <option value="2">Anulado</option>
+                        </select>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="md:col-span-2 flex gap-2">
+                        <button type="submit" className="flex-1 bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-black transition flex justify-center gap-1">
+                            <FunnelIcon className="w-4 h-4" /> Filtrar
+                        </button>
+                        <button type="button" onClick={clearFilters} className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200">
+                            <XMarkIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <div className="overflow-hidden rounded-xl">
@@ -191,7 +267,7 @@ const ListarComprobantes = () => {
                     pagination={{
                         currentPage: paginationInfo.currentPage,
                         totalPages: paginationInfo.totalPages,
-                        onPageChange: (page) => fetchComprobantes(page, searchTerm)
+                        onPageChange: (page) => fetchComprobantes(page)
                     }}
                 />
             </div>
@@ -205,5 +281,5 @@ const ListarComprobantes = () => {
         </div>
     );
 };
-
+ 
 export default ListarComprobantes;

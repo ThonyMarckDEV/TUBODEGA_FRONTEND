@@ -3,11 +3,21 @@ import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
 /**
- * Listar ventas con paginación y búsqueda opcional.
- * Endpoint: GET /api/ventas/index?page={page}&search={search}
+ * Listar ventas con filtros avanzados.
+ * Endpoint: GET /api/ventas/index?...Params
  */
-export const getVentas = async (page = 1, search = '') => {
-  const url = `${API_BASE_URL}/api/ventas/index?page=${page}&search=${encodeURIComponent(search)}`;
+export const getVentas = async (page = 1, filters = {}) => {
+  // Construimos los parámetros de la URL
+  const params = new URLSearchParams({
+    page: page,
+    search: filters.search || '',
+    fecha_inicio: filters.fechaInicio || '',
+    fecha_fin: filters.fechaFin || '',
+    metodo_pago: filters.metodoPago || ''
+  });
+
+  const url = `${API_BASE_URL}/api/ventas/index?${params.toString()}`;
+  
   const response = await fetchWithAuth(url, { 
       method: 'GET',
       headers: { 'Accept': 'application/json' }
