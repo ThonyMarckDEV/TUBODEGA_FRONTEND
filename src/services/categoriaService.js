@@ -22,12 +22,12 @@ export const createCategoria = async (categoriaData) => {
 };
 
 /**
- * Obtiene lista paginada de categorías.
- * Endpoint: GET /api/categorias?page={page}&search={search}
+ * Obtiene lista paginada de categorías con filtros.
+ * Endpoint: GET /api/categorias/index?page={page}&search={search}&estado={estado}
  */
-export const getCategorias = async (page = 1, search = '') => {
-  // Construimos la URL con el parámetro de búsqueda si existe
-  const url = `${API_BASE_URL}/api/categorias/index?page=${page}&search=${search}`;
+export const getCategorias = async (page = 1, search = '', estado = '') => {
+  const term = encodeURIComponent(search);
+  const url = `${API_BASE_URL}/api/categorias/index?page=${page}&search=${term}&estado=${estado}`;
 
   const response = await fetchWithAuth(url, {
     method: 'GET',
@@ -36,7 +36,6 @@ export const getCategorias = async (page = 1, search = '') => {
 
   return handleResponse(response);
 };
-
 
 /**
  * Obtiene una categoría por ID.

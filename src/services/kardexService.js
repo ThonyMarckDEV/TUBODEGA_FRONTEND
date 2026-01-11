@@ -7,14 +7,16 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
  * Endpoint: GET /api/kardex
  */
 export const getKardex = async (page = 1, filters = {}) => {
-  // Construimos query string dinámico
   const params = new URLSearchParams();
   params.append('page', page);
 
   if (filters.producto_id) params.append('producto_id', filters.producto_id);
   if (filters.fecha_inicio) params.append('fecha_inicio', filters.fecha_inicio);
   if (filters.fecha_fin) params.append('fecha_fin', filters.fecha_fin);
+  
+  // Filtros de Tipo y Ubicación
   if (filters.tipo) params.append('tipo', filters.tipo);
+  if (filters.ubicacion) params.append('ubicacion', filters.ubicacion);
 
   const response = await fetchWithAuth(`${API_BASE_URL}/api/kardex?${params.toString()}`, {
     method: 'GET',

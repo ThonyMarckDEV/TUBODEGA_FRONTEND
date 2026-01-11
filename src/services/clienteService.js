@@ -26,12 +26,13 @@ export const createCliente = async (clienteData) => {
 
 
 /**
- * Obtiene una lista paginada de clientes desde el backend.
- * @param {number} page - El número de página a solicitar.
- * @returns {Promise<object>} - La respuesta paginada del backend.
+ * Obtiene lista paginada de clientes.
+ * Endpoint: GET /api/clientes/index?page={page}&search={search}&estado={estado}
  */
-export const getClientes = async (page = 1 , search = '') => {
-  const url = `${API_BASE_URL}/api/clientes/index?page=${page}&search=${search}`;
+export const getClientes = async (page = 1, search = '', estado = '') => {
+  // Construcción de URL segura
+  const term = encodeURIComponent(search);
+  const url = `${API_BASE_URL}/api/clientes/index?page=${page}&search=${term}&estado=${estado}`;
 
   const response = await fetchWithAuth(url, {
     method: 'GET',

@@ -22,13 +22,12 @@ export const createProveedor = async (proveedorData) => {
 };
 
 /**
- * Obtiene lista paginada de proveedores con búsqueda.
- * Endpoint: GET /api/proveedores/index?page={page}&search={search}
+ * Obtiene lista paginada de proveedores con búsqueda y filtro de estado.
+ * Endpoint: GET /api/proveedores/index?page={page}&search={search}&estado={estado}
  */
-export const getProveedores = async (page = 1, search = '') => {
-  // Aseguramos que caracteres especiales viajen bien
+export const getProveedores = async (page = 1, search = '', estado = '') => {
   const term = encodeURIComponent(search);
-  const url = `${API_BASE_URL}/api/proveedores/index?page=${page}&search=${term}`;
+  const url = `${API_BASE_URL}/api/proveedores/index?page=${page}&search=${term}&estado=${estado}`;
 
   const response = await fetchWithAuth(url, {
     method: 'GET',

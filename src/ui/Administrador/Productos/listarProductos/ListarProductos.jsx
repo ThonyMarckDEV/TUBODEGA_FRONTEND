@@ -5,7 +5,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
-import { PencilSquareIcon } from '@heroicons/react/24/solid';
+import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/solid'; // Agregué FunnelIcon
 
 const ListarProductos = () => {
     const [loading, setLoading] = useState(true);
@@ -15,9 +15,12 @@ const ListarProductos = () => {
     
     const [productos, setProductos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+    
+    // Estados de filtros
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterEstado, setFilterEstado] = useState(''); // '' = Todos, '1' = Activos, '0' = Inactivos
 
-    // --- COLUMNAS ACTUALIZADAS ---
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Producto',
@@ -26,6 +29,15 @@ const ListarProductos = () => {
                     <div className="font-bold text-gray-800">{row.nombre}</div>
                     <div className="text-xs text-gray-500">{row.categoria?.nombre || 'Sin categoría'}</div>
                 </div>
+            )
+        },
+        // --- NUEVA COLUMNA: UNIDAD ---
+        {
+            header: 'Unidad',
+            render: (row) => (
+                <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">
+                    {row.unidad}
+                </span>
             )
         },
         {
@@ -37,15 +49,13 @@ const ListarProductos = () => {
                 </div>
             )
         },
-        // COLUMNA 1: STOCK BODEGA (Donde se vende)
         {
             header: 'Stock Bodega',
             render: (row) => (
                 <div className="flex flex-col">
                     <span className={`font-bold ${row.stock_bodega <= row.stock_minimo ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {row.stock_bodega} {row.unidad}
+                        {row.stock_bodega}
                     </span>
-                    {/* Alerta visual si hay poco stock */}
                     {row.stock_bodega <= row.stock_minimo && (
                         <span className="text-[10px] uppercase font-bold text-red-500 bg-red-50 px-1 rounded w-fit">
                             Bajo Stock
@@ -54,12 +64,11 @@ const ListarProductos = () => {
                 </div>
             )
         },
-        // COLUMNA 2: STOCK ALMACÉN (Reserva)
         {
             header: 'Stock Almacén',
             render: (row) => (
                 <span className="font-semibold text-blue-700">
-                    {row.stock_almacen} {row.unidad}
+                    {row.stock_almacen}
                 </span>
             )
         },
@@ -93,11 +102,12 @@ const ListarProductos = () => {
     ], []);
 
     // --- CARGAR DATOS ---
-    const fetchProductos = useCallback(async (page, search = '') => {
+    // Ahora recibe 'estado' también
+    const fetchProductos = useCallback(async (page, search = '', estado = '') => {
         setLoading(true);
         setError(null);
         try {
-            const response = await getProductos(page, search);
+            const response = await getProductos(page, search, estado);
             setProductos(response.data || []); 
             setPaginationInfo({
                 currentPage: response.current_page,
@@ -112,17 +122,26 @@ const ListarProductos = () => {
         }
     }, []);
 
+    // Efecto inicial y cuando cambia el filtro de estado
     useEffect(() => {
-        fetchProductos(1, '');
-    }, [fetchProductos]);
+        fetchProductos(1, searchTerm, filterEstado);
+    }, [fetchProductos, filterEstado , searchTerm]); // Se ejecuta al cambiar filtroEstado
 
+    // Manejador del Buscador
     const handleSearchTable = (term) => {
         setSearchTerm(term); 
-        fetchProductos(1, term);
+        fetchProductos(1, term, filterEstado);
     };
 
+    // Manejador de Paginación
     const handlePageChange = (page) => {
-        fetchProductos(page, searchTerm);
+        fetchProductos(page, searchTerm, filterEstado);
+    };
+
+    // Manejador del Cambio de Estado en Filtro
+    const handleFilterEstadoChange = (e) => {
+        setFilterEstado(e.target.value);
+        // El useEffect se encargará de recargar los datos
     };
 
     // --- TOGGLE ESTADO ---
@@ -135,7 +154,8 @@ const ListarProductos = () => {
         try {
             const res = await toggleProductoEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            await fetchProductos(paginationInfo.currentPage, searchTerm); 
+            // Recargamos manteniendo los filtros actuales
+            await fetchProductos(paginationInfo.currentPage, searchTerm, filterEstado); 
         } catch (err) {
             setAlert(err);
             setLoading(false);
@@ -147,11 +167,30 @@ const ListarProductos = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <h1 className="text-3xl font-bold text-slate-800">Productos</h1>
-                <Link to="/admin/agregar-producto" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
-                    + Nuevo Producto
-                </Link>
+                
+                <div className="flex items-center gap-3">
+                    {/* FILTRO DE ESTADO */}
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FunnelIcon className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <select
+                            value={filterEstado}
+                            onChange={handleFilterEstadoChange}
+                            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-black focus:border-black appearance-none cursor-pointer hover:border-gray-400 transition-colors"
+                        >
+                            <option value="">Todos los estados</option>
+                            <option value="1">Activos</option>
+                            <option value="0">Inactivos</option>
+                        </select>
+                    </div>
+
+                    <Link to="/admin/agregar-producto" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
+                        + Nuevo Producto
+                    </Link>
+                </div>
             </div>
 
             <AlertMessage 
