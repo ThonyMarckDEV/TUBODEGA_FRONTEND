@@ -156,10 +156,24 @@ const Sidebar = () => {
     };
 
     const isSectionActive = useCallback((item) => {
-        if (item.link && location.pathname.startsWith(item.link)) return true;
-        if (item.subs) return item.subs.some(sub => location.pathname.startsWith(sub.link));
+        // 1. Prioridad a Submenús: Si tiene hijos, buscamos si alguno coincide
+        if (item.subs) {
+            return item.subs.some(sub => location.pathname.startsWith(sub.link));
+        }
+
+        // 2. Enlaces directos
+        if (item.link) {
+            // Para home, usamos igualdad exacta
+            if (item.link === '/admin' || item.link === '/cajero') {
+                return location.pathname === item.link;
+            }
+
+            // Para cualquier otro link directo que no sea home, mantenemos startsWith
+            return location.pathname.startsWith(item.link);
+        }
+
         return false;
-    }, [location.pathname]); 
+    }, [location.pathname]);
     
     useEffect(() => {
         if (openSection === null) {
