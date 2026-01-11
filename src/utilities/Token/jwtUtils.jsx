@@ -1,70 +1,10 @@
-// jwtUtils.jsx
 import { jwtDecode } from "jwt-decode";
 
+// ==========================================
+// 1. GESTIÓN DE COOKIES (Internas y Públicas)
+// ==========================================
 
-// Función para obtener el ID del usuario
-//export const getIdUsuario = (token) => decodeToken(token)?.idUsuario ?? null;
-
-export const getClaims = (token) => {
-  try {
-    return jwtDecode(token) ?? null;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
-  }
-};
-
-
-export const getUsername = (token) => jwtDecode(token)?.username ?? null;
-
-// Función para obtener el nombre de usuario
-export const getFullName = (token) => jwtDecode(token)?.fullName ?? null;
-
-// Función para obtener el rol del usuario
-export const getUserRole = (token) => jwtDecode(token)?.rol ?? null;
-
-// Función para obtener el  email
-export const getEmail= (token) => jwtDecode(token)?.email ?? null;
-
-// Función para obtener id del usuario
-export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
-
-
-// Función para obtener id del usuario
-export const getTrialDays = (token) => jwtDecode(token)?.trial_days ?? null;
-
-
-// // Función para verificar si el token está expirado
-export const isTokenExpired = (token) => {
-  const decodedToken = jwtDecode(token);
-  if (decodedToken?.exp) {
-    const currentTime = Date.now() / 1000; // Tiempo actual en segundos
-    return decodedToken.exp < currentTime;
-  }
-  return true; // Si no hay exp, considera el token como expirado
-};
-
-
-// Función para obtener la fecha de expiración
-export const getTokenExpirationDate = (token) => {
-  const exp = jwtDecode(token)?.exp;
-  return exp ? new Date(exp * 1000) : null;
-};
-
-// Función para verificar el token de manera general
-export const verifyToken = (token) => {
-  if (!token) {
-    return { valid: false, message: "Token no proporcionado" };
-  }
-  
-  if (isTokenExpired(token)) {
-    return { valid: false, message: "Token expirado" };
-  }
-  
-  return { valid: true, message: "Token válido" };
-};
-
-// Función para obtener el valor de una cookie por su nombre
+// Función interna para obtener el valor de una cookie por su nombre
 const getCookie = (name) => {
   const cookieString = document.cookie;
   const cookies = cookieString.split(';').map(cookie => cookie.trim());
@@ -79,28 +19,69 @@ const getCookie = (name) => {
   return null; // Si no se encuentra la cookie, devuelve null
 };
 
-// // Función para obtener el token JWT de la cookie
+// Función para obtener el token JWT de acceso de la cookie
 export const getAccessTokenFromCookie = () => {
-  const access_token = 'access_token'; // Nombre de la cookie donde se almacena el token
+  const access_token = 'access_token';
   return getCookie(access_token);
 };
 
-// // Función para obtener el token JWT de la cookie
+// Función para obtener el token JWT de refresco de la cookie
 export const getRefreshTokenFromCookie = () => {
-  const refresh_token = 'refresh_token'; // Nombre de la cookie donde se almacena el token
+  const refresh_token = 'refresh_token';
   return getCookie(refresh_token);
 };
 
+// Función para guardar el Access Token en cookie
+export const setAccessTokenInCookie = (token) => {
+  if (!token) return;
 
+  // Configurar opciones de cookies
+  const cookieOptions = '; Path=/; Secure; SameSite=Strict'; 
+
+  // Establecer la cookie con el token
+  document.cookie = `access_token=${token}${cookieOptions}`;
+};
+
+// Función para eliminar tokens (Logout)
 export const removeTokensFromCookie = () => {
-  // Elimina el token de la cookie
   document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 };
 
+// ==========================================
+// 2. GETTERS DE INFORMACIÓN DEL TOKEN
+// ==========================================
 
+export const getClaims = (token) => {
+  try {
+    return jwtDecode(token) ?? null;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
 
-// New function to get the created at date
+export const getUsername = (token) => jwtDecode(token)?.username ?? null;
+
+export const getFullName = (token) => jwtDecode(token)?.fullName ?? null;
+
+export const getUserRole = (token) => jwtDecode(token)?.rol ?? null;
+
+export const getEmail = (token) => jwtDecode(token)?.email ?? null;
+
+export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
+
+export const getTrialDays = (token) => jwtDecode(token)?.trial_days ?? null;
+
+export const isConfigurado = (token) => {
+    try {
+        const decoded = jwtDecode(token);
+        return decoded?.configurado === 1;
+    } catch (error) {
+        return false;
+    }
+};
+
 export const getCreatedAt = (token) => {
   try {
     const decodedToken = jwtDecode(token);
@@ -117,25 +98,42 @@ export const getCreatedAt = (token) => {
   }
 };
 
-export const setAccessTokenInCookie = (token) => {
-  if (!token) return;
+// ==========================================
+// 3. VALIDACIONES Y FECHAS
+// ==========================================
 
-  // Configurar opciones de cookies según "Recordarme"
-  const cookieOptions = '; Path=/; Secure; SameSite=Strict'; // 5 minutos
-
-  // Establecer la cookie con el token
-  document.cookie = `access_token=${token}${cookieOptions}`;
+// Función para obtener la fecha de expiración
+export const getTokenExpirationDate = (token) => {
+  const exp = jwtDecode(token)?.exp;
+  return exp ? new Date(exp * 1000) : null;
 };
 
-export const isConfigurado = (token) => {
-    try {
-        const decoded = jwtDecode(token);
-        // Retornamos true si es 1, false si es 0 o null
-        return decoded?.configurado === 1;
-    } catch (error) {
-        return false;
-    }
+// Función para verificar si el token está expirado
+export const isTokenExpired = (token) => {
+  const decodedToken = jwtDecode(token);
+  if (decodedToken?.exp) {
+    const currentTime = Date.now() / 1000; // Tiempo actual en segundos
+    return decodedToken.exp < currentTime;
+  }
+  return true; // Si no hay exp, considera el token como expirado
 };
+
+// Función para verificar el token de manera general
+export const verifyToken = (token) => {
+  if (!token) {
+    return { valid: false, message: "Token no proporcionado" };
+  }
+  
+  if (isTokenExpired(token)) {
+    return { valid: false, message: "Token expirado" };
+  }
+  
+  return { valid: true, message: "Token válido" };
+};
+
+// ==========================================
+// 4. EXPORT POR DEFECTO
+// ==========================================
 
 const jwtUtils = {
   getClaims,
