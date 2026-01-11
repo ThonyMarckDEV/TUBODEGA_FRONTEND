@@ -51,7 +51,8 @@ const ListarComprobantes = () => {
     // --- EFECTO INICIAL ---
     useEffect(() => { 
         fetchComprobantes(1); 
-    }, []); // Carga inicial única
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // --- HANDLERS FILTROS ---
     const handleFilterChange = (e) => {

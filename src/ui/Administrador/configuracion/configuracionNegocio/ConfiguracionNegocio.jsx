@@ -4,10 +4,8 @@ import { BuildingOfficeIcon, DevicePhoneMobileIcon, EnvelopeIcon, Identification
 import { getConfig, updateConfig } from 'services/configService';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import jwtUtils from 'utilities/Token/jwtUtils';
-import { useNavigate } from 'react-router-dom';
 
 const ConfiguracionNegocio = () => {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         nombre_negocio: '',
         ruc: '',
