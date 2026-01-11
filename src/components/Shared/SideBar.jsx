@@ -18,10 +18,15 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { Settings, ShoppingBasket, UserCircle2Icon } from 'lucide-react';
+import { Home, Settings, ShoppingBasket, UserCircle2Icon } from 'lucide-react';
 
 const menus = {
     admin: [
+        { 
+            section: 'Home', 
+            icon: Home, 
+            link: '/admin'
+        },
         { 
             section: 'Roles', 
             icon: UserGroupIcon, 
@@ -97,6 +102,11 @@ const menus = {
         },
     ],
     cajero: [
+        { 
+            section: 'Home', 
+            icon: Home, 
+            link: '/cajero'
+        },
         {
             section: 'Ventas',
             icon: ShoppingCartIcon,
