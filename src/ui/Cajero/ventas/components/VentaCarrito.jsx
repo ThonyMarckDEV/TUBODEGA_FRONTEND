@@ -7,7 +7,6 @@ const VentaCarrito = ({ items, setItems }) => {
         const newItems = items.map(item => {
             if (item.id === id) {
                 const nuevaCant = item.cantidad + delta;
-                // No permitir menos de 1, para borrar usar el bote de basura
                 return { ...item, cantidad: nuevaCant > 0 ? nuevaCant : 1 };
             }
             return item;
@@ -45,7 +44,10 @@ const VentaCarrito = ({ items, setItems }) => {
                                         {item.nombre}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        Unit: S/ {parseFloat(item.precio_venta).toFixed(2)}
+                                        {/* Muestra KG, UND, LTS, etc. Si no existe, pone UND por defecto */}
+                                        <span className="uppercase font-medium text-slate-400">
+                                            {item.unidad || 'UND'}:
+                                        </span> S/ {parseFloat(item.precio_venta).toFixed(2)}
                                     </div>
                                 </td>
                                 <td className="px-4 py-3">
@@ -57,7 +59,7 @@ const VentaCarrito = ({ items, setItems }) => {
                                         >
                                             <MinusIcon className="w-3 h-3" />
                                         </button>
-                                        <span className="text-sm font-bold w-6 text-center">
+                                        <span className="text-sm font-bold w-8 text-center">
                                             {item.cantidad}
                                         </span>
                                         <button
