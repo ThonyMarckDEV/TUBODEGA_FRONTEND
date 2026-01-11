@@ -54,6 +54,8 @@ import EditarReposicion from 'ui/Administrador/reposiciones/editarReposicion/Edi
 
 import ReporteKardex from 'ui/Administrador/kardex/reporteKardex/ReporteKardex';
 
+import ConfiguracionNegocio from 'ui/Administrador/configuracion/configuracionNegocio/ConfiguracionNegocio';
+
 // UIS CAJERO
 
 import AgregarVenta from 'ui/Cajero/ventas/agregarVenta/AgregarVenta';
@@ -150,6 +152,10 @@ function AppContent() {
          {/* RUTAS KARDEX */}
           {/* Ruta Reporte Kardex */}
           <Route path="reporte-kardex" element={<ReporteKardex />} />
+
+         {/* RUTAS CONFIGURACIÓN NEGOCIO */}
+          {/* Ruta Configuración Negocio */}
+          <Route path="configuracion-negocio" element={<ConfiguracionNegocio />} />
 
 
       </Route>

@@ -18,7 +18,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { ShoppingBasket, UserCircle2Icon } from 'lucide-react';
+import { Settings, ShoppingBasket, UserCircle2Icon } from 'lucide-react';
 
 const menus = {
     admin: [
@@ -89,6 +89,11 @@ const menus = {
             subs: [
                 { name: 'Reporte Kardex', link: '/admin/reporte-kardex' },
             ]
+        },
+        {
+            section: 'Configuración Negocio',
+            icon: Settings,
+            link: '/admin/configuracion-negocio'
         },
     ],
     cajero: [
