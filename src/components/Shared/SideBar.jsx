@@ -18,7 +18,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { Home, Settings, ShoppingBasket, UserCircle2Icon } from 'lucide-react';
+import { Building, Home, Settings, ShoppingBasket, UserCircle2Icon } from 'lucide-react';
 
 const menus = {
     admin: [
@@ -31,6 +31,14 @@ const menus = {
             section: 'Roles', 
             icon: UserGroupIcon, 
             subs: [{ name: 'Listar Roles', link: '/admin/listar-roles' }] 
+        },
+     {
+            section: 'Sedes',
+            icon: Building,
+            subs: [
+                { name: 'Agregar Sede', link: '/admin/agregar-sede' },
+                { name: 'Listar Sedes', link: '/admin/listar-sedes' },
+            ]
         },
         {
             section: 'Clientes',

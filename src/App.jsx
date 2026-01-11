@@ -24,6 +24,10 @@ import Home from 'ui/home/Home';
 // UIS ADMIN
 import ListarRoles from 'ui/Administrador/roles/listarRoles/ListarRoles';
 
+import AgregarSede from 'ui/Administrador/sedes/agregarSede/AgregarSede';
+import ListarSedes from 'ui/Administrador/sedes/listarSedes/ListarSedes';
+import EditarSede from 'ui/Administrador/sedes/editarSede/EditarSede';
+
 import AgregarCliente from 'ui/Administrador/clientes/agregarCliente/AgregarCliente';
 import ListarClientes from 'ui/Administrador/clientes/listarClientes/ListarClientes';
 import EditarCliente from 'ui/Administrador/clientes/editarCliente/EditarCliente';
@@ -97,6 +101,15 @@ function AppContent() {
 
         {/* Ruta Listar Roles */}
         <Route path="listar-roles" element={<ListarRoles />} />
+
+        {/* RUTAS SEDES */}
+          {/* Ruta Agregar Sede */}
+          <Route path="agregar-sede" element={<AgregarSede />} />
+          {/* Ruta Listar Sede */}
+          <Route path="listar-sedes" element={<ListarSedes />} />
+          {/* Ruta Editar Sede */}
+          <Route path="editar-sede/:id" element={<EditarSede />} />
+
 
         {/* RUTAS CLIENTE */}
           {/* Ruta Agregar Cliente */}
