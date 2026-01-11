@@ -68,7 +68,6 @@ import ListarComprobantes from 'ui/Cajero/comprobantes/listarComprobantes/Listar
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRouteCajero from 'utilities/ProtectedRoutes/ProtectedRouteCajero';
 import ProtectedRouteAdmin from 'utilities/ProtectedRoutes/ProtectedRouteAdmin';
-import DemoGuard from 'utilities/ProtectedRoutes/DemoGuard';
 
 //UIS GENERALES
 import LicenciaExpirada from 'ui/auth/Login/components/LicenciaExpirada';
@@ -90,9 +89,7 @@ function AppContent() {
       <Route
         path="/admin"
         element={
-          <DemoGuard>
             <ProtectedRouteAdmin element={<SidebarLayout />} />
-          </DemoGuard>
         }
       >
         {/* Ruta Home (cuando solo pones /admin) */}
@@ -175,9 +172,7 @@ function AppContent() {
       <Route
         path="/cajero"
         element={
-          <DemoGuard>
             <ProtectedRouteCajero element={<SidebarLayout />} />
-          </DemoGuard>
         }
       >
         {/* Ruta Home (cuando solo pones /cajero) */}

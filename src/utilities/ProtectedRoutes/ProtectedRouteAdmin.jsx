@@ -4,6 +4,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRouteAdmin = ({ element }) => {
     const access_token = jwtUtils.getAccessTokenFromCookie();
+    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
     const location = useLocation();
 
     // 1. Si no hay token, al 401
@@ -11,8 +12,16 @@ const ProtectedRouteAdmin = ({ element }) => {
         return <Navigate to="/401" />;
     }
 
+    // --- NUEVO: VALIDACIÓN LICENCIA DEMO ---
+    const trialDays = jwtUtils.getTrialDays(refresh_token);
+    
+    // Si trialDays existe y es 0 o menor (negativo), bloqueamos.
+    if (trialDays !== undefined && trialDays !== null && trialDays <= 0) {
+        return <Navigate to="/licencia-expirada" replace />;
+    }
+    // ---------------------------------------
+
     const rol = jwtUtils.getUserRole(access_token);
-    // Extraemos el claim 'configurado' directamente
     const claims = jwtUtils.getClaims(access_token);
     const configurado = claims?.configurado; 
 
@@ -22,8 +31,6 @@ const ProtectedRouteAdmin = ({ element }) => {
     }
 
     // 3. VALIDACIÓN DE CONFIGURACIÓN
-    // Comprobamos si es exactamente 0. 
-    // Usamos .includes para evitar problemas con la barra diagonal final
     const isConfigPage = location.pathname.includes("configuracion-negocio");
     
     if (configurado === 0 && !isConfigPage) {

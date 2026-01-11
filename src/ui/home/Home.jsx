@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import jwtUtils from "utilities/Token/jwtUtils";
-import { ClockIcon, CheckBadgeIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { ClockIcon, CheckBadgeIcon} from "@heroicons/react/24/outline";
 
 const Home = () => {
   const [rol, setRol] = useState(null);

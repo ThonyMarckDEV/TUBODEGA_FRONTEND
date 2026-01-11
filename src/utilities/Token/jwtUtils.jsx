@@ -14,8 +14,6 @@ export const getClaims = (token) => {
   }
 };
 
-// Función para obtener el username de usuario
-//export const getUsername = (token) => decodeToken(token)?.sub ?? null;
 
 export const getUsername = (token) => jwtDecode(token)?.username ?? null;
 
@@ -25,13 +23,14 @@ export const getFullName = (token) => jwtDecode(token)?.fullName ?? null;
 // Función para obtener el rol del usuario
 export const getUserRole = (token) => jwtDecode(token)?.rol ?? null;
 
-// Función para obtener el rol del usuario
+// Función para obtener el  email
 export const getEmail= (token) => jwtDecode(token)?.email ?? null;
 
-// Función para obtener el rol del usuario
+// Función para obtener id del usuario
 export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
 
-// Función para obtener los días de prueba restantes
+
+// Función para obtener id del usuario
 export const getTrialDays = (token) => jwtDecode(token)?.trial_days ?? null;
 
 
