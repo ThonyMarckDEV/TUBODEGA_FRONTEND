@@ -1,25 +1,39 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
-const ProtectedRouteManager = ({ element }) => {
-  // Obtener el JWT desde localStorage
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+const ProtectedRouteAdmin = ({ element }) => {
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const location = useLocation();
 
+    // 1. Si no hay token, al 401
+    if (!access_token) {
+        return <Navigate to="/401" />;
+    }
 
-  if (!refresh_token) {
-    return <Navigate to="/404" />;
-  }
+    const rol = jwtUtils.getUserRole(access_token);
+    // Extraemos el claim 'configurado' directamente
+    const claims = jwtUtils.getClaims(access_token);
+    const configurado = claims?.configurado; 
 
-  const rol = jwtUtils.getUserRole(refresh_token);
+    // 2. Verificar rol de admin
+    if (rol !== 'admin') {
+        return <Navigate to="/401" />;
+    }
 
-  if (rol !== 'admin') {
-    return <Navigate to="/404" />;
-  }
+    // 3. VALIDACIÓN DE CONFIGURACIÓN
+    // Comprobamos si es exactamente 0. 
+    // Usamos .includes para evitar problemas con la barra diagonal final
+    const isConfigPage = location.pathname.includes("configuracion-negocio");
+    
+    if (configurado === 0 && !isConfigPage) {
+        console.log("Sistema no configurado. Redirigiendo...");
+        return <Navigate to="/admin/configuracion-negocio" replace state={{ 
+            alerta: "⚠️ Configuración pendiente: Debe completar los datos de su empresa para activar el sistema." 
+        }} />;
+    }
 
-  // Si hay token, se muestra el elemento original
-  return element;
-
+    return element;
 };
 
-export default ProtectedRouteManager;
+export default ProtectedRouteAdmin;

@@ -125,8 +125,18 @@ export const setAccessTokenInCookie = (token) => {
   document.cookie = `access_token=${token}${cookieOptions}`;
 };
 
+export const isConfigurado = (token) => {
+    try {
+        const decoded = jwtDecode(token);
+        // Retornamos true si es 1, false si es 0 o null
+        return decoded?.configurado === 1;
+    } catch (error) {
+        return false;
+    }
+};
 
 const jwtUtils = {
+  getClaims,
   getUsername,
   getFullName,
   getUserRole,
@@ -140,6 +150,7 @@ const jwtUtils = {
   getRefreshTokenFromCookie,
   setAccessTokenInCookie,
   getUserID,
+  isConfigurado
 };
 
 export default jwtUtils;

@@ -3,8 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { BuildingOfficeIcon, DevicePhoneMobileIcon, EnvelopeIcon, IdentificationIcon, MapPinIcon, PercentBadgeIcon } from '@heroicons/react/24/outline';
 import { getConfig, updateConfig } from 'services/configService';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
+import jwtUtils from 'utilities/Token/jwtUtils';
+import { useNavigate } from 'react-router-dom';
 
 const ConfiguracionNegocio = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         nombre_negocio: '',
         ruc: '',
@@ -25,7 +28,6 @@ const ConfiguracionNegocio = () => {
         try {
             const response = await getConfig();
             
-            // REVISIÓN: Si tu handleResponse envuelve el objeto en 'data', lo extraemos
             const configData = response.data ? response.data : response;
 
             if (configData && configData.nombre_negocio !== undefined) {
@@ -57,11 +59,31 @@ const ConfiguracionNegocio = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSaving(true);
+        
         try {
             const response = await updateConfig(formData);
-            setAlert(response);
+
+            const tokenRecibido = response.data?.access_token;
+
+            if (response.type === 'success' && tokenRecibido) {
+                console.log("¡Token capturado!", tokenRecibido.slice(-10));
+
+                // Seteo del token
+                jwtUtils.setAccessTokenInCookie(tokenRecibido);
+
+                setAlert({ type: 'success', message: response.message });
+
+                // Redirección
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 1000);
+
+            } else {
+                console.error("Error: El backend no devolvió el token dentro de data.");
+            }
         } catch (error) {
-            setAlert(error);
+            console.error("Error crítico:", error);
+            setAlert({ type: 'error', message: 'Error al procesar la respuesta.' });
         } finally {
             setIsSaving(false);
         }
