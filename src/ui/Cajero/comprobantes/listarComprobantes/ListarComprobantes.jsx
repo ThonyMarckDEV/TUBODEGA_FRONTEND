@@ -51,7 +51,7 @@ const ListarComprobantes = () => {
     // --- EFECTO INICIAL ---
     useEffect(() => { 
         fetchComprobantes(1); 
-    }, []); // Carga inicial única (los filtros tienen sus propios triggers si quisieras, pero aquí usamos submit manual)
+    }, []); // Carga inicial única
 
     // --- HANDLERS FILTROS ---
     const handleFilterChange = (e) => {
@@ -67,7 +67,7 @@ const ListarComprobantes = () => {
     const clearFilters = () => {
         const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', tipoDoc: '', estadoSunat: '' };
         setFilters(emptyFilters);
-        fetchComprobantes(1, emptyFilters); // Forzamos carga con filtros vacíos
+        fetchComprobantes(1, emptyFilters);
     };
 
     // --- UPDATE STATUS ---
