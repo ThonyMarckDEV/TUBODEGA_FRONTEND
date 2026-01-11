@@ -11,6 +11,7 @@ import { ToastContainer } from 'react-toastify';
 
 // Layout
 import SidebarLayout from 'layouts/SidebarLayout';
+import SedeLayout from 'layouts/SedeLayout';
 
 // UIS AUTH
 import ErrorPage404 from 'components/ErrorPage404';
@@ -93,7 +94,11 @@ function AppContent() {
       <Route
         path="/admin"
         element={
-            <ProtectedRouteAdmin element={<SidebarLayout />} />
+          <ProtectedRouteAdmin element={
+            <SedeLayout>
+              <SidebarLayout />
+            </SedeLayout>
+          } />
         }
       >
         {/* Ruta Home (cuando solo pones /admin) */}
@@ -193,7 +198,11 @@ function AppContent() {
       <Route
         path="/cajero"
         element={
-            <ProtectedRouteCajero element={<SidebarLayout />} />
+            <ProtectedRouteCajero element={
+              <SedeLayout>
+                <SidebarLayout />
+              </SedeLayout>
+            } />
         }
       >
         {/* Ruta Home (cuando solo pones /cajero) */}

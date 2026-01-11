@@ -73,6 +73,8 @@ export const getUserID = (token) => jwtDecode(token)?.sub ?? null;
 
 export const getTrialDays = (token) => jwtDecode(token)?.trial_days ?? null;
 
+export const getNombreSede = (token) => jwtDecode(token)?.nombre_sede ?? null;
+
 export const isConfigurado = (token) => {
     try {
         const decoded = jwtDecode(token);
@@ -151,7 +153,8 @@ const jwtUtils = {
   setAccessTokenInCookie,
   getUserID,
   isConfigurado,
-  getTrialDays
+  getTrialDays,
+  getNombreSede
 };
 
 export default jwtUtils;
