@@ -39,7 +39,6 @@ const ConfiguracionNegocio = () => {
                     email: configData.email || '',
                     igv_porcentaje: configData.igv_porcentaje || ''
                 });
-                console.log("Datos cargados al estado:", configData);
             } else {
                 console.warn("La respuesta no tiene el formato esperado:", response);
             }
@@ -66,8 +65,6 @@ const ConfiguracionNegocio = () => {
             const tokenRecibido = response.data?.access_token;
 
             if (response.type === 'success' && tokenRecibido) {
-                console.log("¡Token capturado!", tokenRecibido.slice(-10));
-
                 // Seteo del token
                 jwtUtils.setAccessTokenInCookie(tokenRecibido);
 
