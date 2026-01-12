@@ -20,7 +20,6 @@ import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 
-// --- MANTÉN TU CONFIGURACIÓN DE MENÚS IGUAL ---
 const menus = { 
     admin: [
         { section: 'Home', icon: Home, link: '/admin' },
@@ -83,7 +82,6 @@ const Sidebar = () => {
         }
     }, [location.pathname, roleMenu, isSectionActive, openSection]); 
 
-    // AJUSTE DE ANCHOS
     const sidebarWidth = isHovered ? 'md:w-72' : 'md:w-[5.5rem]';
 
     return (
@@ -136,7 +134,6 @@ const Sidebar = () => {
                                             className={`${itemBaseClasses} ${isActive ? activeClasses : inactiveClasses} ${contentWidth}`}
                                             title={!isHovered ? item.section : ''}
                                         >
-                                            {/* ICONOS MÁS GRANDES (h-6 w-6) */}
                                             <IconComponent className={`h-6 w-6 flex-shrink-0 transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-black'}`} /> 
                                             
                                             <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 text-sm tracking-wide 

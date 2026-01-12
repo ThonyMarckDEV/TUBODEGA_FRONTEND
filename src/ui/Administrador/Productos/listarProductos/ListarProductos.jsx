@@ -5,7 +5,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
-import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/solid'; // Agregué FunnelIcon
+import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/solid';
 
 const ListarProductos = () => {
     const [loading, setLoading] = useState(true);
@@ -16,11 +16,9 @@ const ListarProductos = () => {
     const [productos, setProductos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     
-    // Estados de filtros
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState(''); // '' = Todos, '1' = Activos, '0' = Inactivos
+    const [filterEstado, setFilterEstado] = useState('');
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Producto',
@@ -31,7 +29,6 @@ const ListarProductos = () => {
                 </div>
             )
         },
-        // --- NUEVA COLUMNA: UNIDAD ---
         {
             header: 'Unidad',
             render: (row) => (
@@ -101,8 +98,6 @@ const ListarProductos = () => {
         }
     ], []);
 
-    // --- CARGAR DATOS ---
-    // Ahora recibe 'estado' también
     const fetchProductos = useCallback(async (page, search = '', estado = '') => {
         setLoading(true);
         setError(null);
@@ -122,29 +117,23 @@ const ListarProductos = () => {
         }
     }, []);
 
-    // Efecto inicial y cuando cambia el filtro de estado
     useEffect(() => {
         fetchProductos(1, searchTerm, filterEstado);
-    }, [fetchProductos, filterEstado , searchTerm]); // Se ejecuta al cambiar filtroEstado
+    }, [fetchProductos, filterEstado , searchTerm]);
 
-    // Manejador del Buscador
     const handleSearchTable = (term) => {
         setSearchTerm(term); 
         fetchProductos(1, term, filterEstado);
     };
 
-    // Manejador de Paginación
     const handlePageChange = (page) => {
         fetchProductos(page, searchTerm, filterEstado);
     };
 
-    // Manejador del Cambio de Estado en Filtro
     const handleFilterEstadoChange = (e) => {
         setFilterEstado(e.target.value);
-        // El useEffect se encargará de recargar los datos
     };
 
-    // --- TOGGLE ESTADO ---
     const executeToggle = async () => {
         if (!itemToToggle) return;
         const nuevoEstado = !itemToToggle.estado; 
@@ -154,7 +143,6 @@ const ListarProductos = () => {
         try {
             const res = await toggleProductoEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            // Recargamos manteniendo los filtros actuales
             await fetchProductos(paginationInfo.currentPage, searchTerm, filterEstado); 
         } catch (err) {
             setAlert(err);

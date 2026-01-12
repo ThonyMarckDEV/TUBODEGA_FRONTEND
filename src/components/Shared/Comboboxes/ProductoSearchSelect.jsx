@@ -11,7 +11,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
 
     const wrapperRef = useRef(null);
 
-    // 1. Buscar Productos
     const fetchProductos = async (searchTerm = '') => {
         setLoading(true);
         try {
@@ -29,7 +28,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
         }
     };
 
-    // 2. Sincronizar input visualmente
     useEffect(() => {
         if (form && form.productoNombre) {
             setInputValue(form.productoNombre);
@@ -38,7 +36,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
         }
     }, [form]);
 
-    // 3. Cerrar al hacer clic fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -54,13 +51,12 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
         setInputValue(texto);
         setHasSearched(false);
 
-        // Si el usuario escribe, reseteamos la selección previa
         if (form.id_Producto) {
             setForm(prev => ({ 
                 ...prev, 
                 id_Producto: null, 
                 productoNombre: '',
-                unidad: '' // Limpiamos unidad también
+                unidad: ''
             }));
         }
     };
@@ -72,7 +68,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
         }
     };
 
-    // --- AQUÍ GUARDAMOS LA UNIDAD ---
     const handleSelect = (producto) => {
         setInputValue(producto.nombre);
         setForm(prev => ({ 
@@ -80,7 +75,7 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
             id_Producto: producto.id, 
             productoNombre: producto.nombre,
             stockDisponible: producto.stock_almacen,
-            unidad: producto.unidad // <--- Guardamos la unidad para mostrarla
+            unidad: producto.unidad
         }));
         setShowSuggestions(false);
     };
@@ -98,7 +93,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
     return (
         <section className="relative w-full" ref={wrapperRef}>
             
-            {/* Input y Botón */}
             <div className="relative flex items-center">
                 <input
                     type="text"
@@ -108,7 +102,6 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
                     onClick={handleInputClick}
                     disabled={disabled || loading}
                     placeholder="Buscar producto..."
-                    // Altura fija 38px para alinear con otros inputs
                     className="w-full h-[38px] border-gray-300 rounded-md shadow-sm py-2 pl-3 pr-10 border focus:border-black focus:ring-black text-sm"
                     autoComplete="off"
                 />
@@ -127,12 +120,10 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
                     )}
                 </button>
 
-                {/* Lista Desplegable */}
                 {showSuggestions && (
                     <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
                             suggestions.map((prod) => {
-                                // Verificar si está excluido
                                 const isExcluded = excludeIds.includes(prod.id);
 
                                 return (
@@ -183,11 +174,9 @@ const ProductoSearchSelect = ({ form, setForm, disabled, excludeIds = [] }) => {
                 )}
             </div>
 
-            {/* --- TEXTO DE CONFIRMACIÓN RESTAURADO Y MEJORADO --- */}
             <div className="mt-1 text-xs h-4">
                 {form.id_Producto ? (
                     <span className="text-green-600 font-semibold flex items-center gap-1 truncate">
-                        {/* AHORA MOSTRAMOS LA UNIDAD AQUÍ */}
                         ✓ {form.productoNombre} ({form.unidad || 'U'}) [ID: {form.id_Producto}]
                     </span>
                 ) : (

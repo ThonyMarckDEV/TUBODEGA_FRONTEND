@@ -1,13 +1,11 @@
 // src/pages/cajeros/AgregarCajero.jsx
 import React, { useState } from 'react';
 
-// Importación de componentes
 import CajeroForm from '../components/CajeroForm';
 import ContactosForm from '../components/ContactosForm';
 import DatosAccesoForm from '../components/DatosAccesoForm';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 
-// Importación del servicio
 import { createCajero } from 'services/cajeroService';
 
 

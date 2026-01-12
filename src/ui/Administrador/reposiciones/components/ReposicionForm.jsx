@@ -4,7 +4,6 @@ import ProductoSearchSelect from 'components/Shared/Comboboxes/ProductoSearchSel
 
 const ReposicionForm = ({ data, setData, disabled = false }) => {
 
-  // 1. Calculamos los IDs que ya están en uso en toda la tabla
   const selectedIds = data.detalles
       .map(d => d.id_Producto)
       .filter(id => id != null);
@@ -36,14 +35,11 @@ const ReposicionForm = ({ data, setData, disabled = false }) => {
         const currentRow = newDetalles[index];
         let updatedRow = stateUpdater(currentRow);
 
-        // OPCIONAL: Doble seguridad en el padre
-        // Si el nuevo ID ya existe en otra fila (y no es el mismo de esta fila), no hacemos nada
         const isDuplicate = prev.detalles.some((d, i) => 
             i !== index && d.id_Producto === updatedRow.id_Producto && updatedRow.id_Producto !== null
         );
 
         if (isDuplicate) {
-             // Podrías lanzar un toast/alerta aquí si quisieras
              return prev; 
         }
 
@@ -94,7 +90,6 @@ const ReposicionForm = ({ data, setData, disabled = false }) => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {data.detalles.map((detalle, index) => {
-                            // Calculamos qué IDs excluir para ESTA fila (todos menos el suyo propio)
                             const idsToExclude = selectedIds.filter(id => id !== detalle.id_Producto);
 
                             return (
@@ -104,7 +99,6 @@ const ReposicionForm = ({ data, setData, disabled = false }) => {
                                             form={detalle}
                                             setForm={(updater) => handleSetRowState(index, updater)}
                                             disabled={disabled}
-                                            // PASAMOS LA LISTA DE EXCLUIDOS
                                             excludeIds={idsToExclude} 
                                         />
                                     </td>

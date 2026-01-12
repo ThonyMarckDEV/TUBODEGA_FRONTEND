@@ -46,7 +46,6 @@ const EditarCajero = () => {
 
         const datosApi = cleanNulls(cajeroData.datos);
         const contactosApi = cleanNulls(cajeroData.contactos?.[0]);
-        // Asumiendo que el usuario viene en la raíz o en una relación 'usuario'
         const usernameApi = cajeroData.username || cajeroData.user?.username || '';
 
         const structuredData = {
@@ -54,7 +53,7 @@ const EditarCajero = () => {
           contactos: { ...initialFormData.contactos, ...contactosApi },
           usuario: { 
              username: usernameApi, 
-             password: '', // Siempre vacía al editar
+             password: '',
              password_confirmation: '' 
           }
         };

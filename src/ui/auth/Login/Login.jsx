@@ -7,7 +7,6 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import LoginForm from './components/LoginForm';
 import authService from 'services/authService';
 
-// Importa aquí tu logo
 import LogoTuBodega from 'assets/img/logo_TU_BODEGA.png'; 
 
 const Login = () => {
@@ -33,7 +32,7 @@ const Login = () => {
       document.cookie = `access_token=${access_token}${baseCookie}`;
       document.cookie = `refresh_token=${refresh_token}${refreshExp}${baseCookie}`;
 
-      // --- LÓGICA DE MENSAJE DEMO ---
+      // LÓGICA DE MENSAJE DEMO
       const rol = jwtUtils.getUserRole(access_token);
       
       // Obtenemos los datos completos del token para ver los días
@@ -101,7 +100,7 @@ const Login = () => {
             )}
           </div>
           
-          {/* Barra decorativa inferior (Toque elegante negro) */}
+          {/* Barra decorativa inferior */}
           <div className="h-2 bg-black w-full"></div>
         </div>
         

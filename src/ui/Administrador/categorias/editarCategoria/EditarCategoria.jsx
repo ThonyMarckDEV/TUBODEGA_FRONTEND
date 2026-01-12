@@ -9,7 +9,7 @@ const EditarCategoria = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState(null); // Iniciamos en null para saber si cargó
+  const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
@@ -21,7 +21,6 @@ const EditarCategoria = () => {
         const response = await showCategoria(id);
         const data = response.data; 
         
-        // Asignamos directamente los datos al estado
         setFormData({
             nombre: data.nombre || '',
             descripcion: data.descripcion || ''
@@ -65,7 +64,6 @@ const EditarCategoria = () => {
 
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md max-w-2xl">
         
-        {/* USAMOS EL MISMO COMPONENTE, PERO CON DATOS PRECARGADOS */}
         {formData && (
             <CategoriaForm 
                 data={formData} 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getDashboardMetrics } from 'services/adminDashboardService';
 
-// Importamos los sub-componentes
 import DashboardHeader from './components/DashboardHeader';
 import DashboardKPIs from './components/DashboardKPIs';
 import DashboardCharts from './components/DashboardCharts';
@@ -13,7 +12,6 @@ const AdminDashboard = () => {
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // --- LÓGICA DE DATOS ---
     const fetchMetrics = async (start = '', end = '') => {
         setLoading(true);
         try {
@@ -46,7 +44,6 @@ const AdminDashboard = () => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount || 0);
     };
 
-    // --- RENDERIZADO ---
     if (loading && !metrics) {
         return <div className="p-10 text-center text-slate-500 animate-pulse">Cargando métricas del sistema...</div>;
     }

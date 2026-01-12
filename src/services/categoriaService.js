@@ -54,7 +54,7 @@ export const showCategoria = async (id) => {
 export const updateCategoria = async (id, categoriaData) => {
   const url = `${API_BASE_URL}/api/categorias/update/${id}`;
   const response = await fetchWithAuth(url, {
-    method: 'PUT', // o PATCH según tu preferencia, PUT es estándar para reemplazar
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'

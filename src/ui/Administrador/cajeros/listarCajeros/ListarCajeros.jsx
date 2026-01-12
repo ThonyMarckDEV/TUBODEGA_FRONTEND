@@ -15,7 +15,6 @@ const ListarCajero = () => {
     const [cajeroToToggle, setCajeroToToggle] = useState(null);
     const [cajeros, setCajeros] = useState([]);
     
-    // View Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCajero, setSelectedCajero] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
@@ -160,7 +159,6 @@ const ListarCajero = () => {
                 {selectedCajero && (
                     <div className="space-y-6">
                         
-                        {/* 1. Encabezado con Avatar y Estado */}
                         <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
                             <div className="h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-2xl">
                                 {selectedCajero.datos?.nombre?.charAt(0) || 'C'}

@@ -65,20 +65,19 @@ const VentaCatalogo = ({ onAdd, tipoVenta }) => {
     };
 
     const handleAddToCarrito = (producto) => {
-        // Seleccionamos el precio según el tipo de venta
         const precioAplicado = tipoVenta === 'mayorista' 
             ? producto.precio_venta_mayorista 
             : producto.precio_venta;
 
         onAdd({ 
             ...producto, 
-            precio_venta: precioAplicado // Enviamos el precio correcto al carrito
+            precio_venta: precioAplicado 
         });
     };
 
     return (
         <div className="bg-white p-4 border rounded-xl shadow-sm h-full flex flex-col min-h-[500px]">
-            <div className="flex flex-row items-end gap-4 mb-6"> 
+            <div className="flex flex-row items-start gap-4 mb-6"> 
                 <div className="flex-1">
                     <CategoriaSearchSelect form={cat} setForm={setCat} />
                 </div>

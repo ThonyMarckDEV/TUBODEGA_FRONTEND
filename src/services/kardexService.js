@@ -13,8 +13,7 @@ export const getKardex = async (page = 1, filters = {}) => {
   if (filters.producto_id) params.append('producto_id', filters.producto_id);
   if (filters.fecha_inicio) params.append('fecha_inicio', filters.fecha_inicio);
   if (filters.fecha_fin) params.append('fecha_fin', filters.fecha_fin);
-  
-  // Filtros de Tipo y Ubicación
+
   if (filters.tipo) params.append('tipo', filters.tipo);
   if (filters.ubicacion) params.append('ubicacion', filters.ubicacion);
 

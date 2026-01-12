@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { storeVenta } from 'services/ventaService';
-// Componentes que crearemos
+// Componentes
 import VentaCarrito from '../components/VentaCarrito';
 import VentaCatalogo from '../components/VentaCatalogo';
 import ClienteSearchSelect from 'components/Shared/Comboboxes/ClienteSearchSelect';
@@ -11,10 +11,10 @@ const AgregarVenta = () => {
     const [alert, setAlert] = useState(null);
     
     const initialVentaData = {
-        cliente_id: null, // Se usará para el envío
-        id_Cliente: null, // El que usa tu SearchSelect
+        cliente_id: null,
+        id_Cliente: null, 
         clienteNombre: 'Público General',
-        clienteData: {},  // Datos para el comprobante (RUC/DNI)
+        clienteData: {},
         metodo_pago: 'efectivo',
         tipo_venta: 'bodega',
         detalles: []
@@ -54,7 +54,6 @@ const AgregarVenta = () => {
                 setAlert({ type: 'success', message: response.message || 'Venta procesada con éxito.' });
             } 
         } catch (error) {
-            // 'error' aquí es el objeto que lanzó tu handleResponse original
             console.error("Error capturado:", error);
             
             const errorMessage = (error.details && error.details.length > 0) 

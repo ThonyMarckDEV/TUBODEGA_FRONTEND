@@ -6,7 +6,7 @@ import CompraForm from '../components/CompraForm';
 
 const initialFormData = {
   id_Proveedor: null,
-  proveedorNombre: '', // Para visualización
+  proveedorNombre: '',
   detalles: [
     { id_Producto: null, productoNombre: '', cantidad: 1, precio: '' }
   ]
@@ -22,7 +22,6 @@ const AgregarCompra = () => {
     e.preventDefault();
     setAlert(null);
 
-    // Validaciones Frontend básicas
     if (!formData.id_Proveedor) {
         setAlert({ type: 'error', message: 'Debe seleccionar un proveedor.' });
         return;
@@ -36,7 +35,6 @@ const AgregarCompra = () => {
     setLoading(true);
 
     try {
-      // Preparamos payload para Laravel
       const payload = {
           proveedor_id: formData.id_Proveedor,
           detalles: detallesValidos.map(d => ({

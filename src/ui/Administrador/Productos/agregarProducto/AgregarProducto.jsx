@@ -4,7 +4,6 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { createProducto } from 'services/productoService';
 import ProductoForm from '../components/ProductoForm';
 
-// Estado inicial: incluye campos para el Select de Categoría
 const initialFormData = {
   nombre: '',
   unidad: 'unidad',
@@ -12,7 +11,6 @@ const initialFormData = {
   precio_venta: '',
   precio_venta_mayorista: '',
   stock_minimo: 5,
-  // Campos especiales para CategoriaSearchSelect
   id_Categoria: null, 
   categoriaNombre: ''
 };
@@ -32,7 +30,6 @@ const AgregarProducto = () => {
     e.preventDefault();
     setAlert(null);
 
-    // Validación manual de Categoría
     if (!formData.id_Categoria) {
         setAlert({ type: 'error', message: 'Debe seleccionar una categoría.' });
         return;
@@ -41,7 +38,6 @@ const AgregarProducto = () => {
     setLoading(true);
 
     try {
-      // Preparamos el payload para el backend (mapeamos id_Categoria a categoria_id)
       const payload = {
           ...formData,
           categoria_id: formData.id_Categoria
@@ -77,7 +73,6 @@ const AgregarProducto = () => {
       
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md max-w-3xl">
         
-        {/* Pasamos setData (setFormData) porque CategoriaSearchSelect lo necesita */}
         <ProductoForm 
             data={formData} 
             setData={setFormData}

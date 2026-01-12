@@ -4,7 +4,7 @@ const ProveedorForm = ({ data, handleChange }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       
-      {/* Campo: Razón Social (Ocupa las 2 columnas en pantallas medianas) */}
+      {/* Campo: Razón Social */}
       <div className="md:col-span-2">
         <label 
           htmlFor="razon_social" 

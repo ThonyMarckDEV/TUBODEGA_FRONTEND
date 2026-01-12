@@ -20,7 +20,6 @@ const AgregarReposicion = () => {
     e.preventDefault();
     setAlert(null);
 
-    // Validación simple
     const detallesValidos = formData.detalles.filter(d => d.id_Producto && d.cantidad > 0);
     if (detallesValidos.length === 0) {
         setAlert({ type: 'error', message: 'Debe seleccionar al menos un producto válido.' });

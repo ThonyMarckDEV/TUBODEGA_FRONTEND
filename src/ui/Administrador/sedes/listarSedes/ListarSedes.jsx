@@ -16,7 +16,6 @@ const ListarSedes = () => {
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [searchTerm, setSearchTerm] = useState('');
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Nombre',
@@ -67,7 +66,6 @@ const ListarSedes = () => {
         }
     ], []);
 
-    // --- CARGA DE DATOS ---
     const fetchSedes = useCallback(async (page, search = '') => {
         setLoading(true);
         try {
@@ -85,16 +83,13 @@ const ListarSedes = () => {
         }
     }, []);
 
-    // Efecto reactivo para búsqueda
     useEffect(() => { 
         fetchSedes(1, searchTerm); 
     }, [fetchSedes, searchTerm]);
 
-    // --- TOGGLE ESTADO ---
     const executeToggleEstado = async () => {
         if (!sedeToToggle) return;
         
-        // Doble check de seguridad en frontend
         if(sedeToToggle.esPrincipal) {
             setAlert({ type: 'warning', message: 'No se puede desactivar la Sede Principal.' });
             setSedeToToggle(null);
@@ -145,7 +140,7 @@ const ListarSedes = () => {
                     totalPages: paginationInfo.totalPages,
                     onPageChange: (page) => fetchSedes(page, searchTerm)
                 }}
-                onSearch={setSearchTerm} // Simplemente actualizamos el estado, useEffect hace el fetch
+                onSearch={setSearchTerm}
                 searchPlaceholder="Buscar sede..."
             />
         </div>

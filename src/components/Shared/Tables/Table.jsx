@@ -1,45 +1,41 @@
 // src/components/Shared/Table.jsx
 import React, { useState } from 'react';
 import Pagination from '../Pagination';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Asegúrate de tener heroicons instalado
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const Table = ({ 
     columns, 
     data, 
     loading = false, 
     pagination = null, 
-    onSearch = null, // NUEVA PROP: Función que recibe el texto a buscar
-    searchPlaceholder = "Buscar..." // NUEVA PROP: Texto del placeholder
+    onSearch = null,
+    searchPlaceholder = "Buscar..."
 }) => {
     
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Maneja el clic en "Buscar" o Enter
     const handleSearchSubmit = () => {
         if (onSearch) {
             onSearch(searchTerm);
         }
     };
 
-    // Maneja la tecla Enter
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             handleSearchSubmit();
         }
     };
 
-    // Maneja el botón de limpiar "X"
     const handleClear = () => {
         setSearchTerm('');
         if (onSearch) {
-            onSearch(''); // Envía vacío para resetear la lista
+            onSearch('');
         }
     };
 
     return (
         <div className="w-full">
             
-            {/* --- SECCIÓN DEL BUSCADOR (Solo se renderiza si pasas onSearch) --- */}
             {onSearch && (
                 <div className="mb-4 flex gap-2 items-center max-w-md">
                     <div className="relative w-full">
@@ -55,7 +51,7 @@ const Table = ({
                             onKeyDown={handleKeyDown}
                             disabled={loading}
                         />
-                        {/* Botón X para limpiar */}
+
                         {searchTerm && (
                             <button 
                                 onClick={handleClear}
@@ -76,7 +72,6 @@ const Table = ({
                 </div>
             )}
 
-            {/* --- CONTENEDOR DE LA TABLA --- */}
             <div className={`bg-white shadow-md rounded-lg overflow-hidden transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                 <div className="overflow-x-auto">
                     <table className="min-w-full leading-normal">
@@ -114,7 +109,6 @@ const Table = ({
                 </div>
             </div>
 
-            {/* --- PAGINACIÓN --- */}
             {pagination && (
                 <div className="mt-4">
                     <Pagination

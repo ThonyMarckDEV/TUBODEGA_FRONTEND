@@ -7,7 +7,6 @@ const CompraForm = ({ data, setData, disabled = false }) => {
   
   const [totalGeneral, setTotalGeneral] = useState(0);
 
-  // 1. LISTA GLOBAL DE IDs SELECCIONADOS
   const selectedIds = data.detalles
       .map(d => d.id_Producto)
       .filter(id => id != null);
@@ -46,7 +45,6 @@ const CompraForm = ({ data, setData, disabled = false }) => {
         const currentRow = newDetalles[index];
         const updatedRow = stateUpdater(currentRow);
 
-        // Validación anti-duplicados en el padre
         const isDuplicate = prev.detalles.some((d, i) => 
             i !== index && d.id_Producto === updatedRow.id_Producto && updatedRow.id_Producto !== null
         );
@@ -115,7 +113,6 @@ const CompraForm = ({ data, setData, disabled = false }) => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {data.detalles.map((detalle, index) => {
-                             // Excluir IDs de otras filas, pero permitir el propio
                              const idsToExclude = selectedIds.filter(id => id !== detalle.id_Producto);
 
                              return (
@@ -125,7 +122,7 @@ const CompraForm = ({ data, setData, disabled = false }) => {
                                             form={detalle}
                                             setForm={(updater) => handleSetRowState(index, updater)}
                                             disabled={disabled}
-                                            excludeIds={idsToExclude} // <--- NUEVA PROP
+                                            excludeIds={idsToExclude}
                                         />
                                     </td>
 

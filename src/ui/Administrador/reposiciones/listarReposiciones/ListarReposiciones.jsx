@@ -10,7 +10,6 @@ const ListarReposiciones = () => {
     const [reposiciones, setReposiciones] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
-    // Estados Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRepo, setSelectedRepo] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);

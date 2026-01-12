@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRouteCliente = ({ element }) => {
-  // Obtener el JWT desde localStorage
   const refresh_token = jwtUtils.getRefreshTokenFromCookie();
 
 
@@ -17,7 +16,6 @@ const ProtectedRouteCliente = ({ element }) => {
     return <Navigate to="/404" />;
   }
 
-  // Si hay token, se muestra el elemento original
   return element;
 
 };

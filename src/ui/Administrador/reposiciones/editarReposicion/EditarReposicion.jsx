@@ -20,7 +20,6 @@ const EditarReposicion = () => {
         const response = await showReposicion(id);
         const data = response.data; 
         
-        // Mapeo Backend -> Frontend
         setFormData({
             detalles: data.detalles.map(d => ({
                 id_Producto: d.producto_id,

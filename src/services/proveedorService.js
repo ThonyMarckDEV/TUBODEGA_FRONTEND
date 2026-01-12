@@ -69,7 +69,6 @@ export const updateProveedor = async (id, proveedorData) => {
  * Endpoint: PATCH /api/proveedores/cambiar-estado/{id}
  */
 export const toggleProveedorEstado = async (id, nuevoEstado) => {
-    // Nota: Asegúrate de haber corregido la ruta en api.php si usaste 'toggle' o 'cambiar-estado'
     const url = `${API_BASE_URL}/api/proveedores/cambiar-estado/${id}`; 
     
     const response = await fetchWithAuth(url, {

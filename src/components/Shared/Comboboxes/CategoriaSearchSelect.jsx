@@ -11,15 +11,11 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
 
     const wrapperRef = useRef(null);
 
-    // 1. Cargar datos iniciales (o buscar cuando el usuario lo pida)
     const fetchCategorias = async (searchTerm = '') => {
         setLoading(true);
         try {
-            // Llamamos al servicio pasando el término de búsqueda
-            // Esto activará el filtro WHERE LIKE en el backend
             const response = await getCategorias(1, searchTerm);
             
-            // Extraemos los datos
             const lista = response.data?.data || response.data || [];
             
             setSuggestions(lista);
@@ -33,7 +29,6 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // 2. Sincronizar input si viene un valor del formulario (ej. al Editar)
     useEffect(() => {
         if (form && form.categoriaNombre) {
             setInputValue(form.categoriaNombre);
@@ -42,7 +37,6 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
         }
     }, [form]);
 
-    // 3. Detectar clic fuera para cerrar la lista
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -53,27 +47,23 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [wrapperRef]);
 
-    // Al escribir en el input
     const handleChange = (e) => {
         const texto = e.target.value;
         setInputValue(texto);
-        setHasSearched(false); // Reiniciamos estado de búsqueda
+        setHasSearched(false);
 
-        // Si el usuario modifica el texto, borramos la selección previa
         if (form.id_Categoria) {
             setForm(prev => ({ ...prev, id_Categoria: null, categoriaNombre: '' }));
         }
     };
 
-    // Al presionar Enter
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Evita enviar el formulario principal
+            e.preventDefault();
             fetchCategorias(inputValue);
         }
     };
 
-    // Al seleccionar una opción
     const handleSelect = (categoria) => {
         setInputValue(categoria.nombre);
         setForm(prev => ({ 
@@ -84,15 +74,13 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
         setShowSuggestions(false);
     };
 
-    // Al hacer clic en el botón de buscar
     const handleSearchClick = () => {
         fetchCategorias(inputValue);
     };
 
-    // Al hacer clic para abrir (carga las default si está vacío)
     const handleInputClick = () => {
         if (!showSuggestions && !hasSearched) {
-            fetchCategorias(''); // Carga inicial
+            fetchCategorias('');
         } else {
             setShowSuggestions(true);
         }
@@ -117,7 +105,6 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
                     autoComplete="off"
                 />
 
-                {/* Botón de Acción (Lupa o Loading) */}
                 <button
                     type="button"
                     onClick={handleSearchClick}
@@ -131,7 +118,6 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
                     )}
                 </button>
 
-                {/* Lista Flotante */}
                 {showSuggestions && (
                     <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
@@ -153,7 +139,6 @@ const CategoriaSearchSelect = ({ form, setForm, disabled }) => {
                 )}
             </div>
 
-            {/* Estado de selección */}
             <div className="mt-1 text-xs h-4">
                 {form.id_Categoria ? (
                     <span className="text-green-600 font-semibold flex items-center gap-1">

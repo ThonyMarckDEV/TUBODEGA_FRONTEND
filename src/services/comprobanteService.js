@@ -3,7 +3,6 @@ import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
 export const getComprobantes = async (page = 1, filters = {}) => {
-  // Mapeamos los filtros del state a los parámetros del backend
   const params = new URLSearchParams({
     page: page,
     search: filters.search || '',
@@ -39,13 +38,12 @@ export const getComprobantePdf = async (ventaId) => {
     const url = `${API_BASE_URL}/api/comprobantes/${ventaId}/pdf`;
     const response = await fetchWithAuth(url, { 
         method: 'GET',
-        headers: { 'Accept': 'application/pdf' } // Importante pedir PDF
+        headers: { 'Accept': 'application/pdf' }
     });
 
     if (!response.ok) throw new Error('No se pudo generar el PDF');
 
-    // Convertimos la respuesta a un Blob (objeto binario)
     const blob = await response.blob();
-    // Creamos una URL local para ese archivo
+    
     return URL.createObjectURL(blob);
 };

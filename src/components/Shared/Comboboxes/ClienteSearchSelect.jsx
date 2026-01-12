@@ -67,8 +67,6 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
     };
 
     const handleSelect = (cliente) => {
-        // Lógica de nombre: Si es empresa (tiene RUC), usamos solo el nombre comercial.
-        // Si no, concatenamos los apellidos.
         const esEmpresa = !!cliente.datos.ruc && cliente.datos.ruc !== '';
         
         const nombreMostrar = esEmpresa 
@@ -80,7 +78,7 @@ const ClienteSearchSelect = ({ form, setForm, disabled }) => {
             ...prev, 
             id_Cliente: cliente.id, 
             clienteNombre: nombreMostrar,
-            clienteData: cliente.datos // Guardamos los datos para saber si es B o F en el service
+            clienteData: cliente.datos 
         }));
         setShowSuggestions(false);
     };

@@ -1,4 +1,4 @@
-import { fetchWithAuth } from 'js/authToken'; // Asumo que tienes estas utilidades
+import { fetchWithAuth } from 'js/authToken';
 import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
@@ -8,7 +8,6 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
  * @returns {Promise<object>} - El resultado de la operación desde el backend.
  */
 export const createCliente = async (clienteData) => {
-  // El endpoint que crearemos en Laravel
   const url = `${API_BASE_URL}/api/clientes/store`;
 
   const response = await fetchWithAuth(url, {
@@ -17,7 +16,7 @@ export const createCliente = async (clienteData) => {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    // Convertimos el objeto de JS a una cadena JSON
+
     body: JSON.stringify(clienteData)
   });
 
@@ -30,7 +29,6 @@ export const createCliente = async (clienteData) => {
  * Endpoint: GET /api/clientes/index?page={page}&search={search}&estado={estado}
  */
 export const getClientes = async (page = 1, search = '', estado = '') => {
-  // Construcción de URL segura
   const term = encodeURIComponent(search);
   const url = `${API_BASE_URL}/api/clientes/index?page=${page}&search=${term}&estado=${estado}`;
 

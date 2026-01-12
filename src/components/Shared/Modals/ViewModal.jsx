@@ -3,7 +3,6 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const ViewModal = ({ isOpen, onClose, title, children, isLoading = false }) => {
     
-    // Bloquear scroll del body cuando el modal está abierto
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';

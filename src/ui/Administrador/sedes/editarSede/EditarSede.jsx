@@ -16,7 +16,7 @@ const initialFormData = {
     apellidoPaterno: '',
     dni: '',
     username: '',
-    password: '' // Se deja vacío para no cambiarlo
+    password: ''
   }
 };
 
@@ -29,7 +29,6 @@ const EditarSede = () => {
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
 
-  // 1. Cargar datos de la sede y su admin
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,7 +46,7 @@ const EditarSede = () => {
                 apellidoPaterno: admin?.datos?.apellidoPaterno || '',
                 dni: admin?.datos?.dni || '',
                 username: admin?.username || '',
-                password: '' // Siempre limpio al editar
+                password: ''
             }
         });
 
@@ -61,7 +60,6 @@ const EditarSede = () => {
     fetchData();
   }, [id]);
 
-  // 2. Manejar cambios en inputs (Genérico para anidados)
   const handleChange = (e, section) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -73,7 +71,6 @@ const EditarSede = () => {
     }));
   };
 
-  // 3. Enviar actualización
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -85,7 +82,6 @@ const EditarSede = () => {
     } catch (err) {
         let errorMsg = 'Error al actualizar';
         if (err.details) {
-            // Si el backend devuelve un array de errores, tomamos el primero o los mostramos todos
             errorMsg = Object.values(err.details).flat().join(', ');
         } else if (err.message) {
             errorMsg = err.message;

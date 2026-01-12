@@ -27,7 +27,7 @@ export const createProducto = async (productoData) => {
  */
 export const getProductos = async (page = 1, search = '', estado = '') => {
   const term = encodeURIComponent(search);
-  // Construimos la URL. Si estado es '', el backend lo ignorará gracias a $request->filled()
+
   const url = `${API_BASE_URL}/api/productos/index?page=${page}&search=${term}&estado=${estado}`;
 
   const response = await fetchWithAuth(url, {

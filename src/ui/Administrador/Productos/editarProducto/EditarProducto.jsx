@@ -20,7 +20,6 @@ const EditarProducto = () => {
         const response = await showProducto(id);
         const data = response.data; 
         
-        // Mapeamos los datos del backend al formato del formulario
         setFormData({
             nombre: data.nombre,
             unidad: data.unidad,
@@ -28,7 +27,7 @@ const EditarProducto = () => {
             precio_venta: data.precio_venta,
             precio_venta_mayorista: data.precio_venta_mayorista,
             stock_minimo: data.stock_minimo,
-            // IMPORTANTE: Precargar el Select de Categoría
+
             id_Categoria: data.categoria_id,
             categoriaNombre: data.categoria ? data.categoria.nombre : ''
         });
@@ -57,7 +56,6 @@ const EditarProducto = () => {
       setSaving(true);
       setAlert(null);
       try {
-          // Mapeamos de nuevo id_Categoria a categoria_id
           const payload = {
               ...formData,
               categoria_id: formData.id_Categoria
@@ -85,7 +83,7 @@ const EditarProducto = () => {
         {formData && (
             <ProductoForm 
                 data={formData} 
-                setData={setFormData} // Necesario para el Select
+                setData={setFormData}
                 handleChange={handleChange} 
                 disabled={saving}
             />

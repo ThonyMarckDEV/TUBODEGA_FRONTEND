@@ -5,7 +5,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
-import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline'; // Agregamos FunnelIcon
+import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 const ListarCategorias = () => {
     const [loading, setLoading] = useState(true);
@@ -17,11 +17,9 @@ const ListarCategorias = () => {
     
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
 
-    // --- ESTADOS DE FILTRO ---
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState(''); // '' = Todos
+    const [filterEstado, setFilterEstado] = useState('');
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Nombre',
@@ -60,7 +58,6 @@ const ListarCategorias = () => {
         }
     ], []);
 
-    // --- CARGAR DATOS ---
     const fetchCategorias = useCallback(async (page, search = '', estado = '') => {
         setLoading(true);
         setError(null);
@@ -82,16 +79,13 @@ const ListarCategorias = () => {
         }
     }, []);
 
-    // Efecto reactivo (Carga automática al cambiar filtros)
     useEffect(() => {
         fetchCategorias(1, searchTerm, filterEstado);
     }, [fetchCategorias, searchTerm, filterEstado]);
 
-    // --- HANDLERS ---
 
     const handleSearchTable = (term) => {
         setSearchTerm(term); 
-        // fetchCategorias se ejecutará por el useEffect
     };
 
     const handlePageChange = (page) => {
@@ -102,7 +96,6 @@ const ListarCategorias = () => {
         setFilterEstado(e.target.value);
     };
 
-    // --- MANEJAR CAMBIO DE ESTADO ---
     const executeToggle = async () => {
         if (!itemToToggle) return;
         

@@ -7,7 +7,6 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
  * Endpoint: GET /api/ventas/index?...Params
  */
 export const getVentas = async (page = 1, filters = {}) => {
-  // Construimos los parámetros de la URL
   const params = new URLSearchParams({
     page: page,
     search: filters.search || '',

@@ -6,7 +6,7 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
-import { EyeIcon, PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline'; // Agregamos FunnelIcon
+import { EyeIcon, PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 const ListarCliente = () => {
     const [loading, setLoading] = useState(true);
@@ -16,11 +16,9 @@ const ListarCliente = () => {
     const [clienteToToggle, setClienteToToggle] = useState(null);
     const [clientes, setClientes] = useState([]);
     
-    // --- ESTADOS DE FILTRO ---
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState(''); // Estado del filtro select
+    const [filterEstado, setFilterEstado] = useState('');
 
-    // --- ESTADOS PARA EL MODAL ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCliente, setSelectedCliente] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
@@ -31,7 +29,6 @@ const ListarCliente = () => {
         totalItems: 0 
     });
 
-    // --- FUNCIÓN DE CARGA (Actualizada con estado) ---
     const fetchClientes = useCallback(async (page, search = '', estado = '') => {
         setLoading(true);
         setError(null);
@@ -51,12 +48,10 @@ const ListarCliente = () => {
         }
     }, []);
 
-    // Efecto principal: Recarga cuando cambia el filtro de estado
     useEffect(() => {
         fetchClientes(1, searchTerm, filterEstado);
-    }, [fetchClientes, filterEstado , searchTerm]); // searchTerm lo manejamos en el evento del buscador, filterEstado aquí
+    }, [fetchClientes, filterEstado , searchTerm]);
 
-    // --- HANDLERS ---
     
     const handleSearchTable = (term) => {
         setSearchTerm(term);
@@ -69,10 +64,8 @@ const ListarCliente = () => {
 
     const handleFilterEstadoChange = (e) => {
         setFilterEstado(e.target.value);
-        // El useEffect detectará el cambio y recargará
     };
 
-    // --- MODAL Y TOGGLE ---
     const handleViewDetails = async (id) => {
         setIsModalOpen(true);
         setDetailsLoading(true);
@@ -107,7 +100,6 @@ const ListarCliente = () => {
         try {
             const response = await toggleClienteEstado(id, nuevoEstado);
             setAlert(response);
-            // Recargamos manteniendo filtros actuales
             await fetchClientes(paginationInfo.currentPage, searchTerm, filterEstado); 
         } catch (err) {
             setAlert(err); 
@@ -115,7 +107,6 @@ const ListarCliente = () => {
         }
     };
 
-    // --- DEFINICIÓN DE COLUMNAS (Igual que antes) ---
     const columns = useMemo(() => [
         {
             header: 'Documento',
@@ -254,7 +245,7 @@ const ListarCliente = () => {
                 searchPlaceholder="Buscar por DNI o Nombre"
             />
 
-            {/* MODAL DETALLES (Sin cambios en lógica interna) */}
+            {/* MODAL DETALLES */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={closeModal} 
@@ -262,10 +253,7 @@ const ListarCliente = () => {
                 isLoading={detailsLoading}
             >
                 {selectedCliente && (
-                    // ... (El contenido de tu modal se mantiene igual) ...
                     <div className="space-y-6">
-                         {/* ... Copia aquí el contenido del modal que ya tenías ... */}
-                         {/* Para abreviar la respuesta, asumo que mantienes tu diseño de modal */}
                          <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
                             <div className={`h-16 w-16 rounded-full flex items-center justify-center font-bold text-2xl ${!!selectedCliente.datos?.ruc ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'}`}>
                                 {selectedCliente.datos?.nombre?.charAt(0) || 'C'}
@@ -281,14 +269,11 @@ const ListarCliente = () => {
                                 </div>
                             </div>
                         </div>
-                        {/* ... Resto de campos del modal ... */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {/* ... Datos ... */}
                              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                                 <h4 className="font-bold text-gray-700 mb-2">Información Legal</h4>
                                 <p className="text-sm"><span className="text-gray-500">Documento:</span> {selectedCliente.datos?.ruc || selectedCliente.datos?.dni}</p>
                              </div>
-                             {/* ... Contactos ... */}
                              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                                 <h4 className="font-bold text-gray-700 mb-2">Contactos</h4>
                                 <div className="space-y-2 text-sm">

@@ -44,7 +44,6 @@ const VentaCarrito = ({ items, setItems }) => {
                                         {item.nombre}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {/* Muestra KG, UND, LTS, etc. Si no existe, pone UND por defecto */}
                                         <span className="uppercase font-medium text-slate-400">
                                             {item.unidad || 'UND'}:
                                         </span> S/ {parseFloat(item.precio_venta).toFixed(2)}

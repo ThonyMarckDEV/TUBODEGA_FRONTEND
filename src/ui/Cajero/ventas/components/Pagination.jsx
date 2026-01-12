@@ -4,8 +4,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 const Pagination = ({ current, last, total, onPageChange, loading }) => {
     if (total === 0) return null;
 
-    // Generar el array de números de página
-    // Ejemplo: Si last es 5, crea [1, 2, 3, 4, 5]
     const pageNumbers = [];
     for (let i = 1; i <= last; i++) {
         pageNumbers.push(i);

@@ -11,14 +11,11 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
 
     const wrapperRef = useRef(null);
 
-    // 1. Función para buscar en el Backend
     const fetchProveedores = async (searchTerm = '') => {
         setLoading(true);
         try {
-            // Llamamos al servicio con la página 1 y el término de búsqueda
             const response = await getProveedores(1, searchTerm);
             
-            // Manejamos la estructura de respuesta de Laravel (paginada o directa)
             const lista = response.data?.data || response.data || [];
             
             setSuggestions(lista);
@@ -32,9 +29,7 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // 2. Sincronizar input si el formulario padre ya tiene datos (ej. Editar)
     useEffect(() => {
-        // Asumimos que en el form usas 'proveedorNombre' o 'proveedorRazonSocial' para mostrar el texto
         if (form && form.proveedorNombre) {
             setInputValue(form.proveedorNombre);
         } else if (form && !form.id_Proveedor) {
@@ -42,7 +37,6 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
         }
     }, [form]);
 
-    // 3. Cerrar lista al hacer clic fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -53,13 +47,11 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [wrapperRef]);
 
-    // Manejar escritura en el input
     const handleChange = (e) => {
         const texto = e.target.value;
         setInputValue(texto);
-        setHasSearched(false); // Reiniciamos el estado de "buscado"
+        setHasSearched(false);
 
-        // Si el usuario cambia el texto, limpiamos el ID seleccionado para evitar inconsistencias
         if (form.id_Proveedor) {
             setForm(prev => ({ 
                 ...prev, 
@@ -69,15 +61,13 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
         }
     };
 
-    // Buscar al presionar Enter
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Evita submit del form principal
+            e.preventDefault();
             fetchProveedores(inputValue);
         }
     };
 
-    // Seleccionar un proveedor de la lista
     const handleSelect = (proveedor) => {
         setInputValue(proveedor.razon_social);
         setForm(prev => ({ 
@@ -88,15 +78,13 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
         setShowSuggestions(false);
     };
 
-    // Buscar al hacer clic en la lupa
     const handleSearchClick = () => {
         fetchProveedores(inputValue);
     };
 
-    // Abrir lista al hacer clic en el input (carga inicial si está vacío)
     const handleInputClick = () => {
         if (!showSuggestions && !hasSearched) {
-            fetchProveedores(''); // Trae los primeros 10 por defecto
+            fetchProveedores('');
         } else {
             setShowSuggestions(true);
         }
@@ -121,7 +109,6 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
                     autoComplete="off"
                 />
 
-                {/* Botón Lupa / Loading */}
                 <button
                     type="button"
                     onClick={handleSearchClick}
@@ -136,7 +123,6 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
                     )}
                 </button>
 
-                {/* Dropdown de Resultados */}
                 {showSuggestions && (
                     <ul className="absolute z-50 top-full left-0 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
                         {suggestions.length > 0 ? (
@@ -161,7 +147,6 @@ const ProveedorSearchSelect = ({ form, setForm, disabled }) => {
                 )}
             </div>
 
-            {/* Feedback de Selección */}
             <div className="mt-1 text-xs h-4">
                 {form.id_Proveedor ? (
                     <span className="text-green-600 font-semibold flex items-center gap-1">

@@ -10,21 +10,18 @@ const ListarCompras = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Datos tabla
     const [compras, setCompras] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [searchTerm, setSearchTerm] = useState('');
 
-    // --- ESTADOS DEL MODAL ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCompra, setSelectedCompra] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    // --- FUNCIÓN PARA VER DETALLES ---
     const handleViewDetails = async (id) => {
         setIsModalOpen(true);
         setDetailsLoading(true);
-        setSelectedCompra(null); // Limpiar anterior
+        setSelectedCompra(null);
 
         try {
             const response = await showCompra(id);
@@ -38,7 +35,7 @@ const ListarCompras = () => {
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setTimeout(() => setSelectedCompra(null), 300); // Limpiar data después de cerrar
+        setTimeout(() => setSelectedCompra(null), 300);
     };
 
     const columns = useMemo(() => [

@@ -11,7 +11,6 @@ const ListarVentas = () => {
     const [ventas, setVentas] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
-    // ESTADO DE FILTROS
     const [filters, setFilters] = useState({
         search: '',
         fechaInicio: '',
@@ -19,20 +18,13 @@ const ListarVentas = () => {
         metodoPago: ''
     });
     
-    // Estados Modal Detalle
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    /**
-     * Función principal de carga.
-     * Recibe 'filtrosOverrides' para forzar filtros vacíos al limpiar
-     * sin esperar a que el estado de React se actualice.
-     */
     const fetchVentas = async (page = 1, filtrosOverrides = null) => {
         setLoading(true);
         try {
-            // Usamos los filtros que nos pasan O el estado actual
             const filtrosParaEnviar = filtrosOverrides || filters;
             
             const response = await getVentas(page, filtrosParaEnviar);
@@ -50,9 +42,7 @@ const ListarVentas = () => {
 
     useEffect(() => {
         fetchVentas(1);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // --- HANDLERS ---
+    }, []);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -61,17 +51,14 @@ const ListarVentas = () => {
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        fetchVentas(1); // Usa el estado actual de filters
+        fetchVentas(1);
     };
 
     const clearFilters = () => {
         const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', metodoPago: '' };
-        
-        // 1. Limpiamos visualmente los inputs
+
         setFilters(emptyFilters);
         
-        // 2. Forzamos la recarga inmediata pasando los filtros vacíos
-        // (No esperamos a que el setFilters termine)
         fetchVentas(1, emptyFilters);
     };
 
@@ -88,7 +75,6 @@ const ListarVentas = () => {
         }
     };
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         { 
             header: 'VENTA N°', 
@@ -163,7 +149,6 @@ const ListarVentas = () => {
                <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Historial de Ventas</h1>
                     
-                    {/* Solo mostramos el botón si NO es admin (es decir, es cajero) */}
                     {rol !== 'admin' && (
                         <Link 
                             to="/cajero/agregar-venta" 
@@ -174,10 +159,8 @@ const ListarVentas = () => {
                     )}
                 </div>
                 
-                {/* --- BARRA DE FILTROS --- */}
                 <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     
-                    {/* Buscador Texto */}
                     <div className="md:col-span-4">
                         <label className="block text-xs font-bold text-gray-500 mb-1">Buscar Cliente / ID / Doc</label>
                         <div className="relative">
@@ -193,7 +176,6 @@ const ListarVentas = () => {
                         </div>
                     </div>
 
-                    {/* Fecha Inicio */}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-bold text-gray-500 mb-1">Desde</label>
                         <input 
@@ -205,7 +187,6 @@ const ListarVentas = () => {
                         />
                     </div>
 
-                    {/* Fecha Fin */}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
                         <input 
@@ -217,7 +198,6 @@ const ListarVentas = () => {
                         />
                     </div>
 
-                    {/* Método de Pago */}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-bold text-gray-500 mb-1">Método Pago</label>
                         <select 
@@ -234,7 +214,6 @@ const ListarVentas = () => {
                         </select>
                     </div>
 
-                    {/* Botones Acción */}
                     <div className="md:col-span-2 flex gap-2">
                         <button type="submit" className="flex-1 bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-900 transition flex items-center justify-center gap-1">
                             <FunnelIcon className="w-4 h-4" /> Filtrar
@@ -258,7 +237,6 @@ const ListarVentas = () => {
                 }}
             />
 
-            {/* --- MODAL DETALLE --- */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
@@ -267,7 +245,6 @@ const ListarVentas = () => {
             >
                 {selectedVenta && (
                     <div className="space-y-6">
-                        {/* Cabecera del detalle */}
                         <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
                             <div>
                                 <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Información del Cliente</p>
@@ -304,7 +281,6 @@ const ListarVentas = () => {
                             </div>
                         </div>
 
-                        {/* Tabla de Productos */}
                         <div>
                             <h4 className="font-bold text-sm mb-3 border-b pb-1">Productos</h4>
                             <table className="min-w-full text-sm">

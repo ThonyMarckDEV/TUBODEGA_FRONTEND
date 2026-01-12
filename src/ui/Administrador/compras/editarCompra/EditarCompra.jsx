@@ -20,12 +20,10 @@ const EditarCompra = () => {
         const response = await showCompra(id);
         const data = response.data; 
         
-        // --- MAPEO CRÍTICO: Backend -> Frontend ---
         setFormData({
             id_Proveedor: data.proveedor_id,
             proveedorNombre: data.proveedor ? data.proveedor.razon_social : 'Desconocido',
             
-            // Mapeamos los detalles
             detalles: data.detalles.map(d => ({
                 id_Producto: d.producto_id,
                 productoNombre: d.producto ? d.producto.nombre : 'Producto eliminado',
@@ -47,7 +45,6 @@ const EditarCompra = () => {
       setSaving(true);
       setAlert(null);
 
-      // Validamos datos básicos
       const detallesValidos = formData.detalles.filter(d => d.id_Producto && d.cantidad > 0 && d.precio > 0);
 
       try {

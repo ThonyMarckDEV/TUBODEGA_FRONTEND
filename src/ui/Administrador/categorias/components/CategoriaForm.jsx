@@ -16,7 +16,7 @@ const CategoriaForm = ({ data, handleChange }) => {
           id="nombre" 
           name="nombre" 
           type="text" 
-          value={data.nombre || ''} // Evita error de uncontrolled input
+          value={data.nombre || ''}
           onChange={handleChange} 
           placeholder="Ej. Bebidas, Abarrotes" 
           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"

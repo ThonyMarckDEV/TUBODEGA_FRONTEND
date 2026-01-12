@@ -1,16 +1,13 @@
 import React from 'react';
-import ReactDOM from 'react-dom'; // Importamos ReactDOM
+import ReactDOM from 'react-dom';
 import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const LowStockModal = ({ isOpen, onClose, products }) => {
     if (!isOpen) return null;
-
-    // Usamos createPortal para renderizar fuera del flujo normal
     return ReactDOM.createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             
             {/* OVERLAY (Fondo Oscuro) */}
-            {/* Usamos inset-0 para asegurar cobertura total */}
             <div 
                 className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
                 onClick={onClose} 
@@ -86,7 +83,7 @@ const LowStockModal = ({ isOpen, onClose, products }) => {
                 </div>
             </div>
         </div>,
-        document.body // <--- AQUÍ ESTÁ EL TRUCO: Lo renderizamos directamente en el body
+        document.body
     );
 };
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import API_BASE_URL from './urlHelper';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
-let refreshPromise = null; // Variable para controlar la concurrencia
+let refreshPromise = null;
 
 async function verificarYRenovarToken() {
   const access_token = jwtUtils.getAccessTokenFromCookie();
@@ -13,13 +13,11 @@ async function verificarYRenovarToken() {
     throw new Error('Tokens no encontrados');
   }
 
-  // SI YA HAY UNA VALIDACIÓN EN CURSO, ESPERAMOS A ESA
   if (refreshPromise) {
     console.log('[Token] Esperando a la validación en curso...');
     return refreshPromise;
   }
 
-  // CREAMOS LA PROMESA DE VALIDACIÓN
   refreshPromise = (async () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/validate-tokens`, {
@@ -43,13 +41,13 @@ async function verificarYRenovarToken() {
       return access_token;
     } catch (error) {
       console.error('[Token] Error en validación:', error.response?.data?.message);
-      // Solo hacemos logout si es un error de autenticación real (401 o 400)
+
       if (error.response?.status === 401 || error.response?.status === 400) {
         logout();
       }
       throw error;
     } finally {
-      refreshPromise = null; // Liberamos la promesa al terminar
+      refreshPromise = null;
     }
   })();
 
@@ -61,8 +59,6 @@ async function verificarYRenovarToken() {
  */
 async function fetchWithAuth(url, options = {}) {
 
-  // Esta función se encarga de todo: validar, renovar si es necesario,
-  // o hacer logout y lanzar un error si la sesión es inválida.
   const access_token = await verificarYRenovarToken();
   
   const headers = {

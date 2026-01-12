@@ -12,13 +12,12 @@ const ListarComprobantes = () => {
     const [comprobantes, setComprobantes] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
-    // --- ESTADO DE FILTROS ---
     const [filters, setFilters] = useState({
         search: '',
         fechaInicio: '',
         fechaFin: '',
-        tipoDoc: '',     // '' | 'F' | 'B'
-        estadoSunat: ''  // '' | '0' | '1' | '2'
+        tipoDoc: '', 
+        estadoSunat: ''
     });
 
     const [isPdfOpen, setIsPdfOpen] = useState(false);
@@ -30,7 +29,6 @@ const ListarComprobantes = () => {
         setTimeout(() => setAlert(null), 3000);
     }, []);
 
-    // --- FUNCIÓN DE CARGA ---
     const fetchComprobantes = useCallback(async (page = 1, filtersOverrides = null) => {
         setLoading(true);
         try {
@@ -46,15 +44,12 @@ const ListarComprobantes = () => {
         } finally {
             setLoading(false);
         }
-    }, [filters, showAlert]); // Depende de 'filters' actual
+    }, [filters, showAlert]);
 
-    // --- EFECTO INICIAL ---
     useEffect(() => { 
         fetchComprobantes(1); 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // --- HANDLERS FILTROS ---
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -71,7 +66,6 @@ const ListarComprobantes = () => {
         fetchComprobantes(1, emptyFilters);
     };
 
-    // --- UPDATE STATUS ---
     const handleUpdateStatus = useCallback(async (id, newStatus) => {
         setIsUpdating(id);
         try {
@@ -87,7 +81,6 @@ const ListarComprobantes = () => {
         }
     }, [showAlert]);
 
-    // --- PDF LOGIC ---
     const openPdf = async (row) => {
         Swal.fire({
             title: 'Generando PDF...',
@@ -114,7 +107,6 @@ const ListarComprobantes = () => {
         setIsPdfOpen(false);
     };
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         { 
             header: 'Documento', 
@@ -198,7 +190,6 @@ const ListarComprobantes = () => {
                     <p className="text-slate-500 text-sm">Gestión de Facturación Electrónica</p>
                 </div>
                 
-                {/* --- BARRA DE FILTROS --- */}
                 <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     
                     {/* Búsqueda Texto */}

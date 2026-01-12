@@ -1,13 +1,11 @@
 // src/pages/clientes/AgregarCliente.jsx
 import React, { useState } from 'react';
 
-// Importación de los componentes del formulario
 import ClienteForm from '../components/formularios/ClienteForm';
 import ContactosForm from '../components/formularios/ContactosForm';
 
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 
-// Importación del servicio
 import { createCliente } from 'services/clienteService';
 
 const initialFormData = {
@@ -59,7 +57,7 @@ const AgregarCliente = () => {
     };
  
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault(); // Previene cualquier comportamiento por si acaso
+    if (e) e.preventDefault();
     setLoading(true);
     try {
       const response = await createCliente(formData);

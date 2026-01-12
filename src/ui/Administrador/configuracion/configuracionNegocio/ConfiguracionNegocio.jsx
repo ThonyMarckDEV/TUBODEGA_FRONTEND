@@ -26,7 +26,6 @@ const ConfiguracionNegocio = () => {
         try {
             const response = await getConfig();
 
-            // Si el backend manda un mensaje de advertencia, lo mostramos
             if (response.message && response.message.includes('⚠️')) {
                 setAlert({ type: 'info', message: response.message });
             }
@@ -68,12 +67,10 @@ const ConfiguracionNegocio = () => {
             const tokenRecibido = response.data?.access_token;
 
             if (response.type === 'success' && tokenRecibido) {
-                // Seteo del token
                 jwtUtils.setAccessTokenInCookie(tokenRecibido);
 
                 setAlert({ type: 'success', message: response.message });
 
-                // Redirección
                 setTimeout(() => {
                     window.location.href = '/admin';
                 }, 1000);

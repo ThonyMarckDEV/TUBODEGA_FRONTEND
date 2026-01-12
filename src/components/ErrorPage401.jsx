@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { FaRegSadCry } from 'react-icons/fa';
 
 const ErrorPage = () => {
-  // Efecto de animación al cargar la página
   useEffect(() => {
     const elementsToAnimate = document.querySelectorAll('.animate-in');
     

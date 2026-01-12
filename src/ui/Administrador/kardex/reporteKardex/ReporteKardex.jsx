@@ -10,7 +10,6 @@ const ReporteKardex = () => {
     const [movimientos, setMovimientos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
-    // --- FILTROS (Agregada ubicación) ---
     const [filterForm, setFilterForm] = useState({
         id_Producto: null,
         productoNombre: '',
@@ -33,7 +32,7 @@ const ReporteKardex = () => {
                 fecha_inicio: filterForm.fecha_inicio,
                 fecha_fin: filterForm.fecha_fin,
                 tipo: filterForm.tipo,
-                ubicacion: filterForm.ubicacion // <--- ENVIAMOS AL SERVICIO
+                ubicacion: filterForm.ubicacion
             };
 
             const response = await getKardex(page, filters);
@@ -53,7 +52,6 @@ const ReporteKardex = () => {
         fetchKardex(1);
     }, [fetchKardex]);
 
-    // --- COLUMNAS (Sin cambios) ---
     const columns = useMemo(() => [
         {
             header: 'Fecha',
@@ -118,7 +116,6 @@ const ReporteKardex = () => {
         <div className="container mx-auto p-6">
             <h1 className="text-3xl font-bold text-slate-800 mb-6">Kardex (Historial de Inventario)</h1>
 
-            {/* --- BARRA DE FILTROS --- */}
             <div className="bg-white p-4 rounded-lg shadow mb-6 border border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     
@@ -130,7 +127,7 @@ const ReporteKardex = () => {
                         />
                     </div>
 
-                    {/* 2. Filtro Fechas (Agrupado visualmente si prefieres, o separado) */}
+                    {/* 2. Filtro Fechas */}
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1">Rango Fechas</label>
                         <div className="flex gap-1">
@@ -168,7 +165,7 @@ const ReporteKardex = () => {
                         </select>
                     </div>
 
-                    {/* 4. Filtro Ubicación (NUEVO) */}
+                    {/* 4. Filtro Ubicación */}
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1">Ubicación</label>
                         <select 
@@ -185,7 +182,7 @@ const ReporteKardex = () => {
                 </div>
             </div>
 
-            {/* --- TABLA --- */}
+            {/* TABLA*/}
             {loading && movimientos.length === 0 ? (
                 <LoadingScreen />
             ) : (

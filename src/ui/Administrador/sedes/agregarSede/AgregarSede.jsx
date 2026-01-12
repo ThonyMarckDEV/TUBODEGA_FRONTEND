@@ -25,7 +25,6 @@ const AgregarSede = () => {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
 
-  // Manejador genérico para objetos anidados
   const handleChange = (e, section) => {
       const { name, value } = e.target;
       setFormData(prev => ({
@@ -45,7 +44,7 @@ const AgregarSede = () => {
       const response = await createSede(formData);
       setAlert(response);
       setFormData(initialFormData);
-      // setTimeout(() => navigate('/admin/listar-sedes'), 2000);
+      setTimeout(() => navigate('/admin/listar-sedes'), 3000);
     } catch (error) {
       setAlert(error);
     } finally {

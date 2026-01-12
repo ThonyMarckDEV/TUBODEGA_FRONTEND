@@ -44,14 +44,12 @@ const getPaginationRange = ({ totalPages, currentPage, siblingCount = 1 }) => {
     return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
   }
 
-  // Se añade un return por defecto para todos los casos posibles
   return range(1, totalPages);
 };
 
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  // Ahora la llamada a la función está antes del "if", pero ya no es un Hook
-  // por lo que no hay problema. La lógica sigue siendo la misma.
+
   const paginationRange = getPaginationRange({ currentPage, totalPages });
 
   if (totalPages <= 1) {
@@ -62,7 +60,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     <nav className="flex justify-center items-center space-x-2 mt-8">
       <button
           onClick={() => onPageChange(currentPage - 1)}
-          // Si currentPage es 1, se deshabilita
           disabled={currentPage === 1} 
           className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
       >
@@ -90,7 +87,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
       <button
           onClick={() => onPageChange(currentPage + 1)}
-          // Si currentPage es igual a totalPages, se deshabilita
           disabled={currentPage === totalPages}
           className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
       >

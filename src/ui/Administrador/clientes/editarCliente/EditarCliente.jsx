@@ -4,12 +4,9 @@ import { showCliente, updateCliente } from 'services/clienteService';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 
-// Importa todos tus componentes de formulario
 import ClienteForm from '../components/formularios/ClienteForm';
 import ContactosForm from '../components/formularios/ContactosForm';
 
-// --- PLANTILLA DE DATOS VACÍOS ---
-// Define la estructura completa que esperan los formularios para evitar errores.
 const initialFormData = {
   datos: {
     nombre: '', apellidoPaterno: '', apellidoMaterno: '',
@@ -19,7 +16,6 @@ const initialFormData = {
   contactos: { telefonoMovil: '', telefonoFijo: '', correo: '' },
 };
 
-// --- FUNCIÓN DE AYUDA PARA LIMPIAR VALORES NULL ---
 const cleanNulls = (obj) => {
   if (obj === null || obj === undefined) return {};
   const newObj = { ...obj };
@@ -49,14 +45,12 @@ const EditarCliente = () => {
         const datosApi = cleanNulls(clienteData.datos);
         const contactosApi = cleanNulls(clienteData.contactos?.[0]);
 
-        // LÓGICA DE DETECCIÓN:
-        // Si tiene RUC y no tiene DNI (o el RUC no está vacío), es Empresa.
         const tipoDetectado = (datosApi.ruc && datosApi.ruc.trim() !== "") ? 'Empresa' : 'Persona';
 
         const datosLimpios = {
           ...initialFormData.datos,
           ...datosApi,
-          tipo: tipoDetectado, // <--- Asignamos el tipo detectado
+          tipo: tipoDetectado,
           sexo: datosApi.sexo || '',
         };
 

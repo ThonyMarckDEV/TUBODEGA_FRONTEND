@@ -1,11 +1,10 @@
 import React from 'react';
-import { logout } from 'js/logout'; // <--- Importa tu función aquí
+import { logout } from 'js/logout';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 
 const LicenciaExpirada = () => {
 
     const handleLogout = async () => {
-        // Ejecuta tu función de logout que muestra el LoadingScreen
         await logout();
     };
 
@@ -37,7 +36,7 @@ const LicenciaExpirada = () => {
                         </p>
                     </div>
 
-                    {/* Caja de Contacto (Opcional) */}
+                    {/* Caja de Contacto */}
                     <div className="bg-slate-50 rounded-lg p-4 text-sm border border-slate-100">
                         <p className="font-semibold text-slate-700 mb-1">¿Deseas activar el sistema?</p>
                         <p className="text-slate-500">Contacta a soporte técnico:</p>

@@ -5,7 +5,7 @@ import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
-import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline'; // Agregamos FunnelIcon
+import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 const ListarProveedores = () => {
     const [loading, setLoading] = useState(true);
@@ -17,11 +17,9 @@ const ListarProveedores = () => {
     
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     
-    // --- ESTADOS DE FILTRO ---
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState(''); // '' = Todos
+    const [filterEstado, setFilterEstado] = useState('');
 
-    // --- CARGAR DATOS ---
     const fetchProveedores = useCallback(async (page, search = '', estado = '') => {
         setLoading(true);
         setError(null);
@@ -43,16 +41,13 @@ const ListarProveedores = () => {
         }
     }, []);
 
-    // Efecto reactivo: Carga cuando cambia el filtro de estado o el término de búsqueda (con debounce implícito si quisieras, aquí directo)
     useEffect(() => {
         fetchProveedores(1, searchTerm, filterEstado);
     }, [fetchProveedores, filterEstado, searchTerm]);
 
-    // --- HANDLERS ---
 
     const handleSearchTable = (term) => {
         setSearchTerm(term); 
-        // No llamamos a fetchProveedores aquí, el useEffect lo hará
     };
 
     const handlePageChange = (page) => {
@@ -63,7 +58,6 @@ const ListarProveedores = () => {
         setFilterEstado(e.target.value);
     };
 
-    // --- MANEJAR CAMBIO DE ESTADO ---
     const executeToggle = async () => {
         if (!itemToToggle) return;
         
@@ -74,7 +68,6 @@ const ListarProveedores = () => {
         try {
             const res = await toggleProveedorEstado(itemToToggle.id, nuevoEstado);
             setAlert({ type: 'success', message: res.message });
-            // Recargamos manteniendo los filtros
             await fetchProveedores(paginationInfo.currentPage, searchTerm, filterEstado); 
         } catch (err) {
             setAlert(err);
@@ -82,7 +75,6 @@ const ListarProveedores = () => {
         }
     };
 
-    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Razón Social',
