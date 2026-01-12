@@ -16,7 +16,7 @@ const LoadingScreen = () => {
 
       {/* Texto de carga minimalista con animación de pulso */}
       <p className="mt-6 text-gray-500 text-sm font-medium tracking-widest uppercase animate-pulse">
-        Cargando Sistema...
+        Cargando ...
       </p>
     </div>
   );
