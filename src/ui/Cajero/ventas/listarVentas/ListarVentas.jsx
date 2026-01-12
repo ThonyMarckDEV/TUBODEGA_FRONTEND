@@ -4,6 +4,7 @@ import { getVentas, showVenta } from 'services/ventaService';
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
 import { EyeIcon, MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ListarVentas = () => {
     const [loading, setLoading] = useState(true);
@@ -152,14 +153,25 @@ const ListarVentas = () => {
         }
     ], []);
 
+    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+    const rol = jwtUtils.getUserRole(refresh_token);
+
     return (
         <div className="container mx-auto p-6">
             <div className="flex flex-col gap-6 mb-6">
-                <div className="flex justify-between items-center">
+
+               <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Historial de Ventas</h1>
-                    <Link to="/cajero/agregar-venta" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md">
-                        + Nueva Venta
-                    </Link>
+                    
+                    {/* Solo mostramos el botón si NO es admin (es decir, es cajero) */}
+                    {rol !== 'admin' && (
+                        <Link 
+                            to="/cajero/agregar-venta" 
+                            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md"
+                        >
+                            + Nueva Venta
+                        </Link>
+                    )}
                 </div>
                 
                 {/* --- BARRA DE FILTROS --- */}
