@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getVentas, showVenta } from 'services/ventaService'; 
 import Table from 'components/Shared/Tables/Table';
@@ -22,11 +22,10 @@ const ListarVentas = () => {
     const [selectedVenta, setSelectedVenta] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    const fetchVentas = async (page = 1, filtrosOverrides = null) => {
+    const fetchVentas = useCallback(async (page = 1, filtrosOverrides = null) => {
         setLoading(true);
         try {
             const filtrosParaEnviar = filtrosOverrides || filters;
-            
             const response = await getVentas(page, filtrosParaEnviar);
             setVentas(response.data || []); 
             setPaginationInfo({
@@ -38,11 +37,11 @@ const ListarVentas = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
 
     useEffect(() => {
         fetchVentas(1);
-    }, []);
+    }, [fetchVentas]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;

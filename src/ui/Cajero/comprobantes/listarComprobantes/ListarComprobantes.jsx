@@ -48,7 +48,7 @@ const ListarComprobantes = () => {
 
     useEffect(() => { 
         fetchComprobantes(1); 
-    }, []);
+    }, [fetchComprobantes]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
