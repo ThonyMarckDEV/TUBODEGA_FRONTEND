@@ -6,7 +6,7 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
-import { EyeIcon, PencilSquareIcon, InboxIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, InboxIcon } from '@heroicons/react/24/outline';
 
 const ListarCajas = () => {
     const [loading, setLoading] = useState(true);
