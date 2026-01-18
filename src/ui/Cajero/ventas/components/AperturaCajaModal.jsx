@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Importar useNavigate
 import { getCajasDisponibles, abrirCaja } from 'services/cajaService';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import { BanknotesIcon, InboxIcon } from '@heroicons/react/24/outline';
 
 const AperturaCajaModal = ({ onSuccess }) => {
+    const navigate = useNavigate(); // 2. Inicializar el hook de navegación
     const [cajas, setCajas] = useState([]);
     const [formData, setFormData] = useState({ caja_id: '', monto_inicial: '' });
     
@@ -100,7 +102,6 @@ const AperturaCajaModal = ({ onSuccess }) => {
                                 )}
                             </select>
                             
-                            {/* Icono de flecha o spinner */}
                             <div className="absolute right-4 top-4 pointer-events-none text-slate-400">
                                 {loadingCajas ? (
                                     <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -139,21 +140,33 @@ const AperturaCajaModal = ({ onSuccess }) => {
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loadingSubmit || loadingCajas || cajas.length === 0}
-                        className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black transition-all shadow-lg shadow-slate-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
-                    >
-                        {loadingSubmit ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                ABRIENDO...
-                            </>
-                        ) : 'INICIAR TURNO'}
-                    </button>
+                    <div className="flex flex-col gap-3">
+                        <button
+                            type="submit"
+                            disabled={loadingSubmit || loadingCajas || cajas.length === 0}
+                            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black transition-all shadow-lg shadow-slate-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                        >
+                            {loadingSubmit ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    ABRIENDO...
+                                </>
+                            ) : 'INICIAR TURNO'}
+                        </button>
+
+                        {/* 3. BOTÓN CANCELAR */}
+                        <button
+                            type="button"
+                            onClick={() => navigate('/cajero')}
+                            className="w-full py-3 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-800 rounded-xl transition-colors"
+                        >
+                            Cancelar / Volver al Menú
+                        </button>
+                    </div>
+                    
                 </form>
             </div>
         </div>
