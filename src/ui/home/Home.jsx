@@ -3,6 +3,7 @@ import jwtUtils from "utilities/Token/jwtUtils";
 import { ClockIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 
 import AdminDashboard from "ui/Administrador/dashboard/AdminDashboard";
+import CajeroDashboard from "ui/Cajero/dashboard/CajeroDashboard";
 
 const Home = () => {
   const [rol, setRol] = useState(null);
@@ -45,9 +46,7 @@ const Home = () => {
       )}
       
       {rol === 'cajero' && (
-        <div className="bg-pink-50 border border-pink-100 p-6 rounded-xl text-center text-pink-700">
-            <p>Panel de Caja habilitado. Usa el menú lateral para realizar ventas.</p>
-        </div>
+         <CajeroDashboard />
       )}
 
     </div>
