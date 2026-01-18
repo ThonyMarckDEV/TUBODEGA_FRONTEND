@@ -35,3 +35,37 @@ export const getCajasDisponibles = async () => {
     });
     return handleResponse(response);
 };
+
+// --- METODO PARA CAJERO ---
+
+// 1. CHECKEAR SI HAY UNA SESION ABIERTA
+export const verificarSesionActiva = async () => {
+    const url = `${API_BASE_URL}/api/caja-sesiones/estado-actual`;
+    const response = await fetchWithAuth(url, { 
+        method: 'GET', 
+        headers: { 'Accept': 'application/json' } 
+    });
+    return handleResponse(response);
+};
+
+// 2. ABRIR CAJA
+export const abrirCaja = async (data) => {
+    const url = `${API_BASE_URL}/api/caja-sesiones/abrir`;
+    const response = await fetchWithAuth(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
+
+// 3. CERRAR CAJA
+export const cerrarCaja = async (data) => {
+    const url = `${API_BASE_URL}/api/caja-sesiones/cerrar`;
+    const response = await fetchWithAuth(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+};
