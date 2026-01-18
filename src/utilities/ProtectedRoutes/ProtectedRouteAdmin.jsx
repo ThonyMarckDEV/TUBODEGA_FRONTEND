@@ -4,17 +4,10 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRouteAdmin = ({ element }) => {
     const access_token = jwtUtils.getAccessTokenFromCookie();
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
     const location = useLocation();
 
     if (!access_token) {
         return <Navigate to="/401" />;
-    }
-
-    const trialDays = jwtUtils.getTrialDays(refresh_token);
-    
-    if (trialDays !== undefined && trialDays !== null && trialDays <= 0) {
-        return <Navigate to="/licencia-expirada" replace />;
     }
 
     const rol = jwtUtils.getUserRole(access_token);

@@ -63,22 +63,27 @@ const ReporteKardex = () => {
             )
         },
         {
-            header: 'Producto',
+            header: 'Producto / Referencia',
             render: (row) => (
                 <div>
-                    <span className="font-bold text-gray-700">{row.producto?.nombre}</span>
-                    <span className="text-xs text-gray-500 block">{row.observacion}</span>
+                    <span className="font-bold text-gray-700 block">{row.producto?.nombre}</span>
+                    <span className="text-[10px] bg-gray-200 text-gray-600 px-1 rounded uppercase font-mono">
+                        Ref: {row.referencia}
+                    </span>
                 </div>
             )
         },
         {
-            header: 'Movimiento',
+            header: 'Movimiento / Motivo',
             render: (row) => (
-                <div className={`flex items-center gap-1 font-bold text-xs px-2 py-1 rounded-full w-fit ${
-                    row.tipo_movimiento === 'ENTRADA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
-                    {row.tipo_movimiento === 'ENTRADA' ? <ArrowDownIcon className="w-3 h-3" /> : <ArrowUpIcon className="w-3 h-3" />}
-                    {row.tipo_movimiento}
+                <div>
+                    <div className={`flex items-center gap-1 font-bold text-xs px-2 py-1 rounded-full w-fit mb-1 ${
+                        row.tipo_movimiento === 'ENTRADA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                        {row.tipo_movimiento === 'ENTRADA' ? <ArrowDownIcon className="w-3 h-3" /> : <ArrowUpIcon className="w-3 h-3" />}
+                        {row.tipo_movimiento}
+                    </div>
+                    <span className="text-xs text-gray-500 italic">{row.motivo}</span>
                 </div>
             )
         },
@@ -95,6 +100,14 @@ const ReporteKardex = () => {
             )
         },
         {
+            header: 'Stock Inicial',
+            render: (row) => (
+                <span className="text-gray-600 font-medium">
+                    {row.stock_anterior}
+                </span>
+            )
+        },
+        {
             header: 'Cantidad',
             render: (row) => (
                 <span className={`font-bold ${row.tipo_movimiento === 'ENTRADA' ? 'text-green-600' : 'text-red-600'}`}>
@@ -103,9 +116,9 @@ const ReporteKardex = () => {
             )
         },
         {
-            header: 'Saldo Final',
+            header: 'Stock Final',
             render: (row) => (
-                <span className="font-bold text-slate-800 bg-gray-100 px-2 py-1 rounded">
+                <span className="font-bold text-slate-900 bg-yellow-100 px-2 py-1 rounded border border-yellow-200">
                     {row.stock_resultante}
                 </span>
             )
