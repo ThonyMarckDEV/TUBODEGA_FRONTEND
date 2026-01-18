@@ -88,7 +88,7 @@ const CajeroDashboard = () => {
                     color={{ bg: 'bg-purple-50', text: 'text-purple-600' }}
                 />
 
-                {/* KPI 4: PROMEDIO (CAMBIADO "TICKET PROMEDIO" POR "PROMEDIO X VENTA") */}
+                {/* KPI 4: PROMEDIO  */}
                 <MetricCard 
                     title="Promedio por Venta"
                     value={formatMoney(data.resumen.ticket_promedio)}
