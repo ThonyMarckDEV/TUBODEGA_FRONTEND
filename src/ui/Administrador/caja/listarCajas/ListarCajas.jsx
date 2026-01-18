@@ -75,10 +75,6 @@ const ListarCajas = () => {
                     <button onClick={() => handleViewDetails(row)} className="btn-icon-view bg-emerald-50 text-emerald-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-100 transition-colors">
                         <EyeIcon className="w-4 h-4" /> Ver
                     </button>
-                    {/* Asumiendo que crearás una ruta para editar cajas */}
-                    <Link to={`/admin/editar-caja/${row.id}`} className="btn-icon-edit bg-indigo-50 text-indigo-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-100 transition-colors">
-                        <PencilSquareIcon className="w-4 h-4" /> Editar
-                    </Link>
                 </div>
             )
         }
