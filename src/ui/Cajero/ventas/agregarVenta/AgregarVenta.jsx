@@ -48,6 +48,13 @@ const AgregarVenta = () => {
 
     // --- ESTADOS DEL FORMULARIO DE VENTA ---
     const [ventaData, setVentaData] = useState(initialVentaData);
+    
+    // [NUEVO] ESTADO PARA EL MONTO RECIBIDO (Para calcular vuelto)
+    const [montoRecibido, setMontoRecibido] = useState('');
+
+    // [NUEVO] CÁLCULOS EN TIEMPO REAL
+    const totalVenta = ventaData.detalles.reduce((acc, item) => acc + (item.cantidad * item.precio_venta), 0);
+    const vuelto = montoRecibido ? (parseFloat(montoRecibido) - totalVenta) : 0;
 
     // ----------------------------------------------------------------------
     // 1. VERIFICAR SI EL CAJERO YA TIENE TURNO ABIERTO AL CARGAR
@@ -56,7 +63,6 @@ const AgregarVenta = () => {
         const checkSession = async () => {
             try {
                 const response = await verificarSesionActiva();
-                // Validamos que exista data real
                 if (response && response.data && response.data.id) {
                     setSesionActiva(response.data);
                 } else {
@@ -78,14 +84,12 @@ const AgregarVenta = () => {
     const handleConfirmarCierre = async () => {
         setLoading(true);
         try {
-            // Si el input está vacío, enviamos 0, sino el valor float
             const montoFinal = montoCierre === '' ? 0 : parseFloat(montoCierre);
-            
             await cerrarCaja({ monto_final_fisico: montoFinal });
             
             setShowCierreModal(false);
             setMontoCierre(''); 
-            setSesionActiva(null); // Esto hará que aparezca el Modal de Apertura
+            setSesionActiva(null); 
             setAlert({ type: 'success', message: 'Turno finalizado correctamente.' });
         } catch (error) {
             setAlert({ type: 'error', message: error.message || 'Error al cerrar caja.' });
@@ -99,6 +103,7 @@ const AgregarVenta = () => {
     // ----------------------------------------------------------------------
     const resetForm = useCallback(() => {
         setVentaData(initialVentaData);
+        setMontoRecibido(''); // [NUEVO] Limpiar input de pago
     }, []);
 
     const handleShowComprobante = useCallback(async (ventaId) => {
@@ -126,6 +131,18 @@ const AgregarVenta = () => {
             return;
         }
 
+        // [NUEVO] VALIDACIÓN DE PAGO EN EFECTIVO
+        let montoPagadoFinal = totalVenta;
+        if (ventaData.metodo_pago === 'efectivo') {
+            const recibido = parseFloat(montoRecibido) || 0;
+            // Permitimos margen de error de 0.01 por decimales
+            if (recibido < (totalVenta - 0.01)) {
+                setAlert({ type: 'error', message: `Monto insuficiente. Faltan S/ ${(totalVenta - recibido).toFixed(2)}` });
+                return;
+            }
+            montoPagadoFinal = recibido;
+        }
+
         setLoading(true);
         try {
             const payload = {
@@ -133,6 +150,7 @@ const AgregarVenta = () => {
                 cliente_id: ventaData.id_Cliente, 
                 tipo_venta: ventaData.tipo_venta,
                 metodo_pago: ventaData.metodo_pago,
+                monto_pagado: montoPagadoFinal, // [NUEVO] Enviamos lo que pagó
                 detalles: ventaData.detalles.map(d => ({
                     producto_id: d.id,
                     cantidad: d.cantidad,
@@ -154,16 +172,15 @@ const AgregarVenta = () => {
         } finally {
             setLoading(false);
         }
-    }, [ventaData, sesionActiva, handleShowComprobante, resetForm]);
+    }, [ventaData, sesionActiva, handleShowComprobante, resetForm, montoRecibido, totalVenta]);
 
     // Listener de Teclado (F8 para cobrar)
     useEffect(() => {
         const handleKeyDown = (e) => { if (e.key === 'F8') handleSubmit(); };
         window.addEventListener('keydown', handleKeyDown);
-        
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            if (pdfUrl) URL.revokeObjectURL(pdfUrl); // Limpieza de memoria
+            if (pdfUrl) URL.revokeObjectURL(pdfUrl);
         };
     }, [handleSubmit, pdfUrl]);
 
@@ -188,7 +205,7 @@ const AgregarVenta = () => {
     return (
         <div className="container mx-auto p-4 max-w-[1600px] relative">
             
-            {/* 1. MODAL BLOQUEANTE DE APERTURA (Si no hay sesión) */}
+            {/* 1. MODAL BLOQUEANTE DE APERTURA */}
             {!sesionActiva && (
                 <AperturaCajaModal onSuccess={(data) => setSesionActiva(data)} />
             )}
@@ -203,16 +220,12 @@ const AgregarVenta = () => {
                     onCancel={() => setShowCierreModal(false)}
                     disabled={loading}
                 >
-                    {/* INYECTAMOS EL INPUT DENTRO DEL MODAL */}
                     <div className="relative mt-4">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 font-bold sm:text-sm">S/</span>
                         </div>
                         <input
-                            type="number"
-                            min="0"
-                            step="0.10"
-                            autoFocus
+                            type="number" min="0" step="0.10" autoFocus
                             className="w-full pl-8 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none text-center font-mono text-xl font-bold text-gray-800"
                             placeholder="0.00"
                             value={montoCierre}
@@ -226,12 +239,7 @@ const AgregarVenta = () => {
             )}
 
             {/* 3. VISOR PDF */}
-            <PdfModal 
-                isOpen={showPdf} 
-                onClose={() => setShowPdf(false)} 
-                title={pdfTitle}
-                pdfUrl={pdfUrl}
-            />
+            <PdfModal isOpen={showPdf} onClose={() => setShowPdf(false)} title={pdfTitle} pdfUrl={pdfUrl} />
 
             {/* 4. HEADER DEL POS */}
             <header className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
@@ -257,13 +265,9 @@ const AgregarVenta = () => {
                         Modo: {ventaData.tipo_venta}
                     </span>
                     
-                    {/* BOTÓN CERRAR CAJA */}
                     {sesionActiva && (
                         <button 
-                            onClick={() => {
-                                setMontoCierre(''); 
-                                setShowCierreModal(true);
-                            }}
+                            onClick={() => { setMontoCierre(''); setShowCierreModal(true); }}
                             className="flex items-center gap-2 bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 hover:border-red-200 transition-all text-sm font-bold border border-slate-200 shadow-sm"
                             title="Finalizar Turno"
                         >
@@ -276,7 +280,7 @@ const AgregarVenta = () => {
 
             <AlertMessage {...alert} onClose={() => setAlert(null)} />
 
-            {/* 5. INTERFAZ PRINCIPAL (Se difumina si no hay caja) */}
+            {/* 5. INTERFAZ PRINCIPAL */}
             <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all duration-500 ${!sesionActiva ? 'opacity-30 pointer-events-none blur-[2px]' : 'opacity-100'}`}>
                 
                 {/* IZQUIERDA: CATÁLOGO */}
@@ -309,11 +313,14 @@ const AgregarVenta = () => {
                                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Método Pago</label>
                                     <select 
                                         value={ventaData.metodo_pago}
-                                        onChange={(e) => setVentaData({...ventaData, metodo_pago: e.target.value})}
+                                        onChange={(e) => {
+                                            setVentaData({...ventaData, metodo_pago: e.target.value});
+                                            setMontoRecibido(''); // [NUEVO] Limpiamos al cambiar
+                                        }}
                                         className="w-full border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
                                     >
                                         <option value="efectivo">Efectivo</option>
-                                        <option value="transferencia">Transferencia \ Yape - Plin</option>
+                                        <option value="transferencia"> Transferencia\ Yape - Plin</option>
                                         <option value="tarjeta">Tarjeta</option>
                                     </select>
                                 </div>
@@ -329,6 +336,29 @@ const AgregarVenta = () => {
                                     </select>
                                 </div>
                             </div>
+
+                            {/* [NUEVO] INPUT DE PAGO EFECTIVO Y CÁLCULO DE VUELTO */}
+                            {ventaData.metodo_pago === 'efectivo' && (
+                                <div className={`p-3 rounded-lg border transition-all animate-fade-in-down ${vuelto < 0 ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <label className="text-xs font-bold text-slate-600 uppercase">Monto Recibido</label>
+                                        <span className={`text-xs font-black ${vuelto < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                            Vuelto: S/ {vuelto > 0 ? vuelto.toFixed(2) : '0.00'}
+                                        </span>
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-2 text-slate-400 font-bold">S/</span>
+                                        <input 
+                                            type="number" min="0" step="0.10" autoFocus
+                                            value={montoRecibido}
+                                            onChange={(e) => setMontoRecibido(e.target.value)}
+                                            className={`w-full pl-8 py-1.5 rounded border font-bold text-lg outline-none focus:ring-2 
+                                                ${vuelto < 0 ? 'border-red-300 focus:ring-red-200 text-red-600' : 'border-blue-300 focus:ring-blue-200 text-slate-800'}`}
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* LISTA DE PRODUCTOS */}

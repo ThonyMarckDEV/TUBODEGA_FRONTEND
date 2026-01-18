@@ -55,9 +55,7 @@ const ListarVentas = () => {
 
     const clearFilters = () => {
         const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', metodoPago: '' };
-
         setFilters(emptyFilters);
-        
         fetchVentas(1, emptyFilters);
     };
 
@@ -91,7 +89,7 @@ const ListarVentas = () => {
         {
             header: 'Cliente',
             render: (row) => {
-                if (!row.cliente) return <span className="text-gray-400">Público General</span>;
+                if (!row.cliente) return <span className="text-gray-400 italic">Público General</span>;
                 
                 const { datos } = row.cliente;
                 const esEmpresa = !!datos?.ruc;
@@ -114,14 +112,29 @@ const ListarVentas = () => {
             header: 'Tipo/Pago',
             render: (row) => (
                 <div className="text-[10px] uppercase font-bold">
-                    <span className="block text-blue-600">{row.tipo_venta}</span>
-                    <span className="block text-gray-500">{row.metodo_pago}</span>
+                    <span className="block text-blue-600 mb-0.5">{row.tipo_venta}</span>
+                    <span className="inline-block bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                        {row.metodo_pago}
+                    </span>
                 </div>
             )
         },
         {
             header: 'Total',
-            render: (row) => <span className="font-black text-slate-900">S/ {parseFloat(row.total).toFixed(2)}</span>
+            render: (row) => (
+                <div>
+                    <p className="font-black text-slate-900 text-sm">S/ {parseFloat(row.total).toFixed(2)}</p>
+                    {/* [NUEVO] Mostrar detalles de pago en efectivo si existen */}
+                    {row.metodo_pago === 'efectivo' && row.monto_pagado && (
+                        <div className="text-[10px] text-gray-500 mt-0.5">
+                            <span className="block">Pagó: {parseFloat(row.monto_pagado).toFixed(2)}</span>
+                            {parseFloat(row.vuelto) > 0 && (
+                                <span className="block text-emerald-600 font-bold">Vuelto: {parseFloat(row.vuelto).toFixed(2)}</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )
         },
         {
             header: 'Acciones',
@@ -129,9 +142,9 @@ const ListarVentas = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleViewDetails(row.id)}
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-2 py-1 rounded"
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1.5 rounded transition-colors"
                     >
-                        <EyeIcon className="w-4 h-4" /> Ver
+                        <EyeIcon className="w-3.5 h-3.5" /> Ver Detalles
                     </button>
                 </div>
             )
@@ -151,7 +164,7 @@ const ListarVentas = () => {
                     {rol !== 'admin' && (
                         <Link 
                             to="/cajero/agregar-venta" 
-                            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md"
+                            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md text-sm font-bold"
                         >
                             + Nueva Venta
                         </Link>
@@ -161,13 +174,13 @@ const ListarVentas = () => {
                 <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     
                     <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Buscar Cliente / ID / Doc</label>
+                        <label className="block text-xs font-bold text-gray-500 mb-1">Buscar Cliente / ID</label>
                         <div className="relative">
                             <input 
                                 type="text" 
                                 name="search"
                                 placeholder="Nombre, DNI, RUC o ID..."
-                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-shadow"
                                 value={filters.search}
                                 onChange={handleFilterChange}
                             />
@@ -214,10 +227,10 @@ const ListarVentas = () => {
                     </div>
 
                     <div className="md:col-span-2 flex gap-2">
-                        <button type="submit" className="flex-1 bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-900 transition flex items-center justify-center gap-1">
+                        <button type="submit" className="flex-1 bg-slate-800 text-white py-2 rounded-lg text-sm font-semibold hover:bg-slate-900 transition flex items-center justify-center gap-1 shadow-sm">
                             <FunnelIcon className="w-4 h-4" /> Filtrar
                         </button>
-                        <button type="button" onClick={clearFilters} className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200" title="Limpiar filtros">
+                        <button type="button" onClick={clearFilters} className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200 transition-colors" title="Limpiar filtros">
                             <XMarkIcon className="w-5 h-5" />
                         </button>
                     </div>
@@ -249,7 +262,7 @@ const ListarVentas = () => {
                                 <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Información del Cliente</p>
                                 {selectedVenta.cliente ? (
                                     <>
-                                        <p className="font-bold text-indigo-900 uppercase">
+                                        <p className="font-bold text-indigo-900 uppercase leading-tight">
                                             {selectedVenta.cliente.datos?.nombre} 
                                             {!selectedVenta.cliente.datos?.ruc && ` ${selectedVenta.cliente.datos?.apellidoPaterno || ''}`}
                                         </p>
@@ -259,55 +272,71 @@ const ListarVentas = () => {
                                             </span>
                                             {selectedVenta.cliente.datos?.ruc || selectedVenta.cliente.datos?.dni || 'No registrado'}
                                         </p>
-                                        {selectedVenta.cliente.datos?.ruc && (
-                                            <span className="inline-block mt-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded">
-                                                EMPRESA
-                                            </span>
-                                        )}
                                     </>
                                 ) : (
                                     <p className="font-medium text-gray-400 italic">Público General</p>
                                 )}
                             </div>
+                            
                             <div className="text-right border-l pl-4 border-slate-200">
                                 <p className="text-gray-500 uppercase text-[10px] font-bold mb-1">Detalles del Pago</p>
-                                <p className="font-medium text-slate-700">
-                                    Tipo: <span className="uppercase text-blue-600 font-bold">{selectedVenta.tipo}</span>
-                                </p>
-                                <p className="font-medium text-slate-700 uppercase">
-                                    {selectedVenta.metodo_pago}
-                                </p>
+                                <div className="space-y-1">
+                                    <p className="font-medium text-slate-700 text-xs">
+                                        Tipo: <span className="uppercase text-blue-600 font-bold">{selectedVenta.tipo}</span>
+                                    </p>
+                                    <p className="font-medium text-slate-700 uppercase text-xs">
+                                        Método: {selectedVenta.metodo_pago}
+                                    </p>
+                                    
+                                    {/* [NUEVO] Sección de Monto y Vuelto en el Modal */}
+                                    {selectedVenta.metodo_pago === 'efectivo' && selectedVenta.monto_pagado && (
+                                        <div className="mt-2 pt-2 border-t border-slate-200">
+                                            <div className="flex justify-end gap-4 text-xs">
+                                                <span className="text-slate-500">Pagado:</span>
+                                                <span className="font-mono font-medium">S/ {parseFloat(selectedVenta.monto_pagado).toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-end gap-4 text-xs">
+                                                <span className="text-emerald-600 font-bold">Vuelto:</span>
+                                                <span className="font-mono font-bold text-emerald-600">S/ {parseFloat(selectedVenta.vuelto).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                         <div>
-                            <h4 className="font-bold text-sm mb-3 border-b pb-1">Productos</h4>
-                            <table className="min-w-full text-sm">
-                                <thead>
-                                    <tr className="text-left text-gray-400 border-b">
-                                        <th className="py-2">Cant.</th>
-                                        <th className="py-2">Producto</th>
-                                        <th className="py-2 text-right">Unit.</th>
-                                        <th className="py-2 text-right">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedVenta.detalles?.map(det => (
-                                        <tr key={det.id} className="border-b last:border-0">
-                                            <td className="py-3">{det.cantidad}</td>
-                                            <td className="py-3">{det.producto?.nombre}</td>
-                                            <td className="py-3 text-right">S/ {parseFloat(det.precio).toFixed(2)}</td>
-                                            <td className="py-3 text-right font-bold">S/ {(det.cantidad * det.precio).toFixed(2)}</td>
+                            <h4 className="font-bold text-sm mb-3 border-b pb-1 text-slate-700">Productos Vendidos</h4>
+                            <div className="overflow-x-auto border rounded-lg">
+                                <table className="min-w-full text-sm divide-y divide-gray-100">
+                                    <thead className="bg-gray-50">
+                                        <tr className="text-left text-gray-500 text-xs uppercase tracking-wider">
+                                            <th className="py-2 px-3 font-semibold text-center">Cant.</th>
+                                            <th className="py-2 px-3 font-semibold">Producto</th>
+                                            <th className="py-2 px-3 font-semibold text-right">P. Unit.</th>
+                                            <th className="py-2 px-3 font-semibold text-right">Subtotal</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot>
-                                    <tr className="text-lg">
-                                        <td colSpan="3" className="py-4 font-bold text-right">TOTAL:</td>
-                                        <td className="py-4 font-black text-right text-indigo-600">S/ {parseFloat(selectedVenta.total).toFixed(2)}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50 bg-white">
+                                        {selectedVenta.detalles?.map(det => (
+                                            <tr key={det.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="py-2.5 px-3 text-center text-slate-600 font-medium">{det.cantidad}</td>
+                                                <td className="py-2.5 px-3 text-slate-800">{det.producto?.nombre}</td>
+                                                <td className="py-2.5 px-3 text-right text-slate-600 font-mono text-xs">S/ {parseFloat(det.precio).toFixed(2)}</td>
+                                                <td className="py-2.5 px-3 text-right font-bold text-slate-900 font-mono text-xs">S/ {(det.cantidad * det.precio).toFixed(2)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot className="bg-slate-50 border-t border-slate-200">
+                                        <tr>
+                                            <td colSpan="3" className="py-3 px-4 font-bold text-right text-slate-600 text-sm">TOTAL A PAGAR:</td>
+                                            <td className="py-3 px-4 font-black text-right text-indigo-700 text-lg font-mono">
+                                                S/ {parseFloat(selectedVenta.total).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}
