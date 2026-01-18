@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { XMarkIcon, ArrowDownTrayIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 const PdfModal = ({ isOpen, onClose, title, pdfUrl }) => {
     // Referencia para acceder al contenido del iframe
