@@ -80,13 +80,19 @@ const EditarSede = () => {
       setAlert({ type: 'success', message: response.message || 'Sede y Admin actualizados correctamente.' });
       setTimeout(() => navigate('/admin/listar-sedes'), 1500);
     } catch (err) {
-        let errorMsg = 'Error al actualizar';
+        let message = 'Ocurrió un error al actualizar';
+        let details = [];
         if (err.details) {
-            errorMsg = Object.values(err.details).flat().join(', ');
+            message = "Por favor corrige los siguientes errores:";
+            details = Object.values(err.details).flat();
         } else if (err.message) {
-            errorMsg = err.message;
+            message = err.message;
         }
-        setAlert({ type: 'error', message: errorMsg });
+        setAlert({ 
+            type: 'error', 
+            message: message,
+            details: details 
+        });
     } finally {
       setLoading(false);
     }
@@ -106,7 +112,12 @@ const EditarSede = () => {
           </button>
       </div>
 
-      <AlertMessage type={alert?.type} message={alert?.message} onClose={() => setAlert(null)} />
+      <AlertMessage 
+        type={alert?.type} 
+        message={alert?.message} 
+        details={alert?.details}
+        onClose={() => setAlert(null)} 
+      />
 
       <div className="max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
