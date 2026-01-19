@@ -1,6 +1,19 @@
 import React from 'react';
 
 const ProveedorForm = ({ data, handleChange }) => {
+
+  const validateAndChange = (e) => {
+    const { name, value } = e.target;
+
+    // VALIDACIÓN: SOLO NÚMEROS (RUC y Teléfono)
+    if (name === 'ruc' || name === 'telefono') {
+        const soloNumeros = /^[0-9]*$/;
+        if (!soloNumeros.test(value)) return;
+    }
+    
+    handleChange(e);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       
@@ -17,9 +30,9 @@ const ProveedorForm = ({ data, handleChange }) => {
           name="razon_social" 
           type="text" 
           value={data.razon_social || ''} 
-          onChange={handleChange} 
+          onChange={validateAndChange} 
           placeholder="Ej. Distribuidora Sullana S.A.C." 
-          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border outline-none"
           required
         />
       </div>
@@ -38,9 +51,9 @@ const ProveedorForm = ({ data, handleChange }) => {
           type="text" 
           maxLength="11"
           value={data.ruc || ''} 
-          onChange={handleChange} 
+          onChange={validateAndChange} 
           placeholder="Ej. 20123456789" 
-          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border outline-none"
         />
       </div>
 
@@ -55,11 +68,12 @@ const ProveedorForm = ({ data, handleChange }) => {
         <input 
           id="telefono" 
           name="telefono" 
-          type="text" 
+          type="tel" 
+          maxLength="9" 
           value={data.telefono || ''} 
-          onChange={handleChange} 
-          placeholder="Ej. 999 888 777" 
-          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+          onChange={validateAndChange} 
+          placeholder="Ej. 999888777" 
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border outline-none"
         />
       </div>
 

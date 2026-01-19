@@ -1,7 +1,35 @@
+// components/ClienteForm.jsx
 import React from 'react';
 
 const ClienteForm = ({ data, handleChange, isEdit = false }) => {
   const isEmpresa = data.tipo === 'Empresa';
+
+  // Función local para validar entradas antes de enviar al padre
+  const validateAndChange = (e) => {
+    const { name, value } = e.target;
+
+    // 1. VALIDACIÓN SOLO NÚMEROS (DNI y RUC)
+    if (name === 'dni' || name === 'ruc') {
+        const soloNumeros = /^[0-9]*$/;
+        if (!soloNumeros.test(value)) return;
+    }
+
+    // 2. VALIDACIÓN SOLO LETRAS (Nombres y Apellidos)
+    // Regex: Acepta letras (a-z), Ñ, tildes y espacios.
+    const soloLetras = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]*$/;
+
+    if (name === 'apellidoPaterno' || name === 'apellidoMaterno') {
+        if (!soloLetras.test(value)) return;
+    }
+
+    // Caso especial: El 'nombre' solo se valida como letras si es PERSONA NATURAL.
+    if (name === 'nombre' && !isEmpresa) {
+        if (!soloLetras.test(value)) return;
+    }
+
+    // Si pasa todas las validaciones, ejecutamos el cambio
+    handleChange(e);
+  };
 
   return (
     <div>
@@ -14,7 +42,7 @@ const ClienteForm = ({ data, handleChange, isEdit = false }) => {
         )}
       </div>
       
-      {/* Selector de Tipo: Editable si isEdit es false */}
+      {/* Selector de Tipo */}
       <div className={`mb-6 p-4 rounded-lg flex gap-4 border ${isEdit ? 'bg-slate-50 border-slate-200' : 'bg-blue-50 border-blue-200'}`}>
         <label className={`flex items-center gap-2 ${isEdit ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
           <input 
@@ -43,12 +71,17 @@ const ClienteForm = ({ data, handleChange, isEdit = false }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+        
+        {/* NOMBRE / RAZÓN SOCIAL */}
         <div>
           <label className="block text-sm font-medium text-slate-600 mb-1">
             {isEmpresa ? 'Razón Social' : 'Nombre'}
           </label>
           <input 
-            name="nombre" type="text" value={data.nombre} onChange={handleChange} 
+            name="nombre" 
+            type="text" 
+            value={data.nombre} 
+            onChange={validateAndChange} 
             placeholder={isEmpresa ? "Ej. Corporación Acme S.A.C." : "Ej. Juan"} 
             className="w-full px-3 py-2 border rounded-md focus:ring-1 focus:ring-indigo-500 outline-none" 
           />
@@ -56,36 +89,79 @@ const ClienteForm = ({ data, handleChange, isEdit = false }) => {
 
         {!isEmpresa && (
           <>
+            {/* APELLIDO PATERNO */}
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Apellido Paterno</label>
-              <input name="apellidoPaterno" type="text" value={data.apellidoPaterno} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
+              <input 
+                name="apellidoPaterno" 
+                type="text" 
+                value={data.apellidoPaterno} 
+                onChange={validateAndChange} 
+                placeholder="Ej. Pérez"
+                className="w-full px-3 py-2 border rounded-md" 
+              />
             </div>
+            
+            {/* APELLIDO MATERNO */}
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Apellido Materno</label>
-              <input name="apellidoMaterno" type="text" value={data.apellidoMaterno} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
+              <input 
+                name="apellidoMaterno" 
+                type="text" 
+                value={data.apellidoMaterno} 
+                onChange={validateAndChange} 
+                placeholder="Ej. López"
+                className="w-full px-3 py-2 border rounded-md" 
+              />
             </div>
           </>
         )}
 
         {isEmpresa ? (
+          /* RUC */
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">RUC</label>
-            <input name="ruc" type="text" value={data.ruc} onChange={handleChange} maxLength="11" className="w-full px-3 py-2 border rounded-md" />
+            <input 
+                name="ruc" 
+                type="text" 
+                value={data.ruc} 
+                onChange={validateAndChange} 
+                maxLength="11" 
+                placeholder="Ej. 20123456789"
+                className="w-full px-3 py-2 border rounded-md" 
+            />
           </div>
         ) : (
+          /* DNI */
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">DNI</label>
-            <input name="dni" type="text" value={data.dni} onChange={handleChange} maxLength="8" className="w-full px-3 py-2 border rounded-md" />
+            <input 
+                name="dni" 
+                type="text" 
+                value={data.dni} 
+                onChange={validateAndChange} 
+                maxLength="8" 
+                placeholder="Ej. 70123456"
+                className="w-full px-3 py-2 border rounded-md" 
+            />
           </div>
         )}
 
+        {/* FECHA */}
         <div>
           <label className="block text-sm font-medium text-slate-600 mb-1">
             {isEmpresa ? 'Fecha de Constitución' : 'Fecha de Nacimiento'}
           </label>
-          <input type="date" name="fechaNacimiento" value={data.fechaNacimiento} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
+          <input 
+            type="date" 
+            name="fechaNacimiento" 
+            value={data.fechaNacimiento} 
+            onChange={handleChange} 
+            className="w-full px-3 py-2 border rounded-md" 
+          />
         </div>
 
+        {/* SEXO */}
         {!isEmpresa && (
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">Sexo</label>

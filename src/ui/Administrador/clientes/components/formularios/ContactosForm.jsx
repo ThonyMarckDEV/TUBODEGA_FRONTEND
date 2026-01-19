@@ -2,6 +2,23 @@
 import React from 'react';
 
 const ContactosForm = ({ data, handleChange }) => {
+
+  // Función para validar que solo entren números en los teléfonos
+  const validateAndChange = (e) => {
+    const { name, value } = e.target;
+
+    // Si el campo es móvil o fijo, solo permitimos números
+    if (name === 'telefonoMovil' || name === 'telefonoFijo') {
+      const soloNumeros = /^[0-9]*$/;
+      if (!soloNumeros.test(value)) {
+        return; // Si no es número, no hacemos nada (no actualiza el input)
+      }
+    }
+
+    // Si pasa la validación, llamamos al handleChange original
+    handleChange(e);
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold text-slate-700 mb-6 border-b pb-2">
@@ -20,7 +37,7 @@ const ContactosForm = ({ data, handleChange }) => {
             name="telefonoMovil"
             type="tel"
             value={data.telefonoMovil}
-            onChange={handleChange}
+            onChange={validateAndChange} // Usamos la función con validación
             placeholder="Ej. 987654321"
             maxLength="9"
             className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -37,8 +54,9 @@ const ContactosForm = ({ data, handleChange }) => {
             name="telefonoFijo"
             type="tel"
             value={data.telefonoFijo}
-            onChange={handleChange}
-            placeholder="Ej. 073123456"
+            onChange={validateAndChange} // Usamos la función con validación
+            placeholder="Ej. 123456"
+            maxLength="6" // MÁXIMO 6 DÍGITOS SOLICITADO
             className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
           />
         </div>
@@ -53,7 +71,7 @@ const ContactosForm = ({ data, handleChange }) => {
             name="correo"
             type="email"
             value={data.correo}
-            onChange={handleChange}
+            onChange={handleChange} // Correo no necesita validación de números/letras estricta aquí
             placeholder="ejemplo@correo.com"
             className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
           />

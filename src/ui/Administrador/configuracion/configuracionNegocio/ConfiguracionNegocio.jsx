@@ -54,6 +54,14 @@ const ConfiguracionNegocio = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        if (name === 'ruc' || name === 'telefono') {
+            const soloNumeros = /^[0-9]*$/;
+            if (!soloNumeros.test(value)) {
+                return;
+            }
+        }
+
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -128,7 +136,11 @@ const ConfiguracionNegocio = () => {
                                 <IdentificationIcon className="w-4 h-4" /> RUC
                             </label>
                             <input
-                                type="text" name="ruc" value={formData.ruc} onChange={handleChange} maxLength="11"
+                                type="text" 
+                                name="ruc" 
+                                value={formData.ruc} 
+                                onChange={handleChange} 
+                                maxLength="11" // Límite de 11 caracteres
                                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none"
                                 required
                             />
@@ -171,7 +183,11 @@ const ConfiguracionNegocio = () => {
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
                             <input
-                                type="text" name="telefono" value={formData.telefono} onChange={handleChange}
+                                type="text" 
+                                name="telefono" 
+                                value={formData.telefono} 
+                                onChange={handleChange}
+                                maxLength="9" // Límite de 9 caracteres
                                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none"
                             />
                         </div>
