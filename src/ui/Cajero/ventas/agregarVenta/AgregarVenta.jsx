@@ -288,14 +288,27 @@ const AgregarVenta = () => {
                     <VentaCatalogo 
                         tipoVenta={ventaData.tipo_venta}
                         onAdd={(prod) => {
+
+                            const stockMaximo = prod.stock_bodega || 0;
+                            
                             setVentaData(prev => {
                                 const existe = prev.detalles.find(d => d.id === prod.id);
                                 if (existe) {
+                                    if (existe.cantidad >= stockMaximo) {
+                                        setAlert({ type: 'error', message: 'Stock máximo alcanzado' });
+                                        return prev;
+                                    }
                                     return { 
                                         ...prev, 
                                         detalles: prev.detalles.map(d => d.id === prod.id ? { ...d, cantidad: d.cantidad + 1 } : d) 
                                     };
                                 }
+
+                                if (stockMaximo < 1) {
+                                    // setAlert(...)
+                                    return prev;
+                                }
+
                                 return { ...prev, detalles: [...prev.detalles, { ...prod, cantidad: 1 }] };
                             });
                         }} 
