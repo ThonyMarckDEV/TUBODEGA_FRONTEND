@@ -19,7 +19,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { FaCashRegister, FaMoneyBill, FaMoneyBillWave } from 'react-icons/fa';
+import { FaCashRegister, FaMoneyBill } from 'react-icons/fa';
 
 const menus = { 
     admin: [
