@@ -19,7 +19,7 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
 import logoImg from 'assets/img/logo_TU_BODEGA.png'; 
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
-import { FaMoneyBill } from 'react-icons/fa';
+import { FaCashRegister, FaMoneyBill, FaMoneyBillWave } from 'react-icons/fa';
 
 const menus = { 
     admin: [
@@ -29,6 +29,7 @@ const menus = {
         { section: 'Clientes', icon: UsersIcon, subs: [{ name: 'Agregar Cliente', link: '/admin/agregar-cliente' }, { name: 'Listar Clientes', link: '/admin/listar-clientes' }] },
         { section: 'Cajeros', icon: UserCircle2Icon, subs: [{ name: 'Agregar Cajero', link: '/admin/agregar-cajero' }, { name: 'Listar Cajeros', link: '/admin/listar-cajeros' }] },
         { section: 'Cajas', icon: FaMoneyBill, subs: [{ name: 'Agregar Caja', link: '/admin/agregar-caja' }, { name: 'Listar Cajas', link: '/admin/listar-cajas' }] },
+        { section: 'Sesiones Caja', icon: FaCashRegister, subs: [{ name: 'Listar Sesiones Caja', link: '/admin/listar-sesiones-caja' }] },
         { section: 'Categorías', icon: ListBulletIcon, subs: [{ name: 'Agregar Categoría', link: '/admin/agregar-categoria' }, { name: 'Listar Categorías', link: '/admin/listar-categorias' }] },
         { section: 'Proveedores', icon: UserIcon, subs: [{ name: 'Agregar Proveedor', link: '/admin/agregar-proveedor' }, { name: 'Listar Proveedores', link: '/admin/listar-proveedores' }] },
         { section: 'Productos', icon: DocumentTextIcon, subs: [{ name: 'Agregar Producto', link: '/admin/agregar-producto' }, { name: 'Listar Productos', link: '/admin/listar-productos' }] },

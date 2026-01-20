@@ -37,6 +37,8 @@ import AgregarCajero from 'ui/Administrador/cajeros/agregarCajero/AgregarCajero'
 import ListarCajeros from 'ui/Administrador/cajeros/listarCajeros/ListarCajeros';
 import EditarCajero from 'ui/Administrador/cajeros/editarCajero/EditarCajero';
 
+import ListarSesionesCaja from 'ui/Administrador/sesionescaja/listarSesionesCaja/ListarSesionesCaja';
+
 import AgregarCaja from 'ui/Administrador/caja/agregarCaja/AgregarCaja';
 import ListarCajas from 'ui/Administrador/caja/listarCajas/ListarCajas';
 
@@ -140,6 +142,10 @@ function AppContent() {
           <Route path="agregar-caja" element={<AgregarCaja />} />
           {/* Ruta Listar Cajas */}
           <Route path="listar-cajas" element={<ListarCajas />} />
+
+        {/* RUTAS SESIONES CAJA */}
+          {/* Ruta Listar Sesiones Caja */}
+          <Route path="listar-sesiones-caja" element={<ListarSesionesCaja />} />
           
         {/* RUTAS CATEGORIAS */}
           {/* Ruta Agregar Categoria */}
