@@ -1,5 +1,5 @@
 import axios from 'axios';
-import API_BASE_URL from './urlHelper';
+import API_BASE_URL from 'js/urlHelper';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
 let refreshPromise = null;
