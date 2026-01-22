@@ -1,5 +1,7 @@
 import axios from 'axios';
 import API_BASE_URL from 'js/urlHelper';
+import { fetchWithAuth } from 'js/authToken';
+import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
 const login = async (username, password, rememberMe) => {
   const response = await axios.post(
@@ -27,9 +29,26 @@ const forgotPassword = async (dni) => {
   return response.data;
 };
 
+/**
+ * Validar sesión.
+ * 
+ */
+const verifySession = async () => {
+  const response = await fetchWithAuth(`${API_BASE_URL}/api/me`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }
+  });
+
+  // handleResponse procesará si es 200 (OK) o 401 (Token inválido/expiro)
+  return handleResponse(response);
+};
+
 const authService = {
   login,
   forgotPassword,
+  verifySession
 };
 
 export default authService;

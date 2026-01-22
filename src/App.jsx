@@ -76,9 +76,7 @@ import ListarComprobantes from 'ui/Cajero/comprobantes/listarComprobantes/Listar
 
 // Utilities
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
-import ProtectedRouteCajero from 'utilities/ProtectedRoutes/ProtectedRouteCajero';
-import ProtectedRouteAdmin from 'utilities/ProtectedRoutes/ProtectedRouteAdmin';
-
+import ProtectedRoute from 'utilities/ProtectedRoutes/ProtectedRoute';
 //UIS GENERALES
 import LicenciaExpirada from 'ui/auth/Login/components/LicenciaExpirada';
 
@@ -99,11 +97,14 @@ function AppContent() {
       <Route
         path="/admin"
         element={
-          <ProtectedRouteAdmin element={
+          <ProtectedRoute 
+          element={
             <SedeLayout>
               <SidebarLayout />
             </SedeLayout>
-          } />
+          } 
+          allowedRoles={['admin']}
+          />
         }
       >
         {/* Ruta Home (cuando solo pones /admin) */}
@@ -212,11 +213,14 @@ function AppContent() {
       <Route
         path="/cajero"
         element={
-            <ProtectedRouteCajero element={
-              <SedeLayout>
-                <SidebarLayout />
-              </SedeLayout>
-            } />
+            <ProtectedRouteCajero 
+              element={
+                <SedeLayout>
+                  <SidebarLayout />
+                </SedeLayout>
+              } 
+              allowedRoles={['cajero']}
+            />
         }
       >
         {/* Ruta Home (cuando solo pones /cajero) */}
