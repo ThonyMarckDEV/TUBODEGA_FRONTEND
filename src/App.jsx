@@ -213,7 +213,7 @@ function AppContent() {
       <Route
         path="/cajero"
         element={
-            <ProtectedRouteCajero 
+            <ProtectedRoute
               element={
                 <SedeLayout>
                   <SidebarLayout />
