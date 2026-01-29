@@ -21,16 +21,12 @@ const Login = () => {
     setLoading(true);
     try {
       const result = await authService.login(username, password, rememberMe);
-      const { access_token, refresh_token } = result;
+      const { access_token } = result;
 
       // Configuración de Cookies
       const baseCookie = "; path=/; Secure; SameSite=Strict";
-      const refreshExp = rememberMe 
-        ? `; expires=${new Date(Date.now() + 7*24*60*60*1000).toUTCString()}` 
-        : "";
 
       document.cookie = `access_token=${access_token}${baseCookie}`;
-      document.cookie = `refresh_token=${refresh_token}${refreshExp}${baseCookie}`;
 
       // LÓGICA DE MENSAJE DEMO
       const rol = jwtUtils.getUserRole(access_token);

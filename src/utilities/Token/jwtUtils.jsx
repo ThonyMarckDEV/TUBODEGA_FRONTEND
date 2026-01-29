@@ -25,11 +25,6 @@ export const getAccessTokenFromCookie = () => {
   return getCookie(access_token);
 };
 
-// Función para obtener el token JWT de refresco de la cookie
-export const getRefreshTokenFromCookie = () => {
-  const refresh_token = 'refresh_token';
-  return getCookie(refresh_token);
-};
 
 // Función para guardar el Access Token en cookie
 export const setAccessTokenInCookie = (token) => {
@@ -45,7 +40,6 @@ export const setAccessTokenInCookie = (token) => {
 // Función para eliminar tokens (Logout)
 export const removeTokensFromCookie = () => {
   document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 };
 
 // ==========================================
@@ -149,7 +143,6 @@ const jwtUtils = {
   getEmail,
   getCreatedAt,
   getAccessTokenFromCookie,
-  getRefreshTokenFromCookie,
   setAccessTokenInCookie,
   getUserID,
   isConfigurado,

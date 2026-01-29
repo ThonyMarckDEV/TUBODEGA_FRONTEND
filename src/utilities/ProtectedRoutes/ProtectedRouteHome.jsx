@@ -3,10 +3,10 @@ import { Navigate } from 'react-router-dom';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRoute = ({ element }) => {
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+  const access_token = jwtUtils.getAccessTokenFromCookie();
   
-  if (refresh_token) {
-    const rol = jwtUtils.getUserRole(refresh_token);
+  if (access_token) {
+    const rol = jwtUtils.getUserRole(access_token);
 
      switch (rol) {
       case 'admin':

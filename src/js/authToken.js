@@ -1,90 +1,78 @@
-import axios from 'axios';
-import API_BASE_URL from 'js/urlHelper';
+import API_BASE_URL from './urlHelper';
 import jwtUtils from 'utilities/Token/jwtUtils';
+import { logout } from 'js/logout';
 
-let refreshPromise = null;
-
-async function verificarYRenovarToken() {
-  const access_token = jwtUtils.getAccessTokenFromCookie();
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-
-  if (!access_token || !refresh_token) {
-    logout();
-    throw new Error('Tokens no encontrados');
-  }
-
-  if (refreshPromise) {
-    console.log('[Token] Esperando a la validación en curso...');
-    return refreshPromise;
-  }
-
-  refreshPromise = (async () => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/validate-tokens`, {
-        access_token,
-        refresh_token
-      });
-
-      const { valid, access_token: newAccessToken } = response.data;
-
-      if (!valid) {
-        logout();
-        throw new Error('Sesión no válida');
-      }
-
-      if (newAccessToken) {
-        console.log('[Token] Access token renovado.');
-        jwtUtils.setAccessTokenInCookie(newAccessToken);
-        return newAccessToken;
-      }
-
-      return access_token;
-    } catch (error) {
-      console.error('[Token] Error en validación:', error.response?.data?.message);
-
-      if (error.response?.status === 401 || error.response?.status === 400) {
-        logout();
-      }
-      throw error;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
-/**
- * Función wrapper para hacer fetch asegurando que el token es válido.
- */
-async function fetchWithAuth(url, options = {}) {
-
-  const access_token = await verificarYRenovarToken();
+export async function fetchWithAuth(url, options = {}) {
+  // -----------------------------------------------------------------------
+  // 1. PREPARACIÓN: Inyección del Access Token
+  // -----------------------------------------------------------------------
   
+  let access_token = jwtUtils.getAccessTokenFromCookie();
+
   const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...options.headers,
-    Authorization: `Bearer ${access_token}`
   };
-  
-  return fetch(url, { ...options, headers });
-}
 
-/**
- * Cierra la sesión del usuario eliminando tokens y redirigiendo.
- */
-function logout() {
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-  
-  // Intenta notificar al backend sobre el logout si hay un refresh token
-  if (refresh_token) {
-    axios.post(`${API_BASE_URL}/api/logout`, { refresh_token })
-      .catch(err => {
-        console.warn('Error al notificar logout al backend:', err.message);
-      });
+  if (access_token) {
+    headers['Authorization'] = `Bearer ${access_token}`;
   }
 
-  jwtUtils.removeTokensFromCookie();
-  window.location.href = '/'; // Redirigir a la página de login
-}
+  // -----------------------------------------------------------------------
+  // 2. EJECUCIÓN INICIAL: Primer intento
+  // -----------------------------------------------------------------------
 
-export { fetchWithAuth, verificarYRenovarToken, logout };
+  let response = await fetch(url, { ...options, headers });
+
+  // -----------------------------------------------------------------------
+  // 3. INTERCEPCIÓN DE ERRORES: Manejo de Token Expirado (401)
+  // -----------------------------------------------------------------------
+  if (response.status === 401) {
+    // console.log("[Auth] 401 detectado. Intentando estrategia de Refresh Token...");
+
+    try {
+      // -------------------------------------------------------
+      // A) Petición de Refresh 
+      // -------------------------------------------------------
+      const refreshResponse = await fetch(`${API_BASE_URL}/api/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include' 
+      });
+
+      // Si el refresh falla (ej. el refresh token también expiró o fue revocado)
+      if (!refreshResponse.ok) {
+        throw new Error('No se pudo renovar el token (Refresh token inválido o expirado).');
+      }
+
+      // -------------------------------------------------------
+      // B) Actualización del Estado Local
+      // -------------------------------------------------------
+      const data = await refreshResponse.json();
+      const newAccessToken = data.access_token;
+
+      jwtUtils.setAccessTokenInCookie(newAccessToken);
+
+      // -------------------------------------------------------
+      // C) REINTENTO: Ejecutar la petición original de nuevo
+      // -------------------------------------------------------
+      headers['Authorization'] = `Bearer ${newAccessToken}`;
+      
+      response = await fetch(url, { ...options, headers });
+
+    } catch (error) {
+      // -------------------------------------------------------
+      // D) Fallo Fatal: Logout
+      // -------------------------------------------------------
+      console.error("[Auth] Sesión expirada totalmente. Forzando logout...", error);
+      
+      // Si falló el refresh logout (Usará la versión importada con UI)
+      logout();
+      
+      return response; 
+    }
+  }
+
+  return response;
+}

@@ -8,9 +8,8 @@ const login = async (username, password, rememberMe) => {
     `${API_BASE_URL}/api/login`,
     { username, password, remember_me: rememberMe },
     {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      withCredentials: true, 
+      headers: { 'Content-Type': 'application/json' },
     }
   );
   return response.data;
@@ -30,10 +29,11 @@ const forgotPassword = async (dni) => {
 };
 
 /**
- * Validar sesión.
- * 
+ * Validar sesión y obtener datos reales del usuario (Ruta PROTEGIDA).
+ * Aquí SÍ usamos fetchWithAuth para que inyecte el token y maneje la renovación.
  */
 const verifySession = async () => {
+  // fetchWithAuth se encarga de poner el Header: Authorization Bearer ...
   const response = await fetchWithAuth(`${API_BASE_URL}/api/me`, {
     method: 'GET',
     headers: {

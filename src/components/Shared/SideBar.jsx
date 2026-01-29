@@ -54,8 +54,8 @@ const Sidebar = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     
     const location = useLocation();
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    const rol = refresh_token ? jwtUtils.getUserRole(refresh_token) : null;
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const rol = access_token ? jwtUtils.getUserRole(access_token) : null;
 
     const roleMenu = useMemo(() => rol && menus[rol] ? menus[rol] : [], [rol]);
 

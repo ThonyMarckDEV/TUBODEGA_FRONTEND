@@ -3,9 +3,9 @@ import { BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
 const SedeFloatingBadge = () => {
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    const nombreSede = refresh_token ? jwtUtils.getNombreSede(refresh_token) : null;
-    const rol = refresh_token ? jwtUtils.getUserRole(refresh_token) : null;
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const nombreSede = access_token ? jwtUtils.getNombreSede(access_token) : null;
+    const rol = access_token ? jwtUtils.getUserRole(access_token) : null;
 
     if (!nombreSede) return null;
 
