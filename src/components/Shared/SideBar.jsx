@@ -89,6 +89,30 @@ const Sidebar = () => {
 
     return (
         <>
+            {/* AQUÍ ESTÁN LOS ESTILOS CSS PUROS PARA NO INSTALAR PLUGINS */}
+            <style>{`
+                /* Ocultar scrollbar estándar */
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+                /* Scrollbar Personalizado (Gris delgado) */
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: #e5e7eb; /* Equivalente a gray-200 */
+                    border-radius: 20px;
+                }
+                /* Para Firefox */
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: #e5e7eb transparent;
+                }
+            `}</style>
+
             {/* Botón Móvil */}
             <button className="md:hidden fixed top-4 left-4 z-50 p-2 bg-black text-white rounded-md shadow-lg hover:bg-zinc-800 transition-colors" onClick={() => setIsOpen(!isOpen)}>
                 <Bars3Icon className="h-6 w-6" />
@@ -116,8 +140,8 @@ const Sidebar = () => {
                     />
                 </div>
 
-                {/* 2. BODY (Menú) */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                {/* 2. BODY (Menú) - CAMBIÉ LAS CLASES AQUÍ */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1 custom-scrollbar">
                     {roleMenu.map((item, index) => {
                         const isActive = isSectionActive(item); 
                         const isSubOpen = item.subs && openSection === item.section; 
