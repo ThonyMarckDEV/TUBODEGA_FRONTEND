@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getCajas, toggleCajaEstado } from 'services/cajaService'; // Asumiendo que ya creaste el service
+// Asegúrate de que la ruta a tu servicio sea correcta
+import { getCajas, toggleCajaEstado } from 'services/cajaService';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
@@ -14,17 +15,106 @@ const ListarCajas = () => {
     const [cajaToToggle, setCajaToToggle] = useState(null);
     const [cajas, setCajas] = useState([]);
     
-    // Estados para el Modal de Ver Detalle
+    // Estados para el Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCaja, setSelectedCaja] = useState(null);
 
+    // Estado para la Paginación
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const [searchTerm, setSearchTerm] = useState('');
 
-    // Función para abrir el modal (en cajas es simple, no requiere fetch extra si la tabla ya tiene todo)
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        search: '',
+        estado: ''
+    });
+
+    // Configuración de los campos de filtro
+    const filterConfig = useMemo(() => [
+        {
+            name: 'search',
+            type: 'text',
+            placeholder: 'Buscar por nombre de caja...',
+            label: 'Buscador',
+            colSpan: 'md:col-span-7'
+        },
+        {
+            name: 'estado',
+            type: 'select',
+            label: 'Estado',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Activas' },
+                { value: '0', label: 'Inactivas' }
+            ],
+            colSpan: 'md:col-span-4'
+        }
+    ], []);
+
+    // --- MANEJADORES DE FILTROS  ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    // Función principal de carga
+    const fetchCajas = useCallback(async (page = 1, currentFilters = filters) => {
+        setLoading(true);
+        try {
+            const response = await getCajas(
+                page, 
+                currentFilters.search, 
+                currentFilters.estado
+            );
+            
+            setCajas(response.data || []);
+            setPaginationInfo({
+                currentPage: response.current_page || 1,
+                totalPages: response.last_page || 1,
+                totalItems: response.total || 0,
+            });
+        } catch (err) {
+            setAlert({
+                type: 'error',
+                message: 'Error al cargar el listado de cajas.'
+            });
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Carga inicial
+    useEffect(() => { 
+        fetchCajas(1, { search: '', estado: '' }); 
+    }, [fetchCajas]);
+
+    // --- AQUÍ ESTABA EL ERROR DEL BUCLE ---
+    const handleFilterSubmit = useCallback(() => {
+        fetchCajas(1, filters);
+    }, [fetchCajas, filters]);
+
+    const handleFilterClear = useCallback(() => {
+        const cleanFilters = { search: '', estado: '' };
+        setFilters(cleanFilters);
+        fetchCajas(1, cleanFilters);
+    }, [fetchCajas]);
+
+    // --- LÓGICA DE MODALES Y ACCIONES ---
     const handleViewDetails = (caja) => {
         setSelectedCaja(caja);
         setIsModalOpen(true);
+    };
+
+    const executeToggleEstado = async () => {
+        if (!cajaToToggle) return;
+        setCajaToToggle(null);
+        setLoading(true);
+        try {
+            const response = await toggleCajaEstado(cajaToToggle.id);
+            setAlert({ type: 'success', message: response.message || 'Estado actualizado.' });
+            await fetchCajas(paginationInfo.currentPage, filters);
+        } catch (err) {
+            setAlert({ type: 'error', message: err.message || 'Error al cambiar estado.' });
+            setLoading(false);
+        }
     };
 
     const columns = useMemo(() => [
@@ -80,44 +170,6 @@ const ListarCajas = () => {
         }
     ], []); 
 
-    const fetchCajas = useCallback(async (page, search = '') => {
-        setLoading(true);
-        try {
-            const response = await getCajas(page, search);
-            setCajas(response.data || []);
-            setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                totalItems: response.total,
-            });
-        } catch (err) {
-            setAlert({
-                type: 'error',
-                message: 'Error al cargar el listado de cajas.'
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => { fetchCajas(1, ''); }, [fetchCajas]);
-
-    const executeToggleEstado = async () => {
-        if (!cajaToToggle) return;
-        // La logica del backend invierte el estado actual, no necesitamos enviarle el nuevo estado, solo el ID
-        // O si tu servicio toggleCajaEstado requiere ID, úsalo así:
-        setCajaToToggle(null);
-        setLoading(true);
-        try {
-            const response = await toggleCajaEstado(cajaToToggle.id);
-            setAlert(response);
-            await fetchCajas(paginationInfo.currentPage, searchTerm);
-        } catch (err) {
-            setAlert(err);
-            setLoading(false);
-        }
-    };
-
     if (loading && cajas.length === 0) return <LoadingScreen />;
 
     return (
@@ -131,6 +183,7 @@ const ListarCajas = () => {
 
             <AlertMessage type={alert?.type} message={alert?.message} onClose={() => setAlert(null)} />
 
+            {/* Modal de Confirmación */}
             {cajaToToggle && (
                 <ConfirmModal
                     message={`¿Desea cambiar el estado de la caja a ${cajaToToggle.estado === 1 ? 'INACTIVA' : 'ACTIVA'}?`}
@@ -144,16 +197,23 @@ const ListarCajas = () => {
                 columns={columns}
                 data={cajas}
                 loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleFilterSubmit}
+                onFilterClear={handleFilterClear}
+
+                // Paginación
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: (page) => fetchCajas(page, searchTerm)
+                    onPageChange: (page) => fetchCajas(page, filters)
                 }}
-                onSearch={(term) => { setSearchTerm(term); fetchCajas(1, term); }}
-                searchPlaceholder="Buscar caja por nombre..."
             />
             
-            {/* MODAL DETALLES DE LA CAJA */}
+            {/* Modal Detalles */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
@@ -161,7 +221,6 @@ const ListarCajas = () => {
             >
                 {selectedCaja && (
                     <div className="space-y-6">
-                        
                         <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
                             <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
                                 <InboxIcon className="w-8 h-8" />

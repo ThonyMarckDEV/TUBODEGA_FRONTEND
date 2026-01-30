@@ -13,8 +13,8 @@ export const createCajero = async (data) => {
   return handleResponse(response);
 };
 
-export const getCajeros = async (page = 1, search = '') => {
-  const url = `${API_BASE_URL}/api/cajeros/index?page=${page}&search=${search}`;
+export const getCajeros = async (page = 1, search = '' , estado = '') => {
+  const url = `${API_BASE_URL}/api/cajeros/index?page=${page}&search=${search}&estado=${estado}`;
   const response = await fetchWithAuth(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
   return handleResponse(response);
 };

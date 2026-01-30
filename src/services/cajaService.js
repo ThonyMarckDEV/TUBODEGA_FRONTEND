@@ -2,8 +2,8 @@ import { fetchWithAuth } from 'js/authToken';
 import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse'; 
 
-export const getCajas = async (page = 1, search = '') => {
-  const url = `${API_BASE_URL}/api/cajas/index?page=${page}&search=${search}`;
+export const getCajas = async (page = 1, search = '' , estado = '') => {
+  const url = `${API_BASE_URL}/api/cajas/index?page=${page}&search=${search}&estado=${estado}`;
   const response = await fetchWithAuth(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
   return handleResponse(response);
 };

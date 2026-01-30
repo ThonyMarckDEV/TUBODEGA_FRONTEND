@@ -1,7 +1,6 @@
-// src/components/Shared/Tables/Table.jsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Pagination from '../Pagination';
-import { FunnelIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const Table = ({ 
     columns, 
@@ -15,14 +14,24 @@ const Table = ({
     onFilterClear = () => {}
 }) => {
 
+    // --- LÓGICA DE FILTRADO AUTOMÁTICO ---
+    const isFirstRun = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            onFilterSubmit(); 
+        }, 600);
+
+        return () => clearTimeout(timer);
+    }, [filters, onFilterSubmit]); 
+
     const handleInput = (e, name) => {
         onFilterChange(name, e.target.value);
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            onFilterSubmit();
-        }
     };
 
     const renderFilterInput = (config) => {
@@ -66,7 +75,6 @@ const Table = ({
                             placeholder={config.placeholder || ''}
                             value={filters[config.name] || ''}
                             onChange={(e) => handleInput(e, config.name)}
-                            onKeyDown={handleKeyDown}
                             disabled={loading}
                             className={`${baseClass} pl-9`}
                         />
@@ -94,21 +102,13 @@ const Table = ({
                             </div>
                         ))}
 
-                        <div className="md:col-span-2 flex gap-2 h-[38px]">
-                            <button 
-                                type="button" 
-                                onClick={onFilterSubmit}
-                                disabled={loading}
-                                className="flex-1 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-black transition flex justify-center items-center gap-1 disabled:opacity-50"
-                            >
-                                <FunnelIcon className="w-4 h-4" /> 
-                                <span className="lg:inline">Filtrar</span>
-                            </button>
+                        {/* Botón de Limpiar (Solo icono X o texto pequeño) */}
+                        <div className="md:col-span-1 flex h-[38px]">
                             <button 
                                 type="button" 
                                 onClick={onFilterClear} 
                                 disabled={loading}
-                                className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200 transition"
+                                className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 border border-gray-200 transition-colors"
                                 title="Limpiar filtros"
                             >
                                 <XMarkIcon className="w-5 h-5" />
@@ -121,21 +121,16 @@ const Table = ({
             {/* --- CONTENEDOR DE DATOS (TABLA + CARDS) --- */}
             <div className={`transition-opacity duration-300 ${loading ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
                 
-               {/* VISTA MOBILE: CARDS COMPACTAS */}
+                {/* VISTA MOBILE */}
                 <div className="grid grid-cols-1 gap-3 md:hidden">
                     {data.length > 0 ? (
                         data.map((row, rowIndex) => (
                             <div key={row.id || rowIndex} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
                                 {columns.map((col, colIndex) => (
-                                    <div 
-                                        key={colIndex} 
-                                        className="flex justify-between py-1.5 border-b border-slate-50 last:border-0 items-center"
-                                    >
-                                        {/* Header más pequeño y discreto */}
+                                    <div key={colIndex} className="flex justify-between py-1.5 border-b border-slate-50 last:border-0 items-center">
                                         <span className="text-[10px] font-bold uppercase text-slate-400 tracking-tight">
                                             {col.header}
                                         </span>
-                                        {/* Contenido alineado a la derecha y compacto */}
                                         <span className="text-xs font-semibold text-slate-700 text-right ml-4">
                                             {col.render ? col.render(row) : row[col.accessor]}
                                         </span>
@@ -150,7 +145,7 @@ const Table = ({
                     )}
                 </div>
 
-                {/* VISTA DESKTOP: TABLA TRADICIONAL */}
+                {/* VISTA DESKTOP */}
                 <div className="hidden md:block bg-white shadow-md rounded-xl overflow-hidden border border-slate-200">
                     <div className="overflow-x-auto">
                         <table className="min-w-full leading-normal">

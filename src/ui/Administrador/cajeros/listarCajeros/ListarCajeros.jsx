@@ -1,4 +1,3 @@
-// src/pages/cajeros/ListarCajero.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getCajeros, toggleCajeroEstado, showCajero } from 'services/cajeroService'; 
@@ -15,13 +14,87 @@ const ListarCajero = () => {
     const [cajeroToToggle, setCajeroToToggle] = useState(null);
     const [cajeros, setCajeros] = useState([]);
     
+    // Modals
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCajero, setSelectedCajero] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const [searchTerm, setSearchTerm] = useState('');
 
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        search: '',
+        estado: ''
+    });
+
+    // --- CONFIGURACIÓN VISUAL DE FILTROS ---
+    const filterConfig = useMemo(() => [
+        {
+            name: 'search',
+            type: 'text',
+            label: 'Buscador',
+            placeholder: 'Usuario, Nombre, DNI...',
+            colSpan: 'md:col-span-7' 
+        },
+        {
+            name: 'estado',
+            type: 'select',
+            label: 'Estado',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Activos' },
+                { value: '0', label: 'Inactivos' }
+            ],
+            colSpan: 'md:col-span-4'
+        }
+    ], []);
+
+    // --- HANDLERS CON useCallback  ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    // ---- FETCH DATA  ---
+    const fetchCajeros = useCallback(async (page = 1, currentFilters = filters) => {
+        setLoading(true);
+        try {
+            const response = await getCajeros(
+                page, 
+                currentFilters.search, 
+                currentFilters.estado
+            );
+            
+            setCajeros(response.data || []);
+            setPaginationInfo({
+                currentPage: response.current_page || 1,
+                totalPages: response.last_page || 1,
+                totalItems: response.total || 0,
+            });
+        } catch (err) {
+            setAlert({ type: 'error', message: 'Error al cargar cajeros.' });
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Carga inicial
+    useEffect(() => { 
+        fetchCajeros(1, { search: '', estado: '' }); 
+    }, [fetchCajeros]);
+
+    // Función estable para el submit automático
+    const handleFilterSubmit = useCallback(() => {
+        fetchCajeros(1, filters);
+    }, [fetchCajeros, filters]);
+    
+    // Función estable para limpiar
+    const handleFilterClear = useCallback(() => {
+        const cleanFilters = { search: '', estado: '' };
+        setFilters(cleanFilters);
+        fetchCajeros(1, cleanFilters);
+    }, [fetchCajeros]);
+
+    // --- ACCIONES ---
     const handleViewDetails = async (id) => {
         setIsModalOpen(true);
         setDetailsLoading(true);
@@ -30,12 +103,29 @@ const ListarCajero = () => {
             const response = await showCajero(id);
             setSelectedCajero(response.data);
         } catch (error) {
-            console.error(error);
+            setAlert({ type: 'error', message: 'Error al ver detalles.' });
         } finally {
             setDetailsLoading(false);
         }
     };
 
+    const executeToggleEstado = async () => {
+        if (!cajeroToToggle) return;
+        const nuevoEstado = cajeroToToggle.estado === 1 ? 0 : 1; 
+        
+        setCajeroToToggle(null);
+        setLoading(true);
+        try {
+            const response = await toggleCajeroEstado(cajeroToToggle.id, nuevoEstado);
+            setAlert({ type: 'success', message: response.message });
+            await fetchCajeros(paginationInfo.currentPage, filters);
+        } catch (err) {
+            setAlert({ type: 'error', message: err.message });
+            setLoading(false);
+        }
+    };
+
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Usuario',
@@ -53,7 +143,7 @@ const ListarCajero = () => {
             render: (cajero) => (
                 <button 
                     onClick={() => setCajeroToToggle({ id: cajero.id, estado: cajero.estado })}
-                    className={`px-3 py-1 font-bold text-xs rounded-full transition-colors duration-150 ${
+                    className={`px-3 py-1 font-bold text-xs rounded-full transition-colors ${
                         cajero.estado === 1
                             ? 'text-green-700 bg-green-100 hover:bg-red-100 hover:text-red-700'
                             : 'text-red-700 bg-red-100 hover:bg-green-100 hover:text-green-700'
@@ -78,50 +168,13 @@ const ListarCajero = () => {
         }
     ], []); 
 
-    const fetchCajeros = useCallback(async (page, search = '') => {
-        setLoading(true);
-        try {
-            const response = await getCajeros(page, search);
-            setCajeros(response.data || []);
-            setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                totalItems: response.total,
-            });
-        } catch (err) {
-            setAlert({
-                type: 'error',
-                message: 'Error al cargar cajeros.'
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => { fetchCajeros(1, ''); }, [fetchCajeros]);
-
-    const executeToggleEstado = async () => {
-        if (!cajeroToToggle) return;
-        const nuevoEstado = cajeroToToggle.estado === 1 ? 0 : 1;
-        setCajeroToToggle(null);
-        setLoading(true);
-        try {
-            const response = await toggleCajeroEstado(cajeroToToggle.id, nuevoEstado);
-            setAlert(response);
-            await fetchCajeros(paginationInfo.currentPage, searchTerm);
-        } catch (err) {
-            setAlert(err);
-            setLoading(false);
-        }
-    };
-
     if (loading && cajeros.length === 0) return <LoadingScreen />;
 
     return (
         <div className="container mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-slate-800">Gestión de Cajeros</h1>
-                <Link to="/admin/agregar-cajero" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
+                <Link to="/admin/agregar-cajero" className="btn-primary-shadow">
                     + Nuevo Cajero
                 </Link>
             </div>
@@ -131,6 +184,7 @@ const ListarCajero = () => {
             {cajeroToToggle && (
                 <ConfirmModal
                     message={`¿Cambiar estado a ${cajeroToToggle.estado === 1 ? 'INACTIVO' : 'ACTIVO'}?`}
+                    subMessage="El cajero perderá acceso al sistema si se desactiva."
                     onConfirm={executeToggleEstado}
                     onCancel={() => setCajeroToToggle(null)}
                 />
@@ -140,16 +194,22 @@ const ListarCajero = () => {
                 columns={columns}
                 data={cajeros}
                 loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleFilterSubmit} 
+                onFilterClear={handleFilterClear}   
+
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: (page) => fetchCajeros(page, searchTerm)
+                    onPageChange: (page) => fetchCajeros(page, filters)
                 }}
-                onSearch={(term) => { setSearchTerm(term); fetchCajeros(1, term); }}
-                searchPlaceholder="Buscar por Usuario o Nombre"
             />
             
-            {/* MODAL DETALLES DEL CAJERO */}
+            {/* Modal Detalles */}
             <ViewModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
@@ -158,7 +218,7 @@ const ListarCajero = () => {
             >
                 {selectedCajero && (
                     <div className="space-y-6">
-                        
+                        {/* Cabecera Modal */}
                         <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
                             <div className="h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-2xl">
                                 {selectedCajero.datos?.nombre?.charAt(0) || 'C'}
@@ -179,60 +239,32 @@ const ListarCajero = () => {
                             </div>
                         </div>
 
+                        {/* Grid de Información */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
-                            {/* 2. Datos Personales */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
-                                    Datos Personales
-                                </h4>
+                             {/* Datos Personales */}
+                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">Datos Personales</h4>
                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">DNI:</span>
-                                        <span className="font-medium text-gray-900">{selectedCajero.datos?.dni}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Sexo:</span>
-                                        <span className="font-medium text-gray-900">{selectedCajero.datos?.sexo}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">Fecha Nacimiento:</span>
-                                        <span className="font-medium text-gray-900">{selectedCajero.datos?.fechaNacimiento || 'N/A'}</span>
-                                    </div>
+                                    <div className="flex justify-between"><span className="text-gray-500">DNI:</span><span className="font-medium">{selectedCajero.datos?.dni}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-500">Sexo:</span><span className="font-medium">{selectedCajero.datos?.sexo}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-500">Nacimiento:</span><span className="font-medium">{selectedCajero.datos?.fechaNacimiento || 'N/A'}</span></div>
                                 </div>
-                            </div>
-
-                            {/* 3. Información de Contacto */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">
-                                    Información de Contacto
-                                </h4>
-                                <div className="space-y-3">
-                                    {selectedCajero.contactos && selectedCajero.contactos.length > 0 ? (
-                                        selectedCajero.contactos.map((contacto, index) => (
-                                            <div key={index} className="text-sm bg-white p-2 rounded shadow-sm border border-gray-100">
-                                                <div className="flex flex-col">
-                                                    <span className="text-gray-500 text-xs uppercase">Email</span>
-                                                    <span className="font-medium text-gray-800 break-all">{contacto.correo || 'N/A'}</span>
-                                                </div>
-                                                <div className="flex flex-col mt-1">
-                                                    <span className="text-gray-500 text-xs uppercase">Teléfono Móvil</span>
-                                                    <span className="font-medium text-gray-800">{contacto.telefonoMovil || 'N/A'}</span>
-                                                </div>
-                                                {contacto.telefonoFijo && (
-                                                    <div className="flex flex-col mt-1">
-                                                        <span className="text-gray-500 text-xs uppercase">Teléfono Fijo</span>
-                                                        <span className="font-medium text-gray-800">{contacto.telefonoFijo}</span>
-                                                    </div>
-                                                )}
+                             </div>
+                             
+                             {/* Info Contacto */}
+                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                <h4 className="font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">Contacto</h4>
+                                <div className="space-y-2 text-sm">
+                                    {selectedCajero.contactos?.length > 0 ? (
+                                        selectedCajero.contactos.map((c, i) => (
+                                            <div key={i} className="border-b pb-2 mb-2 last:border-0 last:mb-0 last:pb-0">
+                                                <div className="block"><span className="text-xs text-gray-500 uppercase">Email:</span> <span className="font-medium">{c.correo}</span></div>
+                                                <div className="block"><span className="text-xs text-gray-500 uppercase">Móvil:</span> <span className="font-medium">{c.telefonoMovil}</span></div>
                                             </div>
                                         ))
-                                    ) : (
-                                        <p className="text-sm text-gray-500 italic">No hay información de contacto registrada.</p>
-                                    )}
+                                    ) : <span className="italic text-gray-400">Sin contacto</span>}
                                 </div>
-                            </div>
-
+                             </div>
                         </div>
                     </div>
                 )}
