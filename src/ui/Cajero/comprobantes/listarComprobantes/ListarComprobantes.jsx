@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getComprobantePdf, getComprobantes, updateSunatStatus } from 'services/comprobanteService';
 import Table from 'components/Shared/Tables/Table';
 import PdfModal from 'components/Shared/Modals/PdfModal';
-import { PrinterIcon, MagnifyingGlassIcon, ArrowPathIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PrinterIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import Swal from 'sweetalert2';
 
@@ -12,6 +12,7 @@ const ListarComprobantes = () => {
     const [comprobantes, setComprobantes] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
     
+    // Estado de los filtros
     const [filters, setFilters] = useState({
         search: '',
         fechaInicio: '',
@@ -50,13 +51,15 @@ const ListarComprobantes = () => {
         fetchComprobantes(1); 
     }, [fetchComprobantes]);
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
+    // ---------------------------------------------------------
+    // MANEJADORES DE LA TABLA (FILTROS)
+    // ---------------------------------------------------------
+
+    const handleFilterChange = (name, value) => {
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
+    const handleSearchSubmit = () => {
         fetchComprobantes(1);
     };
 
@@ -65,6 +68,56 @@ const ListarComprobantes = () => {
         setFilters(emptyFilters);
         fetchComprobantes(1, emptyFilters);
     };
+
+    // ---------------------------------------------------------
+    // CONFIGURACIÓN DE COLUMNAS Y FILTROS
+    // ---------------------------------------------------------
+
+    // Configuración JSON de los filtros para pasárselo a la Tabla
+    const filterConfig = useMemo(() => [
+        {
+            type: 'text',
+            name: 'search',
+            label: 'Buscar (Serie, Cliente, RUC)',
+            placeholder: 'Ej: F001-23, Juan Perez...',
+            colSpan: 'md:col-span-4' 
+        },
+        {
+            type: 'date',
+            name: 'fechaInicio',
+            label: 'Desde',
+            colSpan: 'md:col-span-2'
+        },
+        {
+            type: 'date',
+            name: 'fechaFin',
+            label: 'Hasta',
+            colSpan: 'md:col-span-2'
+        },
+        {
+            type: 'select',
+            name: 'tipoDoc',
+            label: 'Tipo Doc.',
+            colSpan: 'md:col-span-1',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'B', label: 'Boleta' },
+                { value: 'F', label: 'Factura' }
+            ]
+        },
+        {
+            type: 'select',
+            name: 'estadoSunat',
+            label: 'Estado SUNAT',
+            colSpan: 'md:col-span-1',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '0', label: 'Pendiente' },
+                { value: '1', label: 'Enviado' },
+                { value: '2', label: 'Anulado' }
+            ]
+        }
+    ], []);
 
     const handleUpdateStatus = useCallback(async (id, newStatus) => {
         setIsUpdating(id);
@@ -190,77 +243,25 @@ const ListarComprobantes = () => {
                     <p className="text-slate-500 text-sm">Gestión de Facturación Electrónica</p>
                 </div>
                 
-                <form onSubmit={handleSearchSubmit} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    
-                    {/* Búsqueda Texto */}
-                    <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Buscar (Serie, Cliente, RUC)</label>
-                        <div className="relative">
-                            <input 
-                                type="text" 
-                                name="search"
-                                placeholder="F001-23, Cliente..."
-                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
-                                value={filters.search}
-                                onChange={handleFilterChange}
-                            />
-                            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
-                        </div>
-                    </div>
-
-                    {/* Fechas */}
-                    <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Desde</label>
-                        <input type="date" name="fechaInicio" className="w-full px-2 py-2 border rounded-lg text-sm" value={filters.fechaInicio} onChange={handleFilterChange} />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
-                        <input type="date" name="fechaFin" className="w-full px-2 py-2 border rounded-lg text-sm" value={filters.fechaFin} onChange={handleFilterChange} />
-                    </div>
-
-                    {/* Tipo Doc */}
-                    <div className="md:col-span-1">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Tipo</label>
-                        <select name="tipoDoc" className="w-full px-2 py-2 border rounded-lg text-sm bg-white" value={filters.tipoDoc} onChange={handleFilterChange}>
-                            <option value="">Todos</option>
-                            <option value="B">Boleta</option>
-                            <option value="F">Factura</option>
-                        </select>
-                    </div>
-
-                    {/* Estado SUNAT */}
-                    <div className="md:col-span-1">
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Estado</label>
-                        <select name="estadoSunat" className="w-full px-2 py-2 border rounded-lg text-sm bg-white" value={filters.estadoSunat} onChange={handleFilterChange}>
-                            <option value="">Todos</option>
-                            <option value="0">Pendiente</option>
-                            <option value="1">Enviado</option>
-                            <option value="2">Anulado</option>
-                        </select>
-                    </div>
-
-                    {/* Botones */}
-                    <div className="md:col-span-2 flex gap-2">
-                        <button type="submit" className="flex-1 bg-slate-900 text-white py-2 rounded-lg text-sm font-semibold hover:bg-black transition flex justify-center gap-1">
-                            <FunnelIcon className="w-4 h-4" /> Filtrar
-                        </button>
-                        <button type="button" onClick={clearFilters} className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200">
-                            <XMarkIcon className="w-5 h-5" />
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div className="overflow-hidden rounded-xl">
+                {/* LA TABLA AHORA SE ENCARGA DE RENDERIZAR LOS FILTROS */}
                 <Table 
                     columns={columns} 
                     data={comprobantes} 
                     loading={loading}
+                    
+                    // Paginación
                     pagination={{
                         currentPage: paginationInfo.currentPage,
                         totalPages: paginationInfo.totalPages,
                         onPageChange: (page) => fetchComprobantes(page)
                     }}
+
+                    // Configuración de Filtros
+                    filterConfig={filterConfig}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onFilterSubmit={handleSearchSubmit}
+                    onFilterClear={clearFilters}
                 />
             </div>
 

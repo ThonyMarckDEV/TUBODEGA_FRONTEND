@@ -1,106 +1,160 @@
-// src/components/Shared/Table.jsx
-import React, { useState } from 'react';
+// src/components/Shared/Tables/Table.jsx
+import React from 'react';
 import Pagination from '../Pagination';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const Table = ({ 
     columns, 
     data, 
     loading = false, 
-    pagination = null, 
-    onSearch = null,
-    searchPlaceholder = "Buscar..."
+    pagination = null,
+    filterConfig = [], 
+    filters = {},
+    onFilterChange = () => {},
+    onFilterSubmit = () => {},
+    onFilterClear = () => {}
 }) => {
-    
-    const [searchTerm, setSearchTerm] = useState('');
 
-    const handleSearchSubmit = () => {
-        if (onSearch) {
-            onSearch(searchTerm);
-        }
+    // Maneja el cambio en cualquier input
+    const handleInput = (e, name) => {
+        onFilterChange(name, e.target.value);
     };
 
+    // Permite buscar al presionar Enter
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            handleSearchSubmit();
+            onFilterSubmit();
         }
     };
 
-    const handleClear = () => {
-        setSearchTerm('');
-        if (onSearch) {
-            onSearch('');
+    // Renderiza el input correcto según el tipo (text, select, date)
+    const renderFilterInput = (config) => {
+        const baseClass = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all disabled:bg-gray-100 disabled:text-gray-400";
+
+        switch (config.type) {
+            case 'select':
+                return (
+                    <select
+                        name={config.name}
+                        value={filters[config.name] || ''}
+                        onChange={(e) => handleInput(e, config.name)}
+                        disabled={loading}
+                        className={`${baseClass} bg-white cursor-pointer`}
+                    >
+                        {config.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+                );
+            
+            case 'date':
+                return (
+                    <input
+                        type="date"
+                        name={config.name}
+                        value={filters[config.name] || ''}
+                        onChange={(e) => handleInput(e, config.name)}
+                        disabled={loading}
+                        className={baseClass}
+                    />
+                );
+
+            case 'text':
+            default:
+                return (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            name={config.name}
+                            placeholder={config.placeholder || ''}
+                            value={filters[config.name] || ''}
+                            onChange={(e) => handleInput(e, config.name)}
+                            onKeyDown={handleKeyDown}
+                            disabled={loading}
+                            className={`${baseClass} pl-9`}
+                        />
+                        <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                    </div>
+                );
         }
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full flex flex-col gap-4">
             
-            {onSearch && (
-                <div className="mb-4 flex gap-2 items-center max-w-md">
-                    <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="text"
-                            className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-black focus:ring-1 focus:ring-black sm:text-sm transition duration-150 ease-in-out"
-                            placeholder={searchPlaceholder}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={loading}
-                        />
+            {/* --- SECCIÓN DE FILTROS DINÁMICOS --- */}
+            {filterConfig.length > 0 && (
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        {filterConfig.map((field, index) => (
+                            <div key={index} className={field.colSpan || "md:col-span-12"}>
+                                {field.label && (
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">
+                                        {field.label}
+                                    </label>
+                                )}
+                                {renderFilterInput(field)}
+                            </div>
+                        ))}
 
-                        {searchTerm && (
+                        {/* Botones de Acción (Filtrar / Limpiar) */}
+                        <div className="md:col-span-2 flex gap-2 h-[38px]"> {/* Altura fija para alinear con inputs */}
                             <button 
-                                onClick={handleClear}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
+                                type="button" 
+                                onClick={onFilterSubmit}
+                                disabled={loading}
+                                className="flex-1 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-black transition flex justify-center items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <XMarkIcon className="h-5 w-5" />
+                                <FunnelIcon className="w-4 h-4" /> 
+                                <span className="hidden lg:inline">Filtrar</span>
                             </button>
-                        )}
+                            <button 
+                                type="button" 
+                                onClick={onFilterClear} 
+                                disabled={loading}
+                                className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-200 transition disabled:opacity-50"
+                                title="Limpiar filtros"
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-                    
-                    <button
-                        onClick={handleSearchSubmit}
-                        disabled={loading}
-                        className="px-4 py-2 bg-black text-white rounded-md hover:bg-zinc-800 transition-colors text-sm font-medium disabled:opacity-50"
-                    >
-                        Buscar
-                    </button>
                 </div>
             )}
 
-            <div className={`bg-white shadow-md rounded-lg overflow-hidden transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                <div className="overflow-x-auto">
+            {/* --- TABLA DE DATOS --- */}
+            <div className={`bg-white shadow-md rounded-lg overflow-hidden transition-opacity duration-300 ${loading ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+                <div className="overflow-x-auto min-h-[200px]">
                     <table className="min-w-full leading-normal">
                         <thead>
-                            <tr className="bg-gray-100 text-left text-gray-600 uppercase text-sm">
+                            <tr className="bg-slate-50 text-left text-slate-600 uppercase text-xs tracking-wider border-b border-slate-200">
                                 {columns.map((col, index) => (
-                                    <th key={index} className="px-5 py-3 font-semibold tracking-wider">
+                                    <th key={index} className="px-5 py-3 font-bold">
                                         {col.header}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="bg-white">
                             {data.length > 0 ? (
                                 data.map((row, rowIndex) => (
-                                    <tr key={row.id || rowIndex} className="border-b border-gray-200 hover:bg-gray-50">
+                                    <tr key={row.id || rowIndex} className="border-b border-gray-100 hover:bg-slate-50 transition-colors">
                                         {columns.map((col, colIndex) => (
-                                            <td key={`${rowIndex}-${colIndex}`} className="px-5 py-4 text-sm">
-                                                {col.render 
-                                                    ? col.render(row) 
-                                                    : row[col.accessor]}
+                                            <td key={`${rowIndex}-${colIndex}`} className="px-5 py-4 text-sm text-slate-700">
+                                                {col.render ? col.render(row) : row[col.accessor]}
                                             </td>
                                         ))}
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={columns.length} className="text-center py-8 text-gray-500">
-                                        No se encontraron datos.
+                                    <td colSpan={columns.length} className="text-center py-16 text-slate-400">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <MagnifyingGlassIcon className="w-8 h-8 opacity-20" />
+                                            <span className="text-sm">No se encontraron registros</span>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -109,8 +163,9 @@ const Table = ({
                 </div>
             </div>
 
+            {/* --- PAGINACIÓN --- */}
             {pagination && (
-                <div className="mt-4">
+                <div className="mt-2">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}
