@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getSesionesCaja } from 'services/sesionesCajaService';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
@@ -11,33 +11,97 @@ const ListarSesionesCaja = () => {
     const [alert, setAlert] = useState(null);
     const [sesiones, setSesiones] = useState([]);
     
-    // Estados para el Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSesion, setSelectedSesion] = useState(null);
 
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    const [searchTerm, setSearchTerm] = useState('');
 
-    // --- HELPER: FORMATEAR MONEDA ---
+    const [filters, setFilters] = useState({
+        search: '',
+        fecha: ''
+    });
+
+
+    const filtersRef = useRef(filters);
+    useEffect(() => {
+        filtersRef.current = filters;
+    }, [filters]);
+
+    const filterConfig = useMemo(() => [
+        {
+            name: 'search',
+            type: 'text',
+            label: 'Buscador',
+            placeholder: 'Nombre de Caja, Cajero...',
+            colSpan: 'md:col-span-7'
+        },
+        {
+            name: 'fecha',
+            type: 'date',
+            label: 'Fecha de Apertura',
+            colSpan: 'md:col-span-4'
+        }
+    ], []);
+
+    const fetchSesiones = useCallback(async (page = 1) => {
+        setLoading(true);
+        try {
+            const currentFilters = filtersRef.current;
+            
+            const response = await getSesionesCaja(page, currentFilters);
+            
+            setSesiones(response.data || []);
+            setPaginationInfo({
+                currentPage: response.current_page,
+                totalPages: response.last_page,
+                totalItems: response.total,
+            });
+        } catch (err) {
+            setAlert({
+                type: 'error',
+                message: 'Error al cargar el historial de sesiones.'
+            });
+        } finally {
+            setLoading(false);
+        }
+    }, []); // Dependencias vacías
+
+    // Carga inicial
+    useEffect(() => { 
+        fetchSesiones(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    const handleFilterSubmit = useCallback(() => {
+        fetchSesiones(1);
+    }, [fetchSesiones]);
+
+    const handleFilterClear = useCallback(() => {
+        const cleanFilters = { search: '', fecha: '' };
+        setFilters(cleanFilters);
+        filtersRef.current = cleanFilters; 
+        fetchSesiones(1);
+    }, [fetchSesiones]);
+
     const formatCurrency = (amount) => {
         if (amount === null || amount === undefined) return '-';
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
     };
 
-    // --- HELPER: FORMATEAR FECHA ---
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
-    // --- HELPER: OBTENER NOMBRE DEL CAJERO  ---
     const getNombreCajero = (cajero) => {
         if (!cajero) return 'Desconocido';
-        // Si existe la relación 'datos', usamos nombre y apellido
         if (cajero.datos) {
             return `${cajero.datos.nombre || ''} ${cajero.datos.apellidoPaterno || ''} ${cajero.datos.apellidoMaterno || ''}`;
         }
-        // Fallback: Si no hay datos personales, usamos el username
         return cajero.username || 'Usuario sin nombre';
     };
 
@@ -46,6 +110,7 @@ const ListarSesionesCaja = () => {
         setIsModalOpen(true);
     };
 
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'ID',
@@ -98,28 +163,6 @@ const ListarSesionesCaja = () => {
         }
     ], []); 
 
-    const fetchSesiones = useCallback(async (page, search = '') => {
-        setLoading(true);
-        try {
-            const response = await getSesionesCaja(page, search);
-            setSesiones(response.data || []);
-            setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                totalItems: response.total,
-            });
-        } catch (err) {
-            setAlert({
-                type: 'error',
-                message: 'Error al cargar el historial de sesiones.'
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => { fetchSesiones(1, ''); }, [fetchSesiones]);
-
     if (loading && sesiones.length === 0) return <LoadingScreen />;
 
     return (
@@ -134,13 +177,19 @@ const ListarSesionesCaja = () => {
                 columns={columns}
                 data={sesiones}
                 loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleFilterSubmit}
+                onFilterClear={handleFilterClear}
+
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: (page) => fetchSesiones(page, searchTerm)
+                    onPageChange: (page) => fetchSesiones(page)
                 }}
-                onSearch={(term) => { setSearchTerm(term); fetchSesiones(1, term); }}
-                searchPlaceholder="Buscar por caja o cajero..."
             />
             
             {/* MODAL DETALLES DE LA SESIÓN */}

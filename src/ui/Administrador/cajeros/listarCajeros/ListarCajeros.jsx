@@ -75,7 +75,7 @@ const ListarCajero = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [filters]);
 
     // Carga inicial
     useEffect(() => { 

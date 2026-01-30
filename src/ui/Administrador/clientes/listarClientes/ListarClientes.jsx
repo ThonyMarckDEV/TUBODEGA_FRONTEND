@@ -6,66 +6,98 @@ import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
 import ViewModal from 'components/Shared/Modals/ViewModal';
-import { EyeIcon, PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 const ListarCliente = () => {
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [alert, setAlert] = useState(null);
 
+    // Estados para acciones
     const [clienteToToggle, setClienteToToggle] = useState(null);
     const [clientes, setClientes] = useState([]);
     
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState('');
-
+    // Estados para Modals
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCliente, setSelectedCliente] = useState(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    const [paginationInfo, setPaginationInfo] = useState({ 
-        currentPage: 1, 
-        totalPages: 1, 
-        totalItems: 0 
+    const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        search: '',
+        estado: ''
     });
 
-    const fetchClientes = useCallback(async (page, search = '', estado = '') => {
+    // --- CONFIGURACIÓN VISUAL DE FILTROS ---
+    const filterConfig = useMemo(() => [
+        {
+            name: 'search',
+            type: 'text',
+            label: 'Buscador',
+            placeholder: 'DNI, RUC, Nombre, Razón Social...',
+            colSpan: 'md:col-span-7'
+        },
+        {
+            name: 'estado',
+            type: 'select',
+            label: 'Estado',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Activos' },
+                { value: '0', label: 'Inactivos' }
+            ],
+            colSpan: 'md:col-span-4'
+        }
+    ], []);
+
+    // --- HANDLERS DE FILTROS ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    // --- FETCH DATA ---
+    const fetchClientes = useCallback(async (page = 1, currentFilters = filters) => {
         setLoading(true);
-        setError(null);
         try {
-            const response = await getClientes(page, search, estado);
+            // Pasamos los parámetros individuales al servicio
+            const response = await getClientes(
+                page, 
+                currentFilters.search, 
+                currentFilters.estado
+            );
+            
             setClientes(response.data || []);
             setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                totalItems: response.total,
+                currentPage: response.current_page || 1,
+                totalPages: response.last_page || 1,
+                totalItems: response.total || 0,
             });
         } catch (err) {
-            setError('No se pudieron cargar los clientes.');
-            console.error(err);
+            setAlert({ type: 'error', message: 'No se pudieron cargar los clientes.' });
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [filters]); 
 
+    // Carga Inicial
     useEffect(() => {
-        fetchClientes(1, searchTerm, filterEstado);
-    }, [fetchClientes, filterEstado , searchTerm]);
+        fetchClientes(1, { search: '', estado: '' });
+    }, [fetchClientes]);
 
-    
-    const handleSearchTable = (term) => {
-        setSearchTerm(term);
-        fetchClientes(1, term, filterEstado); 
-    };
+    // Submit Automático (Estable)
+    const handleFilterSubmit = useCallback(() => {
+        fetchClientes(1, filters);
+    }, [fetchClientes, filters]);
 
-    const handlePageChange = (page) => {
-        fetchClientes(page, searchTerm, filterEstado);
-    };
+    // Limpiar (Estable)
+    const handleFilterClear = useCallback(() => {
+        const cleanFilters = { search: '', estado: '' };
+        setFilters(cleanFilters);
+        fetchClientes(1, cleanFilters);
+    }, [fetchClientes]);
 
-    const handleFilterEstadoChange = (e) => {
-        setFilterEstado(e.target.value);
-    };
-
+    // --- LÓGICA DE ACCIONES ---
     const handleViewDetails = async (id) => {
         setIsModalOpen(true);
         setDetailsLoading(true);
@@ -74,39 +106,33 @@ const ListarCliente = () => {
             const response = await showCliente(id);
             setSelectedCliente(response.data);
         } catch (error) {
-            console.error("Error al cargar detalles", error);
+            setAlert({ type: 'error', message: "Error al cargar detalles" });
         } finally {
             setDetailsLoading(false);
         }
     };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setTimeout(() => setSelectedCliente(null), 300); 
-    };
-
-    const handleToggleEstado = (clienteId, currentEstado) => {
-        setClienteToToggle({ id: clienteId, estado: currentEstado });
-    };
-
     const executeToggleEstado = async () => {
         if (!clienteToToggle) return;
         const { id, estado } = clienteToToggle;
-        const nuevoEstado = estado === 1 ? 0 : 1;
+        // Invertir estado (1 -> 0, 0 -> 1)
+        const nuevoEstado = estado === 1 ? 0 : 1; 
         
         setClienteToToggle(null);
         setLoading(true);
 
         try {
+            // Ajusta si tu servicio toggleClienteEstado requiere (id) o (id, nuevoEstado)
             const response = await toggleClienteEstado(id, nuevoEstado);
-            setAlert(response);
-            await fetchClientes(paginationInfo.currentPage, searchTerm, filterEstado); 
+            setAlert({ type: 'success', message: response.message || 'Estado actualizado.' });
+            await fetchClientes(paginationInfo.currentPage, filters); 
         } catch (err) {
-            setAlert(err); 
+            setAlert({ type: 'error', message: err.message || 'Error al cambiar estado.' }); 
             setLoading(false);
         }
     };
 
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Documento',
@@ -139,21 +165,19 @@ const ListarCliente = () => {
                             {nombreMostrar}
                         </div>
                         {esEmpresa && (
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1 rounded">EMPRESA</span>
+                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1 rounded border border-blue-100">
+                                EMPRESA
+                            </span>
                         )}
                     </div>
                 );
             }
         },
         {
-            header: 'Fecha de Registro',
-            render: (cliente) => new Date(cliente.created_at).toLocaleDateString()
-        },
-        {
             header: 'Estado',
             render: (cliente) => (
                 <button 
-                    onClick={() => handleToggleEstado(cliente.id, cliente.estado)}
+                    onClick={() => setClienteToToggle({ id: cliente.id, estado: cliente.estado })}
                     className={`px-3 py-1 font-bold text-xs rounded-full transition-colors duration-150 ${
                         cliente.estado === 1
                             ? 'text-green-700 bg-green-100 hover:bg-red-100 hover:text-red-700'
@@ -170,13 +194,13 @@ const ListarCliente = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleViewDetails(cliente.id)}
-                        className="flex items-center gap-1 text-emerald-600 hover:text-emerald-800 font-medium text-sm bg-emerald-50 px-2 py-1 rounded transition-colors"
+                        className="btn-icon-view bg-emerald-50 text-emerald-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-emerald-100 transition-colors"
                     >
                         <EyeIcon className="w-4 h-4" /> Ver
                     </button>
                     <Link 
                         to={`/admin/editar-cliente/${cliente.id}`} 
-                        className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-sm bg-indigo-50 px-2 py-1 rounded transition-colors"
+                        className="btn-icon-edit bg-indigo-50 text-indigo-600 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-100 transition-colors"
                     >
                         <PencilSquareIcon className="w-4 h-4" /> Editar
                     </Link>
@@ -186,47 +210,27 @@ const ListarCliente = () => {
     ], []);
 
     if (loading && clientes.length === 0) return <LoadingScreen />;
-    if (error) return <div className="text-center p-8 text-red-600">{error}</div>;
 
     return (
         <div className="container mx-auto p-6">
 
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold text-slate-800">Clientes</h1>
-                
-                <div className="flex items-center gap-3">
-                    {/* FILTRO DE ESTADO */}
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FunnelIcon className="h-4 w-4 text-gray-400" />
-                        </div>
-                        <select
-                            value={filterEstado}
-                            onChange={handleFilterEstadoChange}
-                            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-black focus:border-black appearance-none cursor-pointer hover:border-gray-400 transition-colors"
-                        >
-                            <option value="">Todos los estados</option>
-                            <option value="1">Activos</option>
-                            <option value="0">Inactivos</option>
-                        </select>
-                    </div>
-
-                    <Link to="/admin/agregar-cliente" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-                        + Nuevo Cliente
-                    </Link>
-                </div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-slate-800">Gestión de Clientes</h1>
+                <Link to="/admin/agregar-cliente" className="btn-primary-shadow">
+                    + Nuevo Cliente
+                </Link>
             </div>
 
             <AlertMessage
                 type={alert?.type}
                 message={alert?.message}
-                details={alert?.details}
                 onClose={() => setAlert(null)}
             />
 
             {clienteToToggle && (
                 <ConfirmModal
-                    message={`¿Desea cambiar el estado de este cliente a ${clienteToToggle.estado === 1 ? 'INACTIVO' : 'ACTIVO'}?`}
+                    message={`¿Desea cambiar el estado a ${clienteToToggle.estado === 1 ? 'INACTIVO' : 'ACTIVO'}?`}
+                    subMessage="El cliente no podrá ser seleccionado en nuevas ventas si está inactivo."
                     onConfirm={executeToggleEstado}
                     onCancel={() => setClienteToToggle(null)}
                 />
@@ -236,19 +240,25 @@ const ListarCliente = () => {
                 columns={columns}
                 data={clientes}
                 loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleFilterSubmit}
+                onFilterClear={handleFilterClear}
+
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: handlePageChange
+                    onPageChange: (page) => fetchClientes(page, filters)
                 }}
-                onSearch={handleSearchTable}
-                searchPlaceholder="Buscar por DNI o Nombre"
             />
 
             {/* MODAL DETALLES */}
             <ViewModal 
                 isOpen={isModalOpen} 
-                onClose={closeModal} 
+                onClose={() => setIsModalOpen(false)} 
                 title="Información Detallada"
                 isLoading={detailsLoading}
             >
@@ -266,23 +276,32 @@ const ListarCliente = () => {
                                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${!!selectedCliente.datos?.ruc ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'}`}>
                                         {!!selectedCliente.datos?.ruc ? 'PERSONA JURÍDICA' : 'PERSONA NATURAL'}
                                     </span>
+                                    <span className="text-gray-300">|</span>
+                                    <span className={`font-semibold ${selectedCliente.estado === 1 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {selectedCliente.estado === 1 ? 'Activo' : 'Inactivo'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-2">Información Legal</h4>
-                                <p className="text-sm"><span className="text-gray-500">Documento:</span> {selectedCliente.datos?.ruc || selectedCliente.datos?.dni}</p>
+                                <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Información Legal</h4>
+                                <div className="space-y-2 text-sm">
+                                    <p className="flex justify-between"><span className="text-gray-500">Documento:</span> <span className="font-medium">{selectedCliente.datos?.ruc || selectedCliente.datos?.dni}</span></p>
+                                    <p className="flex justify-between"><span className="text-gray-500">Registro:</span> <span className="font-medium">{new Date(selectedCliente.created_at).toLocaleDateString()}</span></p>
+                                </div>
                              </div>
                              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-2">Contactos</h4>
+                                <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Contactos</h4>
                                 <div className="space-y-2 text-sm">
-                                    {selectedCliente.contactos?.map((c, i) => (
-                                        <div key={i} className="bg-white p-2 rounded border border-gray-200">
-                                            <p className="font-medium">{c.correo}</p>
-                                            <p className="text-gray-500">Movil: {c.telefonoMovil}</p>
-                                        </div>
-                                    ))}
+                                    {selectedCliente.contactos?.length > 0 ? (
+                                        selectedCliente.contactos.map((c, i) => (
+                                            <div key={i} className="bg-white p-2 rounded border border-gray-200">
+                                                {c.correo && <p className="font-medium text-gray-800">{c.correo}</p>}
+                                                {c.telefonoMovil && <p className="text-gray-500 text-xs">Móvil: {c.telefonoMovil}</p>}
+                                            </div>
+                                        ))
+                                    ) : <span className="italic text-gray-400">Sin datos de contacto</span>}
                                 </div>
                              </div>
                         </div>

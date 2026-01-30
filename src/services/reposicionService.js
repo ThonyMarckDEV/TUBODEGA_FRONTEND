@@ -22,15 +22,24 @@ export const createReposicion = async (reposicionData) => {
 };
 
 /**
- * Listar reposiciones.
- * Endpoint: GET /api/reposiciones?page={page}
+ * Listar reposiciones con filtros de fecha.
  */
-export const getReposiciones = async (page = 1) => {
-  const url = `${API_BASE_URL}/api/reposiciones/index?page=${page}`;
-  const response = await fetchWithAuth(url, { 
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
+export const getReposiciones = async (page = 1, filters = {}) => {
+  // Usamos URLSearchParams para construir la query string de forma limpia
+  const params = new URLSearchParams({
+    page: page,
+    fecha_inicio: filters.fecha_inicio || '',
+    fecha_fin: filters.fecha_fin || '',
+    fecha: filters.fecha || '' 
   });
+
+  const url = `${API_BASE_URL}/api/reposiciones/index?${params.toString()}`;
+  
+  const response = await fetchWithAuth(url, { 
+      method: 'GET', 
+      headers: { 'Accept': 'application/json' } 
+  });
+  
   return handleResponse(response);
 };
 

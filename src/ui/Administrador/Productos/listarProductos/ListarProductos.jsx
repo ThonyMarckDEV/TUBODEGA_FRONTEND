@@ -1,24 +1,123 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+// Asegúrate de que la ruta sea correcta
 import { getProductos, toggleProductoEstado } from 'services/productoService'; 
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import AlertMessage from 'components/Shared/Errors/AlertMessage';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 import Table from 'components/Shared/Tables/Table';
-import { PencilSquareIcon, FunnelIcon } from '@heroicons/react/24/solid';
+import { PencilSquareIcon } from '@heroicons/react/24/solid';
 
 const ListarProductos = () => {
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [alert, setAlert] = useState(null);
     const [itemToToggle, setItemToToggle] = useState(null);
     
     const [productos, setProductos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
-    
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterEstado, setFilterEstado] = useState('');
 
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        search: '',
+        estado: ''
+    });
+
+    // --- REFERENCIA DE FILTROS  ---
+    const filtersRef = useRef(filters);
+    useEffect(() => {
+        filtersRef.current = filters;
+    }, [filters]);
+
+    // --- CONFIGURACIÓN VISUAL DE FILTROS ---
+    const filterConfig = useMemo(() => [
+        {
+            name: 'search',
+            type: 'text',
+            label: 'Buscador',
+            placeholder: 'Nombre del producto o categoría...',
+            colSpan: 'md:col-span-4'
+        },
+        {
+            name: 'estado',
+            type: 'select',
+            label: 'Estado',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Activos' },
+                { value: '0', label: 'Inactivos' }
+            ],
+            colSpan: 'md:col-span-4'
+        }
+    ], []);
+
+    // --- 4. FETCH DATA ---
+    const fetchProductos = useCallback(async (page = 1) => {
+        setLoading(true);
+        try {
+            // Leemos los filtros desde la referencia para no reiniciar la función
+            const currentFilters = filtersRef.current;
+            
+            // Llamamos al servicio con los parámetros separados
+            const response = await getProductos(
+                page, 
+                currentFilters.search, 
+                currentFilters.estado
+            );
+            
+            setProductos(response.data || []); 
+            setPaginationInfo({
+                currentPage: response.current_page || 1,
+                totalPages: response.last_page || 1,
+                totalItems: response.total || 0,
+            });
+        } catch (err) {
+            setAlert({ type: 'error', message: 'Error al cargar productos.' });
+        } finally {
+            setLoading(false);
+        }
+    }, []); 
+
+    // Carga inicial (Solo una vez)
+    useEffect(() => {
+        fetchProductos(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // --- HANDLERS ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    const handleFilterSubmit = useCallback(() => {
+        fetchProductos(1);
+    }, [fetchProductos]);
+
+    const handleFilterClear = useCallback(() => {
+        const cleanFilters = { search: '', estado: '' };
+        setFilters(cleanFilters);
+        filtersRef.current = cleanFilters; // Actualizamos ref inmediatamente
+        fetchProductos(1);
+    }, [fetchProductos]);
+
+    // --- ACCIONES ---
+    const executeToggle = async () => {
+        if (!itemToToggle) return;
+        const nuevoEstado = !itemToToggle.estado; 
+        
+        setItemToToggle(null); 
+        setLoading(true);
+
+        try {
+            const res = await toggleProductoEstado(itemToToggle.id, nuevoEstado);
+            setAlert({ type: 'success', message: res.message });
+            await fetchProductos(paginationInfo.currentPage); 
+        } catch (err) {
+            setAlert({ type: 'error', message: err.message || 'Error al cambiar estado' });
+            setLoading(false);
+        }
+    };
+
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Producto',
@@ -98,93 +197,20 @@ const ListarProductos = () => {
         }
     ], []);
 
-    const fetchProductos = useCallback(async (page, search = '', estado = '') => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await getProductos(page, search, estado);
-            setProductos(response.data || []); 
-            setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-                totalItems: response.total,
-            });
-        } catch (err) {
-            setError('Error al cargar productos.');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchProductos(1, searchTerm, filterEstado);
-    }, [fetchProductos, filterEstado , searchTerm]);
-
-    const handleSearchTable = (term) => {
-        setSearchTerm(term); 
-        fetchProductos(1, term, filterEstado);
-    };
-
-    const handlePageChange = (page) => {
-        fetchProductos(page, searchTerm, filterEstado);
-    };
-
-    const handleFilterEstadoChange = (e) => {
-        setFilterEstado(e.target.value);
-    };
-
-    const executeToggle = async () => {
-        if (!itemToToggle) return;
-        const nuevoEstado = !itemToToggle.estado; 
-        setLoading(true);
-        setItemToToggle(null); 
-
-        try {
-            const res = await toggleProductoEstado(itemToToggle.id, nuevoEstado);
-            setAlert({ type: 'success', message: res.message });
-            await fetchProductos(paginationInfo.currentPage, searchTerm, filterEstado); 
-        } catch (err) {
-            setAlert(err);
-            setLoading(false);
-        }
-    };
-
     if (loading && productos.length === 0) return <LoadingScreen />;
-    if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
 
     return (
         <div className="container mx-auto p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-slate-800">Productos</h1>
-                
-                <div className="flex items-center gap-3">
-                    {/* FILTRO DE ESTADO */}
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FunnelIcon className="h-4 w-4 text-gray-400" />
-                        </div>
-                        <select
-                            value={filterEstado}
-                            onChange={handleFilterEstadoChange}
-                            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-black focus:border-black appearance-none cursor-pointer hover:border-gray-400 transition-colors"
-                        >
-                            <option value="">Todos los estados</option>
-                            <option value="1">Activos</option>
-                            <option value="0">Inactivos</option>
-                        </select>
-                    </div>
-
-                    <Link to="/admin/agregar-producto" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-                        + Nuevo Producto
-                    </Link>
-                </div>
+                <Link to="/admin/agregar-producto" className="btn-primary-shadow">
+                    + Nuevo Producto
+                </Link>
             </div>
 
             <AlertMessage 
                 type={alert?.type} 
                 message={alert?.message} 
-                details={alert?.details} 
                 onClose={() => setAlert(null)} 
             />
 
@@ -200,13 +226,19 @@ const ListarProductos = () => {
                 columns={columns}
                 data={productos}
                 loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleFilterSubmit}
+                onFilterClear={handleFilterClear}
+
                 pagination={{
                     currentPage: paginationInfo.currentPage,
                     totalPages: paginationInfo.totalPages,
-                    onPageChange: handlePageChange
+                    onPageChange: (page) => fetchProductos(page)
                 }}
-                onSearch={handleSearchTable} 
-                searchPlaceholder="Buscar por nombre o categoría..."
             />
         </div>
     );

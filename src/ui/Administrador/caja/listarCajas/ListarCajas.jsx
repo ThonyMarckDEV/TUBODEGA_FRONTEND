@@ -79,7 +79,7 @@ const ListarCajas = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [filters]);
 
     // Carga inicial
     useEffect(() => { 

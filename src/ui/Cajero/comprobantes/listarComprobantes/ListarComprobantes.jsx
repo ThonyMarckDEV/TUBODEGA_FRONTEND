@@ -11,8 +11,13 @@ const ListarComprobantes = () => {
     const [isUpdating, setIsUpdating] = useState(null);
     const [comprobantes, setComprobantes] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
+    const [alert, setAlert] = useState(null);
     
-    // Estado de los filtros
+    // Configuración PDF
+    const [isPdfOpen, setIsPdfOpen] = useState(false);
+    const [pdfConfig, setPdfConfig] = useState({ url: '', title: '' });
+
+    // --- ESTADO DE FILTROS ---
     const [filters, setFilters] = useState({
         search: '',
         fechaInicio: '',
@@ -21,66 +26,14 @@ const ListarComprobantes = () => {
         estadoSunat: ''
     });
 
-    const [isPdfOpen, setIsPdfOpen] = useState(false);
-    const [pdfConfig, setPdfConfig] = useState({ url: '', title: '' });
-    const [alert, setAlert] = useState(null);
-
-    const showAlert = useCallback((type, message) => {
-        setAlert({ type, message });
-        setTimeout(() => setAlert(null), 3000);
-    }, []);
-
-    const fetchComprobantes = useCallback(async (page = 1, filtersOverrides = null) => {
-        setLoading(true);
-        try {
-            const filtersToSend = filtersOverrides || filters;
-            const response = await getComprobantes(page, filtersToSend);
-            setComprobantes(response.data || []);
-            setPaginationInfo({
-                currentPage: response.current_page,
-                totalPages: response.last_page,
-            });
-        } catch (err) {
-            showAlert('error', 'Error al cargar los datos');
-        } finally {
-            setLoading(false);
-        }
-    }, [filters, showAlert]);
-
-    useEffect(() => { 
-        fetchComprobantes(1); 
-    }, [fetchComprobantes]);
-
-    // ---------------------------------------------------------
-    // MANEJADORES DE LA TABLA (FILTROS)
-    // ---------------------------------------------------------
-
-    const handleFilterChange = (name, value) => {
-        setFilters(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSearchSubmit = () => {
-        fetchComprobantes(1);
-    };
-
-    const clearFilters = () => {
-        const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', tipoDoc: '', estadoSunat: '' };
-        setFilters(emptyFilters);
-        fetchComprobantes(1, emptyFilters);
-    };
-
-    // ---------------------------------------------------------
-    // CONFIGURACIÓN DE COLUMNAS Y FILTROS
-    // ---------------------------------------------------------
-
-    // Configuración JSON de los filtros para pasárselo a la Tabla
+    // --- CONFIGURACIÓN VISUAL DE FILTROS ---
     const filterConfig = useMemo(() => [
         {
             type: 'text',
             name: 'search',
             label: 'Buscar (Serie, Cliente, RUC)',
-            placeholder: 'Ej: F001-23, Juan Perez...',
-            colSpan: 'md:col-span-4' 
+            placeholder: 'Ej: F001, Juan Perez...',
+            colSpan: 'md:col-span-3' 
         },
         {
             type: 'date',
@@ -98,7 +51,7 @@ const ListarComprobantes = () => {
             type: 'select',
             name: 'tipoDoc',
             label: 'Tipo Doc.',
-            colSpan: 'md:col-span-1',
+            colSpan: 'md:col-span-2',
             options: [
                 { value: '', label: 'Todos' },
                 { value: 'B', label: 'Boleta' },
@@ -109,7 +62,7 @@ const ListarComprobantes = () => {
             type: 'select',
             name: 'estadoSunat',
             label: 'Estado SUNAT',
-            colSpan: 'md:col-span-1',
+            colSpan: 'md:col-span-2',
             options: [
                 { value: '', label: 'Todos' },
                 { value: '0', label: 'Pendiente' },
@@ -119,6 +72,53 @@ const ListarComprobantes = () => {
         }
     ], []);
 
+    const showAlert = useCallback((type, message) => {
+        setAlert({ type, message });
+        setTimeout(() => setAlert(null), 3000);
+    }, []);
+
+    // --- FETCH DATA ---
+    // Mantenemos la dependencia de filters para obtener el valor actualizado
+    const fetchComprobantes = useCallback(async (page = 1, filtersOverrides = null) => {
+        setLoading(true);
+        try {
+            const filtersToSend = filtersOverrides || filters;
+            const response = await getComprobantes(page, filtersToSend);
+            
+            setComprobantes(response.data || []);
+            setPaginationInfo({
+                currentPage: response.current_page,
+                totalPages: response.last_page,
+            });
+        } catch (err) {
+            showAlert('error', 'Error al cargar los datos');
+        } finally {
+            setLoading(false);
+        }
+    }, [filters, showAlert]); 
+
+    useEffect(() => { 
+        fetchComprobantes(1); 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); 
+
+    // --- HANDLERS DE FILTROS ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    // Este handler es llamado por el Debounce de la Tabla
+    const handleSearchSubmit = useCallback(() => {
+        fetchComprobantes(1, filters);
+    }, [fetchComprobantes, filters]);
+
+    const clearFilters = useCallback(() => {
+        const emptyFilters = { search: '', fechaInicio: '', fechaFin: '', tipoDoc: '', estadoSunat: '' };
+        setFilters(emptyFilters);
+        fetchComprobantes(1, emptyFilters);
+    }, [fetchComprobantes]);
+
+    // --- LÓGICA DE NEGOCIO ---
     const handleUpdateStatus = useCallback(async (id, newStatus) => {
         setIsUpdating(id);
         try {
@@ -160,6 +160,7 @@ const ListarComprobantes = () => {
         setIsPdfOpen(false);
     };
 
+    // --- COLUMNAS ---
     const columns = useMemo(() => [
         { 
             header: 'Documento', 
@@ -243,25 +244,24 @@ const ListarComprobantes = () => {
                     <p className="text-slate-500 text-sm">Gestión de Facturación Electrónica</p>
                 </div>
                 
-                {/* LA TABLA AHORA SE ENCARGA DE RENDERIZAR LOS FILTROS */}
                 <Table 
                     columns={columns} 
                     data={comprobantes} 
                     loading={loading}
                     
-                    // Paginación
-                    pagination={{
-                        currentPage: paginationInfo.currentPage,
-                        totalPages: paginationInfo.totalPages,
-                        onPageChange: (page) => fetchComprobantes(page)
-                    }}
-
                     // Configuración de Filtros
                     filterConfig={filterConfig}
                     filters={filters}
                     onFilterChange={handleFilterChange}
-                    onFilterSubmit={handleSearchSubmit}
-                    onFilterClear={clearFilters}
+                    onFilterSubmit={handleSearchSubmit} 
+                    onFilterClear={clearFilters}        
+
+                    // Paginación
+                    pagination={{
+                        currentPage: paginationInfo.currentPage,
+                        totalPages: paginationInfo.totalPages,
+                        onPageChange: (page) => fetchComprobantes(page, filters)
+                    }}
                 />
             </div>
 

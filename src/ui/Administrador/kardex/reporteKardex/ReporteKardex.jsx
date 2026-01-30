@@ -1,57 +1,120 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getKardex } from 'services/kardexService'; 
-import LoadingScreen from 'components/Shared/LoadingScreen';
 import Table from 'components/Shared/Tables/Table';
-import ProductoSearchSelect from 'components/Shared/Comboboxes/ProductoSearchSelect';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/solid';
+import AlertMessage from 'components/Shared/Errors/AlertMessage';
 
 const ReporteKardex = () => {
     const [loading, setLoading] = useState(true);
     const [movimientos, setMovimientos] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1 });
-    
-    const [filterForm, setFilterForm] = useState({
-        id_Producto: null,
-        productoNombre: '',
+    const [alert, setAlert] = useState(null);
+
+    // --- ESTADO DE FILTROS ---
+    const [filters, setFilters] = useState({
+        producto_id: '',
         fecha_inicio: '',
         fecha_fin: '',
         tipo: '',
         ubicacion: ''
     });
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilterForm(prev => ({ ...prev, [name]: value }));
-    };
+    // ---  REFERENCIA DE FILTROS  ---
+    const filtersRef = useRef(filters);
+    useEffect(() => {
+        filtersRef.current = filters;
+    }, [filters]);
 
+    // --- CONFIGURACIÓN VISUAL DE FILTROS (Pasados a la Tabla) ---
+    const filterConfig = useMemo(() => [
+        {
+            name: 'producto_id',
+            type: 'text',
+            label: 'Producto',
+            placeholder: 'Buscar por ID de producto...',
+            colSpan: 'md:col-span-2'
+        },
+        {
+            name: 'fecha_inicio',
+            type: 'date',
+            label: 'Desde',
+            colSpan: 'md:col-span-2'
+        },
+        {
+            name: 'fecha_fin',
+            type: 'date',
+            label: 'Hasta',
+            colSpan: 'md:col-span-2'
+        },
+        {
+            name: 'tipo',
+            type: 'select',
+            label: 'Movimiento',
+            colSpan: 'md:col-span-2',
+            options: [
+                { value: '', label: 'Todos' },
+                { value: 'ENTRADA', label: 'Entradas (+)' },
+                { value: 'SALIDA', label: 'Salidas (-)' }
+            ]
+        },
+        {
+            name: 'ubicacion',
+            type: 'select',
+            label: 'Ubicación',
+            colSpan: 'md:col-span-3',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'BODEGA', label: 'Bodega (Tienda)' },
+                { value: 'ALMACEN', label: 'Almacén (Reserva)' }
+            ]
+        }
+    ], []);
+
+    // --- FETCH DATA  ---
     const fetchKardex = useCallback(async (page = 1) => {
         setLoading(true);
         try {
-            const filters = {
-                producto_id: filterForm.id_Producto,
-                fecha_inicio: filterForm.fecha_inicio,
-                fecha_fin: filterForm.fecha_fin,
-                tipo: filterForm.tipo,
-                ubicacion: filterForm.ubicacion
-            };
-
-            const response = await getKardex(page, filters);
+            const currentFilters = filtersRef.current;
+            
+            const response = await getKardex(page, currentFilters);
+            
             setMovimientos(response.data || []);
             setPaginationInfo({
                 currentPage: response.current_page,
                 totalPages: response.last_page,
             });
         } catch (err) {
-            console.error(err);
+            setAlert({ type: 'error', message: 'Error al cargar el historial del Kardex.' });
         } finally {
             setLoading(false);
         }
-    }, [filterForm]);
+    }, []); 
 
+    // Carga inicial (Solo una vez)
     useEffect(() => {
+        fetchKardex(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // ---  HANDLERS ---
+    const handleFilterChange = useCallback((name, value) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    // Submit estable (llamado por el debounce de la tabla)
+    const handleSearchSubmit = useCallback(() => {
         fetchKardex(1);
     }, [fetchKardex]);
 
+    // Limpiar estable
+    const handleFilterClear = useCallback(() => {
+        const emptyFilters = { producto_id: '', fecha_inicio: '', fecha_fin: '', tipo: '', ubicacion: '' };
+        setFilters(emptyFilters);
+        filtersRef.current = emptyFilters; // Actualizar ref inmediatamente
+        fetchKardex(1);
+    }, [fetchKardex]);
+
+    // --- 6. COLUMNAS ---
     const columns = useMemo(() => [
         {
             header: 'Fecha',
@@ -67,14 +130,16 @@ const ReporteKardex = () => {
             render: (row) => (
                 <div>
                     <span className="font-bold text-gray-700 block">{row.producto?.nombre}</span>
-                    <span className="text-[10px] bg-gray-200 text-gray-600 px-1 rounded uppercase font-mono">
-                        Ref: {row.referencia}
-                    </span>
+                    {row.referencia && (
+                        <span className="text-[10px] bg-gray-200 text-gray-600 px-1 rounded uppercase font-mono">
+                            Ref: {row.referencia}
+                        </span>
+                    )}
                 </div>
             )
         },
         {
-            header: 'Movimiento / Motivo',
+            header: 'Movimiento',
             render: (row) => (
                 <div>
                     <div className={`flex items-center gap-1 font-bold text-xs px-2 py-1 rounded-full w-fit mb-1 ${
@@ -83,32 +148,30 @@ const ReporteKardex = () => {
                         {row.tipo_movimiento === 'ENTRADA' ? <ArrowDownIcon className="w-3 h-3" /> : <ArrowUpIcon className="w-3 h-3" />}
                         {row.tipo_movimiento}
                     </div>
-                    <span className="text-xs text-gray-500 italic">{row.motivo}</span>
+                    <span className="text-xs text-gray-500 italic block max-w-[150px] truncate" title={row.motivo}>
+                        {row.motivo}
+                    </span>
                 </div>
             )
         },
         {
             header: 'Ubicación',
             render: (row) => (
-                <div className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                <span className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                     row.ubicacion === 'ALMACEN' 
                         ? 'bg-blue-50 text-blue-700 border-blue-200'
                         : 'bg-orange-50 text-orange-700 border-orange-200'
                 }`}>
                     {row.ubicacion}
-                </div>
-            )
-        },
-        {
-            header: 'Stock Inicial',
-            render: (row) => (
-                <span className="text-gray-600 font-medium">
-                    {row.stock_anterior}
                 </span>
             )
         },
         {
-            header: 'Cantidad',
+            header: 'Stock Ini.',
+            render: (row) => <span className="text-gray-500">{row.stock_anterior}</span>
+        },
+        {
+            header: 'Cant.',
             render: (row) => (
                 <span className={`font-bold ${row.tipo_movimiento === 'ENTRADA' ? 'text-green-600' : 'text-red-600'}`}>
                     {row.tipo_movimiento === 'ENTRADA' ? '+' : '-'}{row.cantidad}
@@ -116,7 +179,7 @@ const ReporteKardex = () => {
             )
         },
         {
-            header: 'Stock Final',
+            header: 'Stock Fin.',
             render: (row) => (
                 <span className="font-bold text-slate-900 bg-yellow-100 px-2 py-1 rounded border border-yellow-200">
                     {row.stock_resultante}
@@ -129,88 +192,28 @@ const ReporteKardex = () => {
         <div className="container mx-auto p-6">
             <h1 className="text-3xl font-bold text-slate-800 mb-6">Kardex (Historial de Inventario)</h1>
 
-            <div className="bg-white p-4 rounded-lg shadow mb-6 border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    
-                    {/* 1. Filtro Producto */}
-                    <div className="md:col-span-2">
-                        <ProductoSearchSelect 
-                            form={filterForm} 
-                            setForm={setFilterForm} 
-                        />
-                    </div>
+            <AlertMessage type={alert?.type} message={alert?.message} onClose={() => setAlert(null)} />
 
-                    {/* 2. Filtro Fechas */}
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Rango Fechas</label>
-                        <div className="flex gap-1">
-                             <input 
-                                type="date" 
-                                name="fecha_inicio"
-                                value={filterForm.fecha_inicio}
-                                onChange={handleFilterChange}
-                                className="w-full border-gray-300 rounded-l-md text-xs p-2"
-                                placeholder="Desde"
-                            />
-                             <input 
-                                type="date" 
-                                name="fecha_fin"
-                                value={filterForm.fecha_fin}
-                                onChange={handleFilterChange}
-                                className="w-full border-gray-300 rounded-r-md text-xs p-2"
-                                placeholder="Hasta"
-                            />
-                        </div>
-                    </div>
+            {/* TABLA CON FILTROS INTEGRADOS */}
+            <Table 
+                columns={columns}
+                data={movimientos}
+                loading={loading}
+                
+                // Configuración de Filtros
+                filterConfig={filterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onFilterSubmit={handleSearchSubmit}
+                onFilterClear={handleFilterClear}
 
-                    {/* 3. Filtro Tipo */}
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Tipo Movimiento</label>
-                        <select 
-                            name="tipo" 
-                            value={filterForm.tipo}
-                            onChange={handleFilterChange}
-                            className="w-full border-gray-300 rounded-md text-sm p-2 bg-white"
-                        >
-                            <option value="">Todos</option>
-                            <option value="ENTRADA">Entradas (+)</option>
-                            <option value="SALIDA">Salidas (-)</option>
-                        </select>
-                    </div>
-
-                    {/* 4. Filtro Ubicación */}
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Ubicación</label>
-                        <select 
-                            name="ubicacion" 
-                            value={filterForm.ubicacion}
-                            onChange={handleFilterChange}
-                            className="w-full border-gray-300 rounded-md text-sm p-2 bg-white"
-                        >
-                            <option value="">Todas</option>
-                            <option value="BODEGA">Bodega (Tienda)</option>
-                            <option value="ALMACEN">Almacén (Reserva)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* TABLA*/}
-            {loading && movimientos.length === 0 ? (
-                <LoadingScreen />
-            ) : (
-                <Table 
-                    columns={columns}
-                    data={movimientos}
-                    loading={loading}
-                    pagination={{
-                        currentPage: paginationInfo.currentPage,
-                        totalPages: paginationInfo.totalPages,
-                        onPageChange: (page) => fetchKardex(page)
-                    }}
-                    onSearch={null} 
-                />
-            )}
+                // Paginación
+                pagination={{
+                    currentPage: paginationInfo.currentPage,
+                    totalPages: paginationInfo.totalPages,
+                    onPageChange: (page) => fetchKardex(page)
+                }}
+            />
         </div>
     );
 };
