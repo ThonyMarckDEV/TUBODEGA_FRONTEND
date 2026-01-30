@@ -134,8 +134,7 @@ const Sidebar = () => {
                         src={logoImg}
                         alt="Logo"
                         className={`transition-all duration-300 object-contain
-                            /* LOGO MÁS GRANDE CUANDO ESTÁ COLAPSADO */
-                            ${isHovered ? 'w-32 md:w-40 h-auto' : 'w-12 h-12'}
+                            ${(isHovered || isOpen) ? 'w-32 md:w-40 h-auto' : 'w-12 h-12'}
                         `}
                     />
                 </div>
@@ -150,7 +149,7 @@ const Sidebar = () => {
                         const itemBaseClasses = "flex items-center w-full p-3 mx-2 rounded-xl transition-all duration-200 group relative";
                         const activeClasses = "bg-black text-white shadow-md shadow-gray-300 font-medium"; 
                         const inactiveClasses = "text-gray-600 hover:text-black hover:bg-gray-100"; 
-                        const contentWidth = isHovered ? "w-[calc(100%-16px)]" : "w-auto justify-center";
+                       const contentWidth = (isHovered || isOpen) ? "w-[calc(100%-16px)] justify-start" : "w-auto justify-center";
 
                         return (
                             <div key={index} className="px-1">
@@ -164,7 +163,7 @@ const Sidebar = () => {
                                             <IconComponent className={`h-6 w-6 flex-shrink-0 transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-black'}`} /> 
                                             
                                             <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 text-sm tracking-wide 
-                                                ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                                                ${(isHovered || isOpen) ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
                                                 {item.section}
                                             </span>
 
@@ -197,7 +196,7 @@ const Sidebar = () => {
                                         {/* ICONOS MÁS GRANDES (h-6 w-6) */}
                                         <IconComponent className={`h-6 w-6 flex-shrink-0 transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-black'}`} />
                                         <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 text-sm tracking-wide 
-                                            ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                                            ${(isHovered || isOpen) ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
                                             {item.section}
                                         </span>
                                     </Link>
@@ -217,7 +216,7 @@ const Sidebar = () => {
                         <ArrowRightOnRectangleIcon className="h-6 w-6 flex-shrink-0 group-hover:scale-110 transition-transform" />
                         
                         <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 text-sm font-medium 
-                            ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                            ${(isHovered || isOpen) ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
                             Cerrar Sesión
                         </span>
                     </button>
