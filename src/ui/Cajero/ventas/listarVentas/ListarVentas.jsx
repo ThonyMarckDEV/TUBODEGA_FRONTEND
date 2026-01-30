@@ -151,8 +151,8 @@ const ListarVentas = () => {
         }
     ], []);
 
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    const rol = jwtUtils.getUserRole(refresh_token);
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const rol = jwtUtils.getUserRole(access_token);
 
     return (
         <div className="container mx-auto p-6">
